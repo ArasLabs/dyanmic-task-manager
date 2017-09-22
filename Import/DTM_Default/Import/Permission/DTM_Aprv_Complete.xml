@@ -1,0 +1,34 @@
+﻿<AML>
+ <Item type="Permission" id="0E2C96336BB1472CBDEBFBCB58B7A5FD" action="add">
+  <is_private>0</is_private>
+  <name>DTM_Aprv_Complete</name>
+  <Relationships>
+   <Item type="Access" id="548CD2EBAD9047CE815E6B413C903CDA" action="add">
+    <can_change_access>0</can_change_access>
+    <can_delete>0</can_delete>
+    <can_discover>1</can_discover>
+    <can_get>1</can_get>
+    <can_update>0</can_update>
+    <related_id keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </related_id>
+    <show_permissions_warning>0</show_permissions_warning>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="DTM_Aprv_Complete" type="Permission">0E2C96336BB1472CBDEBFBCB58B7A5FD</source_id>
+   </Item>
+   <Item type="Access" id="7DD6F346CBE149C3A2CC4E2EF4B14C71" action="add">
+    <can_change_access>1</can_change_access>
+    <can_delete>1</can_delete>
+    <can_discover>1</can_discover>
+    <can_get>1</can_get>
+    <can_update>1</can_update>
+    <related_id keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</related_id>
+    <show_permissions_warning>0</show_permissions_warning>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="DTM_Aprv_Complete" type="Permission">0E2C96336BB1472CBDEBFBCB58B7A5FD</source_id>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

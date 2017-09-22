@@ -1,0 +1,246 @@
+﻿<AML>
+ <Item type="Life Cycle Map" id="CDE2AA93582B4EA0AC10204ABC654252" action="add">
+  <start_state keyed_name="Ready" type="Life Cycle State">B2ADE77DC9A04E178ADEC462BA84B8F5</start_state>
+  <name>DTM_Act2_aprv</name>
+  <Relationships>
+   <Item type="Life Cycle State" id="30B5CE1B1058448FA4E37BA2C576DEFA" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>1</set_not_lockable>
+    <sort_order>640</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <state_permission_id keyed_name="DTM_Aprv_InReview" type="Permission">C91BF97ACF5E45918F97050D42A858B8</state_permission_id>
+    <x>236</x>
+    <y>30</y>
+    <name>In Review</name>
+   </Item>
+   <Item type="Life Cycle State" id="A877F9EAADCD41DA8C1343C055C72CB2" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>1</set_not_lockable>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <state_permission_id keyed_name="DTM_Aprv_InReview" type="Permission">C91BF97ACF5E45918F97050D42A858B8</state_permission_id>
+    <x>230</x>
+    <y>86</y>
+    <name>In Review1/2</name>
+   </Item>
+   <Item type="Life Cycle State" id="D85D07A0FAA749CC92FECBF22DE99EEA" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>1</set_not_lockable>
+    <sort_order>768</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <state_permission_id keyed_name="DTM_Aprv_InReview" type="Permission">C91BF97ACF5E45918F97050D42A858B8</state_permission_id>
+    <x>232</x>
+    <y>159</y>
+    <name>In Review1/3</name>
+   </Item>
+   <Item type="Life Cycle State" id="F9BD2C2274964C23B561D2B3A0BDA03E" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>1</set_not_lockable>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <state_permission_id keyed_name="DTM_Aprv_InReview" type="Permission">C91BF97ACF5E45918F97050D42A858B8</state_permission_id>
+    <x>357</x>
+    <y>86</y>
+    <name>In Review2/2</name>
+   </Item>
+   <Item type="Life Cycle State" id="B4147AC9090B40F3932E27D6C450A605" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>1</set_not_lockable>
+    <sort_order>896</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <state_permission_id keyed_name="DTM_Aprv_InReview" type="Permission">C91BF97ACF5E45918F97050D42A858B8</state_permission_id>
+    <x>358</x>
+    <y>157</y>
+    <name>In Review2/3</name>
+   </Item>
+   <Item type="Life Cycle State" id="A06601E34D234CD18F26B5E4481A1871" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>1</set_not_lockable>
+    <sort_order>1024</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <state_permission_id keyed_name="DTM_Aprv_InReview" type="Permission">C91BF97ACF5E45918F97050D42A858B8</state_permission_id>
+    <x>498</x>
+    <y>154</y>
+    <name>In Review3/3</name>
+   </Item>
+   <Item type="Life Cycle State" id="B2ADE77DC9A04E178ADEC462BA84B8F5" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <state_permission_id keyed_name="DTM_Aprv_Start" type="Permission">422D70C41D7444A5B3A04CDB6CCD7A83</state_permission_id>
+    <x>81</x>
+    <y>89</y>
+    <name>Ready</name>
+   </Item>
+   <Item type="Life Cycle State" id="A0935B4DA2D44E929F0CA91A2030AE85" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <set_is_released>1</set_is_released>
+    <set_not_lockable>1</set_not_lockable>
+    <sort_order>1152</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <state_permission_id keyed_name="DTM_Aprv_Complete" type="Permission">0E2C96336BB1472CBDEBFBCB58B7A5FD</state_permission_id>
+    <x>232</x>
+    <y>280</y>
+    <name>Reject</name>
+   </Item>
+   <Item type="Life Cycle State" id="9DF0683A320D45C4AB7D3D583C226CB9" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <set_is_released>1</set_is_released>
+    <set_not_lockable>1</set_not_lockable>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <state_permission_id keyed_name="DTM_Aprv_Complete" type="Permission">0E2C96336BB1472CBDEBFBCB58B7A5FD</state_permission_id>
+    <x>659</x>
+    <y>81</y>
+    <name>Released</name>
+   </Item>
+   <Item type="Life Cycle Transition" id="10FA3B63965E4EBCA9E3258597CBF564" action="add">
+    <from_state keyed_name="In Review" type="Life Cycle State">30B5CE1B1058448FA4E37BA2C576DEFA</from_state>
+    <get_comment>0</get_comment>
+    <post_action keyed_name="DTM_act2_aprv_state_change" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>DTM_act2_aprv_state_change</name>
+     </Item>
+    </post_action>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <segments>424,39</segments>
+    <sort_order>640</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="Released" type="Life Cycle State">9DF0683A320D45C4AB7D3D583C226CB9</to_state>
+    <x>54</x>
+    <y>12</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="522FBA28CC814331A6B13F868ACA5A09" action="add">
+    <from_state keyed_name="In Review" type="Life Cycle State">30B5CE1B1058448FA4E37BA2C576DEFA</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <segments>17,73|17,242</segments>
+    <sort_order>1536</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="Reject" type="Life Cycle State">A0935B4DA2D44E929F0CA91A2030AE85</to_state>
+    <x>0</x>
+    <y>0</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="2A7E5ED1855B4CDBA63CF77839C85ABD" action="add">
+    <from_state keyed_name="In Review3/3" type="Life Cycle State">A06601E34D234CD18F26B5E4481A1871</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <segments>487,282</segments>
+    <sort_order>1920</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="Reject" type="Life Cycle State">A0935B4DA2D44E929F0CA91A2030AE85</to_state>
+    <x>0</x>
+    <y>0</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="3DF7145728CA404EB1D8344EF0B3A115" action="add">
+    <from_state keyed_name="In Review3/3" type="Life Cycle State">A06601E34D234CD18F26B5E4481A1871</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>1152</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="Released" type="Life Cycle State">9DF0683A320D45C4AB7D3D583C226CB9</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="28B8053C503747F8A81F7491E9856909" action="add">
+    <from_state keyed_name="In Review1/2" type="Life Cycle State">A877F9EAADCD41DA8C1343C055C72CB2</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <segments>299,198</segments>
+    <sort_order>1280</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="Reject" type="Life Cycle State">A0935B4DA2D44E929F0CA91A2030AE85</to_state>
+    <x>0</x>
+    <y>0</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="51B7D04258854732977F84183C81DA0A" action="add">
+    <from_state keyed_name="In Review1/2" type="Life Cycle State">A877F9EAADCD41DA8C1343C055C72CB2</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="In Review2/2" type="Life Cycle State">F9BD2C2274964C23B561D2B3A0BDA03E</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="188CB1002FB24F78B38BCE0EE2E1DD5E" action="add">
+    <from_state keyed_name="Ready" type="Life Cycle State">B2ADE77DC9A04E178ADEC462BA84B8F5</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="In Review" type="Life Cycle State">30B5CE1B1058448FA4E37BA2C576DEFA</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="7218FF72FF9E4EBDAD63A9FF1B6E971B" action="add">
+    <from_state keyed_name="Ready" type="Life Cycle State">B2ADE77DC9A04E178ADEC462BA84B8F5</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>768</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="In Review1/3" type="Life Cycle State">D85D07A0FAA749CC92FECBF22DE99EEA</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="B085C43FC6664A6BB22A4600BE5E2ACA" action="add">
+    <from_state keyed_name="Ready" type="Life Cycle State">B2ADE77DC9A04E178ADEC462BA84B8F5</from_state>
+    <get_comment>0</get_comment>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="In Review1/2" type="Life Cycle State">A877F9EAADCD41DA8C1343C055C72CB2</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="699FE3049B594E018A1274BD76414E8F" action="add">
+    <from_state keyed_name="In Review2/3" type="Life Cycle State">B4147AC9090B40F3932E27D6C450A605</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>1792</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="Reject" type="Life Cycle State">A0935B4DA2D44E929F0CA91A2030AE85</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="D9938ACBF6C9451D8796EBBE91C1C61C" action="add">
+    <from_state keyed_name="In Review2/3" type="Life Cycle State">B4147AC9090B40F3932E27D6C450A605</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>1024</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="In Review3/3" type="Life Cycle State">A06601E34D234CD18F26B5E4481A1871</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="3BCD96FD6B1341829BA9C4F5103516D7" action="add">
+    <from_state keyed_name="In Review1/3" type="Life Cycle State">D85D07A0FAA749CC92FECBF22DE99EEA</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>1408</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="Reject" type="Life Cycle State">A0935B4DA2D44E929F0CA91A2030AE85</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="C8A780791C9346CFAE376215320A4D17" action="add">
+    <from_state keyed_name="In Review1/3" type="Life Cycle State">D85D07A0FAA749CC92FECBF22DE99EEA</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>896</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="In Review2/3" type="Life Cycle State">B4147AC9090B40F3932E27D6C450A605</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="40B24B0BCA4E4A9FAC6F2A71CF2A7DD2" action="add">
+    <from_state keyed_name="In Review2/2" type="Life Cycle State">F9BD2C2274964C23B561D2B3A0BDA03E</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="Released" type="Life Cycle State">9DF0683A320D45C4AB7D3D583C226CB9</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="84C1C4A22D7541178453A86583CEBB1B" action="add">
+    <from_state keyed_name="In Review2/2" type="Life Cycle State">F9BD2C2274964C23B561D2B3A0BDA03E</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <segments>444,230</segments>
+    <sort_order>1664</sort_order>
+    <source_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</source_id>
+    <to_state keyed_name="Reject" type="Life Cycle State">A0935B4DA2D44E929F0CA91A2030AE85</to_state>
+    <x>0</x>
+    <y>0</y>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

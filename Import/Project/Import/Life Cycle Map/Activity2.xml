@@ -1,0 +1,118 @@
+﻿<AML>
+ <Item type="Life Cycle Map" id="B075C307CD3D45F3A03C6E0A258403D0" action="add">
+  <start_state keyed_name="Pending" type="Life Cycle State">1029A07345304817B89813EFF7A48367</start_state>
+  <name>Activity2</name>
+  <Relationships>
+   <Item type="Life Cycle State" id="348A09DDD3E34CAFA837984AD1426D9C" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <item_behavior>float</item_behavior>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Activity2" type="Life Cycle Map">B075C307CD3D45F3A03C6E0A258403D0</source_id>
+    <x>133</x>
+    <y>85</y>
+    <name>Active</name>
+   </Item>
+   <Item type="Life Cycle State" id="4CC1BA4D8B694C71B7300277E169C11F" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <item_behavior>float</item_behavior>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="Activity2" type="Life Cycle Map">B075C307CD3D45F3A03C6E0A258403D0</source_id>
+    <x>252</x>
+    <y>37</y>
+    <name>Complete</name>
+   </Item>
+   <Item type="Life Cycle State" id="1029A07345304817B89813EFF7A48367" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <item_behavior>float</item_behavior>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Activity2" type="Life Cycle Map">B075C307CD3D45F3A03C6E0A258403D0</source_id>
+    <x>20</x>
+    <y>37</y>
+    <name>Pending</name>
+   </Item>
+   <Item type="Life Cycle Transition" id="7CF9D4D85A9542A286113538474D490D" action="add">
+    <from_state keyed_name="Pending" type="Life Cycle State">1029A07345304817B89813EFF7A48367</from_state>
+    <get_comment>0</get_comment>
+    <post_action keyed_name="onCompleteActivity" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>onCompleteActivity</name>
+     </Item>
+    </post_action>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <segments>148,20</segments>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="Activity2" type="Life Cycle Map">B075C307CD3D45F3A03C6E0A258403D0</source_id>
+    <to_state keyed_name="Complete" type="Life Cycle State">4CC1BA4D8B694C71B7300277E169C11F</to_state>
+    <x>98</x>
+    <y>-34</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="A450015775E94A96ABE030CA924161CF" action="add">
+    <from_state keyed_name="Pending" type="Life Cycle State">1029A07345304817B89813EFF7A48367</from_state>
+    <get_comment>0</get_comment>
+    <post_action keyed_name="sendEmailToA2Assignee" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>sendEmailToA2Assignee</name>
+     </Item>
+    </post_action>
+    <pre_action keyed_name="Project_promoteActivity2Assgnmts" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Project_promoteActivity2Assgnmts</name>
+     </Item>
+    </pre_action>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <segments></segments>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Activity2" type="Life Cycle Map">B075C307CD3D45F3A03C6E0A258403D0</source_id>
+    <to_state keyed_name="Active" type="Life Cycle State">348A09DDD3E34CAFA837984AD1426D9C</to_state>
+    <x>34</x>
+    <y>41</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="83373C733F61497DA35BB1F6299E8AAE" action="add">
+    <from_state keyed_name="Active" type="Life Cycle State">348A09DDD3E34CAFA837984AD1426D9C</from_state>
+    <get_comment>0</get_comment>
+    <post_action keyed_name="onCompleteActivity" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>onCompleteActivity</name>
+     </Item>
+    </post_action>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <segments></segments>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Activity2" type="Life Cycle Map">B075C307CD3D45F3A03C6E0A258403D0</source_id>
+    <to_state keyed_name="Complete" type="Life Cycle State">4CC1BA4D8B694C71B7300277E169C11F</to_state>
+    <x>45</x>
+    <y>-4</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="018D6D8BE1E34DBD9C82FA278DF1BF47" action="add">
+    <from_state keyed_name="Complete" type="Life Cycle State">4CC1BA4D8B694C71B7300277E169C11F</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="Activity2" type="Life Cycle Map">B075C307CD3D45F3A03C6E0A258403D0</source_id>
+    <to_state keyed_name="Pending" type="Life Cycle State">1029A07345304817B89813EFF7A48367</to_state>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

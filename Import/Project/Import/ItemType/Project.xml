@@ -1,0 +1,1166 @@
+﻿<AML>
+ <Item type="ItemType" id="02184EDAA80D499CB6EC94B159966DBE" action="add">
+  <allow_private_permission>1</allow_private_permission>
+  <auto_search>1</auto_search>
+  <close_icon>../images/Project.svg</close_icon>
+  <enforce_discovery>1</enforce_discovery>
+  <help_item>8C6C6B4BC4C0412CAE9ACD9DE6C9F8EF</help_item>
+  <help_url xml:lang="en">mergedProjects/ProgramManagement/Create_a_project.htm</help_url>
+  <hide_where_used>0</hide_where_used>
+  <implementation_type>table</implementation_type>
+  <instance_data>PROJECT</instance_data>
+  <is_dependent>0</is_dependent>
+  <is_relationship>0</is_relationship>
+  <is_versionable>0</is_versionable>
+  <label xml:lang="en">Project</label>
+  <label_plural xml:lang="en">Projects</label_plural>
+  <large_icon>../images/Project.svg</large_icon>
+  <open_icon>../images/Project.svg</open_icon>
+  <revisions keyed_name="Default" type="Revision">7FE395DD8B9F4E1090756A34B733D75E</revisions>
+  <show_parameters_tab>1</show_parameters_tab>
+  <structure_view>tab view</structure_view>
+  <unlock_on_logout>0</unlock_on_logout>
+  <use_src_access>0</use_src_access>
+  <name>Project</name>
+  <Relationships>
+   <Item type="Property" id="B592A077559F4651A1349635439F61E9" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>16000</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>_parent_project</name>
+   </Item>
+   <Item type="Property" id="739560FA6CFE4091BAB4FE89E2B07913" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>15872</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>_sub_project_activity</name>
+   </Item>
+   <Item type="Property" id="A260CEC51E4644DF9FC361CAEE648198" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>15616</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>_sub_project_plan_finish</name>
+   </Item>
+   <Item type="Property" id="69FFB8E004584A65A05F5990D74A3650" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>15744</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>_sub_project_plan_start</name>
+   </Item>
+   <Item type="Property" id="1868CAA57D7A42009E3A294B877567E4" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>120</column_width>
+    <data_type>text</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Comments</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>19</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>comments</name>
+   </Item>
+   <Item type="Property" id="DFFCD1C31ADA4D4D988D2F8ABC6FA9B0" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Act Finish</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5632</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>date_due_act</name>
+   </Item>
+   <Item type="Property" id="3C4FD3C2F9E849E2849FD98B21042C03" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_type>date</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Sched Due</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>3</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>date_due_sched</name>
+   </Item>
+   <Item type="Property" id="4A6B461C10604DF5A93A48B1192157FB" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Target Due</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5376</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>date_due_target</name>
+   </Item>
+   <Item type="Property" id="316896495EA046EA8F0752B0CD0C8DAC" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Act Start</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5760</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>date_start_act</name>
+   </Item>
+   <Item type="Property" id="7AB513B346D541F59799FDF86DD6B59A" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_type>date</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Sched Start</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>2</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>date_start_sched</name>
+   </Item>
+   <Item type="Property" id="255377F0C7E044B9A28FAA34A0775017" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Target Start</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5504</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>date_start_target</name>
+   </Item>
+   <Item type="Property" id="0AF9A08257CA491F824C5F051FDA240A" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>text</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Description</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>description</name>
+   </Item>
+   <Item type="Property" id="97AA513388294427BBDDFF4ADA01C0F3" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>100</column_width>
+    <data_source keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <label xml:lang="en">From Template</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>18</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>from_template</name>
+   </Item>
+   <Item type="Property" id="36F703E1AED549B9860F252AAFDE1DE9" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>text</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Goals</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>768</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>goals</name>
+   </Item>
+   <Item type="Property" id="BDED853F8AD644689210C0688F3BD271" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>100</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <keyed_name_order>2</keyed_name_order>
+    <label xml:lang="en">Name</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>1</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>name</name>
+   </Item>
+   <Item type="Property" id="D5A2FC9537B24E5A8E1FDCB6264BD25D" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 1</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_1</name>
+   </Item>
+   <Item type="Property" id="9EA62D3B4F0946A3958A992CC02962E0" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 10</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>14</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_10</name>
+   </Item>
+   <Item type="Property" id="2FB33080473B4F7891E58EDDC70279BF" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 11</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>15</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_11</name>
+   </Item>
+   <Item type="Property" id="5C763D73ADC9460E8E6C2BA6B50D1268" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 12</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>16</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_12</name>
+   </Item>
+   <Item type="Property" id="1ABE9DA9C9844806A4BC14A1479D2E22" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 2</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>6</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_2</name>
+   </Item>
+   <Item type="Property" id="DAC29E043D8B479D959E4D66E4D54D99" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 3</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>7</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_3</name>
+   </Item>
+   <Item type="Property" id="414C20927D8C47ADB900634A736D7310" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 4</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>8</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_4</name>
+   </Item>
+   <Item type="Property" id="CBE0EBC2E71D43B09BDB82B4FC9173AB" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 5</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>9</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_5</name>
+   </Item>
+   <Item type="Property" id="287CC17A8A6841B7A3DC8A769BF11A63" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 6</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>10</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_6</name>
+   </Item>
+   <Item type="Property" id="7AC4C036C13343558E3633B1E2994076" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 7</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>11</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_7</name>
+   </Item>
+   <Item type="Property" id="C9EC97E663F84BCE8885668F2C808FB7" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 8</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>12</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_8</name>
+   </Item>
+   <Item type="Property" id="DD5FFC098614482E8EFAD27921D607B2" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 9</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>13</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl_9</name>
+   </Item>
+   <Item type="Property" id="9FBBA8B78A0A4497AA6DB5B98202083A" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="PM_scheduling_modes">1294414791A84C20850379AF8190B8AB</data_source>
+    <data_type>list</data_type>
+    <default_value xml:lang="en">1</default_value>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>1</is_required>
+    <label xml:lang="en">Project Update Mode</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>11392</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>project_update_mode</name>
+   </Item>
+   <Item type="Property" id="5FF90C1B93B343BC8673EE95324E2025" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Rollup Percent Compl</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>8192</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>rollup_percent_compl</name>
+   </Item>
+   <Item type="Property" id="D2D853B44A57474ABFFCB5B3A9450DA4" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Method" type="ItemType" name="Method">87879A09B8044DE380D59DF22DE1867F</data_source>
+    <data_type>item</data_type>
+    <default_value xml:lang="en">7DC85B0668134E949B9212D7CE199265</default_value>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>1</is_required>
+    <item_behavior>float</item_behavior>
+    <label xml:lang="en">Scheduling Method</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>8320</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>scheduling_method</name>
+   </Item>
+   <Item type="Property" id="54904B291D344C5597A0E7C9B325F625" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="PM_scheduling_modes">1294414791A84C20850379AF8190B8AB</data_source>
+    <data_type>list</data_type>
+    <default_value xml:lang="en">1</default_value>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>1</is_required>
+    <label xml:lang="en">Scheduling Mode</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>11264</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>scheduling_mode</name>
+   </Item>
+   <Item type="Property" id="190DB92A3CE9421CA694F7FD3C186A52" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_source keyed_name="Project Schedule Type">5CDB18ED16B64D93B44DEFA5438E7018</data_source>
+    <data_type>list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">SchedTyp</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>19</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>scheduling_type</name>
+   </Item>
+   <Item type="Property" id="0D99A534391B4D3996D012BAAB6E56B5" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 1</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_1</name>
+   </Item>
+   <Item type="Property" id="E500EC08E55B412186B5712F40FCE5C1" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 10</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>14</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_10</name>
+   </Item>
+   <Item type="Property" id="8E9A58E564F947B9A3DE63125066562D" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 11</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>15</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_11</name>
+   </Item>
+   <Item type="Property" id="19DC0E8543CC406D96B8C6429BFEBD8F" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 12</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>16</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_12</name>
+   </Item>
+   <Item type="Property" id="847533EBD135438EBBD9EA0F868EE028" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 2</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>6</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_2</name>
+   </Item>
+   <Item type="Property" id="84A3BFD4A5144B5F9462C9BFE292E5D6" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 3</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>7</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_3</name>
+   </Item>
+   <Item type="Property" id="2292E771FE6948E4AE224FC6433FCB95" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 4</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>8</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_4</name>
+   </Item>
+   <Item type="Property" id="30CA31B1501C4679BA1D88EAC231309A" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 5</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>9</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_5</name>
+   </Item>
+   <Item type="Property" id="3E9502BD57F94C3BA19B82F5CF05B341" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 6</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>10</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_6</name>
+   </Item>
+   <Item type="Property" id="E003B4F7C09E431A85D3DB64F6132054" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 7</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>11</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_7</name>
+   </Item>
+   <Item type="Property" id="83A0369F331E477AA1F818989E860908" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 8</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>12</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_8</name>
+   </Item>
+   <Item type="Property" id="4FF9A6E188104E5BA8147351878B21CF" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>color list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Ph 9</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>13</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>status_9</name>
+   </Item>
+   <Item type="Property" id="57FE6231297641AFBD4AAF8A3C883C86" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Method" type="ItemType" name="Method">87879A09B8044DE380D59DF22DE1867F</data_source>
+    <data_type>item</data_type>
+    <default_value xml:lang="en">6E1133AB87A44D529DF5F9D1FD740100</default_value>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>1</is_required>
+    <item_behavior>float</item_behavior>
+    <label xml:lang="en">Update Method</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>8448</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>update_method</name>
+   </Item>
+   <Item type="Property" id="115095A16B794B6C961A4444E1FE87FB" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="WBS Element" type="ItemType" name="WBS Element">C2083D2B89174D8B9606625092101640</data_source>
+    <data_type>item</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <label xml:lang="en">WBS</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>wbs_id</name>
+   </Item>
+   <Item type="View" id="4F3E0D95BAD4468DAF5E790FD58E7D37" action="add">
+    <client>js</client>
+    <display_priority>1</display_priority>
+    <related_id keyed_name="Project" type="Form">966A7B1F74C446E8A9E2C4B6C999A609</related_id>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <type>default</type>
+   </Item>
+   <Item type="View" id="650D2315CA83446C879F0D655907C6A6" action="add">
+    <client>js</client>
+    <display_priority>3</display_priority>
+    <related_id keyed_name="PM_projectOnAdd" type="Form">1CF50C86BD1141A9863451B7634B2F04</related_id>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <type>default</type>
+   </Item>
+   <Item type="View" id="B66D37368ABC41BA89E3DB7F90CFEE76" action="add">
+    <client>js</client>
+    <display_priority>2</display_priority>
+    <related_id keyed_name="PM_projectPartInACW" type="Form">D273C24F1A7F4B3096ED3F0D0B63C96E</related_id>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <type>default</type>
+   </Item>
+   <Item type="Server Event" id="8D8E7788A987457E98BFC5A62C4720C8" action="add">
+    <related_id keyed_name="Schedule Project" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Schedule Project</name>
+     </Item>
+    </related_id>
+    <sort_order>1536</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="C230DBE3B6C24B93BD0689E97757AFA4" action="add">
+    <related_id keyed_name="Schedule Project" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Schedule Project</name>
+     </Item>
+    </related_id>
+    <sort_order>1664</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="056FB55413D24AE6BC340E47FF8319AE" action="add">
+    <related_id keyed_name="Project_onAfterDelete" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Project_onAfterDelete</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterDelete</server_event>
+    <sort_order>1792</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="5DB0AA53655F43BA883EA8A0018F1679" action="add">
+    <related_id keyed_name="Project_onAfterGetProject" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Project_onAfterGetProject</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterGet</server_event>
+    <sort_order>640</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="7BE3F5CA21E947A1A6C7D80912598EAF" action="add">
+    <related_id keyed_name="PM_SU_modes_onAfterUnlock" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PM_SU_modes_onAfterUnlock</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterUnlock</server_event>
+    <sort_order>1408</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="E002EF243D624708B408CA56D0410C1C" action="add">
+    <related_id keyed_name="PM_unlockNeedfulItemsInTree" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PM_unlockNeedfulItemsInTree</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterUnlock</server_event>
+    <sort_order>1415</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="F805AF04B3B841ABB5BF7E9ED405EB74" action="add">
+    <related_id keyed_name="updateOwnedById" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>updateOwnedById</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterUpdate</server_event>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="3B83D22386F645A9B367CC64D4F1DB7E" action="add">
+    <related_id keyed_name="beforeTreeAdd" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>beforeTreeAdd</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeAdd</server_event>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="7D98F766A9764A28BE3F13E3744E03F1" action="add">
+    <related_id keyed_name="Project_saveProjectTree" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Project_saveProjectTree</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeAdd</server_event>
+    <sort_order>1024</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="215E93BD877148229A65BF705686A0EA" action="add">
+    <related_id keyed_name="deleteProjectTree" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>deleteProjectTree</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeDelete</server_event>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="05BC1AB33F6B457A8945AF8F5235107C" action="add">
+    <related_id keyed_name="Project_onBeforeGetProject" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Project_onBeforeGetProject</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeGet</server_event>
+    <sort_order>768</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Server Event" id="B889AD74FEDC47C49DDABAFD92383448" action="add">
+    <related_id keyed_name="Project_saveProjectTree" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Project_saveProjectTree</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeUpdate</server_event>
+    <sort_order>896</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Item Action" id="CE6B8C176C2F42EF815D3EA807664A6E" action="add">
+    <related_id keyed_name="Update Project" type="Action">AEBC037F360A498B90707FEE1650ECC7</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Item Action" id="677856560C294A68896550EFBD2D2F5C" action="add">
+    <related_id keyed_name="Schedule Project" type="Action">B7D07423A1AD49919B8B9B5D56F91FD4</related_id>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="ItemType Life Cycle" id="9ECBF4E4F7FF4EC7AC9F19328C614202" action="add">
+    <related_id keyed_name="Project" type="Life Cycle Map">ED2BBF21BDBC478F88D493F811D36647</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="TOC Access" id="3993D122756047AD9A64C6EACF382145" action="add">
+    <related_id keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </related_id>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <category>DTM</category>
+   </Item>
+   <Item type="TOC Access" id="CDD0A4AE72234590B357120431529403" action="add">
+    <related_id keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <category>Portfolio</category>
+   </Item>
+   <Item type="Client Event" id="33ED484F080041FBAEAFF20C34669AA5" action="add">
+    <client_event>OnAfterNew</client_event>
+    <related_id keyed_name="onCreateNewProject" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>onCreateNewProject</name>
+     </Item>
+    </related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Can Add" id="EA3EBDC43B4147D08942A547CF8D72D1" action="add">
+    <can_add>1</can_add>
+    <related_id keyed_name="Project Management" type="Identity">5E12CD824411477AA56D9F539FA295EB</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Allowed Permission" id="6BA3E23B42F24C819ACDA37469750670" action="add">
+    <is_default>1</is_default>
+    <related_id keyed_name="Project" type="Permission">1E63D742A5794F8DB995A5298A202C4C</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+   <Item type="Item Report" id="487ED2684AB5487C87E70353C1DBDCD1" action="add">
+    <related_id keyed_name="ProjectTimeReport" type="Report">3FEE448935E34C7DBB557A51A6BA86FD</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+   </Item>
+  </Relationships>
+ </Item>
+ <Item type="ItemType" id="02184EDAA80D499CB6EC94B159966DBE" action="edit">
+  <Relationships>
+   <Item type="Property" id="3DE88DD35079499096C7275F11E93B43" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>100</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>1</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <keyed_name_order>1</keyed_name_order>
+    <label xml:lang="en">Project Number</label>
+    <order_by>1</order_by>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>0</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>project_number</name>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='02184EDAA80D499CB6EC94B159966DBE' and name='owned_by_id'">
+    <column_alignment>left</column_alignment>
+    <column_width>100</column_width>
+    <data_source keyed_name="Identity" type="ItemType" name="Identity">E582AB17663F4EF28460015B2BE9E094</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <label xml:lang="en">Project Manager</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>17</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <track_history>0</track_history>
+    <name>owned_by_id</name>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='02184EDAA80D499CB6EC94B159966DBE' and name='state'">
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Status</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>4</sort_order>
+    <source_id keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>state</name>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

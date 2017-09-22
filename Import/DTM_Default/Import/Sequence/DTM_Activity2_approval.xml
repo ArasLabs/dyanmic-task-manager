@@ -1,0 +1,10 @@
+﻿<AML>
+ <Item type="Sequence" id="EBB5CE06A9494C7BBB155CC8B8769CCA" action="add">
+  <initial_value>0</initial_value>
+  <pad_to>11</pad_to>
+  <pad_with>0</pad_with>
+  <prefix>A</prefix>
+  <step>1</step>
+  <name>DTM_Activity2_approval</name>
+ </Item>
+</AML>

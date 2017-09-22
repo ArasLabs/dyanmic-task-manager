@@ -1,0 +1,1109 @@
+﻿<AML>
+ <Item type="ItemType" id="E236DB697E294C46B630C99A0D20C2B1" action="add">
+  <allow_private_permission>1</allow_private_permission>
+  <auto_search>0</auto_search>
+  <close_icon>../images/Activity2.svg</close_icon>
+  <enforce_discovery>1</enforce_discovery>
+  <hide_where_used>0</hide_where_used>
+  <implementation_type>table</implementation_type>
+  <instance_data>ACTIVITY2</instance_data>
+  <is_dependent>0</is_dependent>
+  <is_relationship>0</is_relationship>
+  <is_versionable>0</is_versionable>
+  <label xml:lang="en">Activity2</label>
+  <label_plural xml:lang="en">Project Activities</label_plural>
+  <large_icon>../images/Activity2.svg</large_icon>
+  <open_icon>../images/Activity2.svg</open_icon>
+  <revisions keyed_name="Default" type="Revision">7FE395DD8B9F4E1090756A34B733D75E</revisions>
+  <show_parameters_tab>1</show_parameters_tab>
+  <structure_view>tab view</structure_view>
+  <unlock_on_logout>0</unlock_on_logout>
+  <use_src_access>0</use_src_access>
+  <name>Activity2</name>
+  <Relationships>
+   <Item type="Property" id="2D16EAEC32294842B6EFE306531382BA" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>22272</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>_doback_cnt</name>
+   </Item>
+   <Item type="Property" id="B1EED522308E4B99B3F1FC8680EA1036" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>boolean</data_type>
+    <default_search></default_search>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>22400</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>_has_sub_project</name>
+   </Item>
+   <Item type="Property" id="A67E5433BE2541C6B4C4FE8EE7B8BB2D" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>string</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>22528</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>_id</name>
+   </Item>
+   <Item type="Property" id="7EDEB7EC1688490D9B8F26F11FFCD025" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>boolean</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>22656</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>_require_apprv</name>
+   </Item>
+   <Item type="Property" id="8EF33F4B8028439AB1958661F42EB8D9" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Workflow Map" type="ItemType" name="Workflow Map">B19D349CC6FC44BC97D50A6D70AE79CB</data_source>
+    <data_type>item</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>22784</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>_selected_workflow</name>
+   </Item>
+   <Item type="Property" id="0681A1D157D348FF8903F1641EF2F76C" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>22912</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>_sub_project</name>
+   </Item>
+   <Item type="Property" id="EE032C33239B45B5A7F0217ADB95A27F" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>23040</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>_sub_project_plan_finish</name>
+   </Item>
+   <Item type="Property" id="268AE89CCA7246A4B824A5DE4FB90AFB" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>23168</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>_sub_project_plan_start</name>
+   </Item>
+   <Item type="Property" id="7D73C3BAC4AB4D29AAF88B88DCBC413C" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>decimal</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Actual Work</label>
+    <prec>5</prec>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <scale>2</scale>
+    <sort_order>17792</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>actual_work</name>
+   </Item>
+   <Item type="Property" id="3085F38DFB9749B0A1C1F907DC304D10" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>decimal</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">CPI</label>
+    <prec>6</prec>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <scale>4</scale>
+    <sort_order>18688</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>cpi</name>
+   </Item>
+   <Item type="Property" id="B91688A2A03C427BA70CF540420EC959" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Activated</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_activated</name>
+   </Item>
+   <Item type="Property" id="95609728EFD74C26B94C0C9A1548A5B7" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Actual Finish</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5120</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_due_act</name>
+   </Item>
+   <Item type="Property" id="7612E35E8D5C4D84BA03F45180FB66A2" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Orig Due</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>1024</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_due_original</name>
+   </Item>
+   <Item type="Property" id="7774BFFA4C0D4CB2AFF3FC9BC197C518" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Sched Due</label>
+    <order_by>2</order_by>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>10</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_due_sched</name>
+   </Item>
+   <Item type="Property" id="5239BA2B4BAB4AD68C2FAC08F5DF0307" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Target Due</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>16896</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_due_target</name>
+   </Item>
+   <Item type="Property" id="AF22686B5C614403AD1CCB2D51EB556C" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Earliest Finish</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>5632</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_ef</name>
+   </Item>
+   <Item type="Property" id="AF685DC51D0B4CE9BF6C82930B74755B" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Earliest Start</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>5504</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_es</name>
+   </Item>
+   <Item type="Property" id="841EA0E6473A42A8BE130D574402A113" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Latest Finish</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>5888</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_lf</name>
+   </Item>
+   <Item type="Property" id="26EDE39539674C68A0EF770650E00D1D" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Latest Start</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>5760</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_ls</name>
+   </Item>
+   <Item type="Property" id="4E7A7E7677BB4EFA93B29735E81E809F" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Resume Date</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>18304</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_resume</name>
+   </Item>
+   <Item type="Property" id="1F69CB432E5D46EDBADD3311ADC9A3D7" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Actual Start</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>4992</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_start_act</name>
+   </Item>
+   <Item type="Property" id="473CB95D4CE24EFDA742EA02637A4A8F" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Sched Start</label>
+    <order_by>1</order_by>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>9</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_start_sched</name>
+   </Item>
+   <Item type="Property" id="69B1DD4D0B5C4ADE89F261D08637B7AB" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Target Start</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>17152</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_start_target</name>
+   </Item>
+   <Item type="Property" id="C3A494E1432F49C481EE1F1F198DAD28" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Date User Estimate</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>13824</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>date_user_estimate</name>
+   </Item>
+   <Item type="Property" id="F2C32D88C15245C88156DBF7F3A93DF9" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Days Remaining</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>18176</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>days_remaining</name>
+   </Item>
+   <Item type="Property" id="FC6C0825B77E4A998E7D6A714672FAE6" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>boolean</data_type>
+    <default_value xml:lang="en">0</default_value>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Deliv Required</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>8448</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>deliv_required</name>
+   </Item>
+   <Item type="Property" id="215AFDEA86C54DBA8A359CE180DAAE96" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Deliverable">
+     <Item type="List" action="get" select="id" page="1" pagesize="1">
+      <name>Deliverable</name>
+     </Item>
+    </data_source>
+    <data_type>list</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Deliv Type</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>8320</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>deliv_type</name>
+   </Item>
+   <Item type="Property" id="D697CA72C3DE4827A2F0C8D522F4A25D" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>text</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Description</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>4736</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>description</name>
+   </Item>
+   <Item type="Property" id="BDDEF1A034F645EEAFC4D8E6796AD17E" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Earned Value</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>18432</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>earned_value</name>
+   </Item>
+   <Item type="Property" id="1515EA9D2F2845D087422B6D34E409AA" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>50</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Days</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>expected_duration</name>
+   </Item>
+   <Item type="Property" id="E6D7C3445BEC4DD7A309680A81477D28" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>boolean</data_type>
+    <default_value xml:lang="en">0</default_value>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Is Critical</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>16896</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>is_critical</name>
+   </Item>
+   <Item type="Property" id="003E64C683F745888F7D3D0C19B94C70" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>boolean</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Mst</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>1</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>is_milestone</name>
+   </Item>
+   <Item type="Property" id="15663E940D3749C2907AF86339392ACF" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>40</column_width>
+    <data_type>boolean</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Rqd</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>2</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>is_required</name>
+   </Item>
+   <Item type="Property" id="71C20E9C880B412C8A141E8E6519704A" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Project Role">E15C81B361CB44F09508F9259D1C5B5D</data_source>
+    <data_type>list</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Lead Role</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>19072</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>lead_role</name>
+   </Item>
+   <Item type="Property" id="FFF1AFC47C6E443583DDED6013891DD2" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>string</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Message</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>17024</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>message</name>
+   </Item>
+   <Item type="Property" id="C953667DB46B4E478ADD18D7FE6F2BE8" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>100</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <keyed_name_order>1</keyed_name_order>
+    <label xml:lang="en">Name</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>4</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <stored_length>128</stored_length>
+    <track_history>0</track_history>
+    <name>name</name>
+   </Item>
+   <Item type="Property" id="2EBA2B89102D4BFDBCD3EAE3D4AA7189" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Original Duration</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>18944</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>orig_duration</name>
+   </Item>
+   <Item type="Property" id="927190D4E2664499851A6EB3F7AF9A3D" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>50</column_width>
+    <data_type>integer</data_type>
+    <default_value xml:lang="en">0</default_value>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Percent Complete</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>7</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>percent_compl</name>
+   </Item>
+   <Item type="Property" id="2C1DC92A339543A4BBA7CD5C5BAAB54A" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Planned Value</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>18560</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>planned_value</name>
+   </Item>
+   <Item type="Property" id="B6A3C5A64B184F9DB1FC5CE77BA69B33" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>string</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Prev Item</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>10752</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>prev_item</name>
+   </Item>
+   <Item type="Property" id="FD5939F102CA4B37BADDDF3EF6953BD6" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Proj Index</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>3</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <stored_length>30</stored_length>
+    <track_history>0</track_history>
+    <name>proj_index</name>
+   </Item>
+   <Item type="Property" id="1E74D9F8BFB44F738FD7F3A6ADCC83C3" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Project</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5248</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>proj_num</name>
+   </Item>
+   <Item type="Property" id="44B7A53F168D414ABC98371A1912D166" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>decimal</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Actual Work</label>
+    <prec>5</prec>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <scale>2</scale>
+    <sort_order>17408</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>rollup_actual_work</name>
+   </Item>
+   <Item type="Property" id="37DDFA0DF6B0454C933A2FA869CC05AB" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Actual Start Date</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>17920</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>rollup_date_start_act</name>
+   </Item>
+   <Item type="Property" id="E3841D780004477496B3ADF174D3E952" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Percent Complete</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>17536</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>rollup_percent_compl</name>
+   </Item>
+   <Item type="Property" id="FBC4D7646EAE4C6EB8E1E35691EF2407" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Work Estimate</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>17280</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>rollup_work_est</name>
+   </Item>
+   <Item type="Property" id="F73B3AC85EF14258B89617386DFEF0AD" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Current Work Estimate</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>17664</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>rollup_work_est_curr</name>
+   </Item>
+   <Item type="Property" id="C6762B97047E40B790EC18F01B2EF72E" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>boolean</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Leader Signoff</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>19200</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>signoff_required</name>
+   </Item>
+   <Item type="Property" id="BFFAEA10212C413F80F2C6DF0FB67622" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>decimal</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">SPI</label>
+    <prec>6</prec>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <scale>4</scale>
+    <sort_order>18816</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>spi</name>
+   </Item>
+   <Item type="Property" id="D06DF4FD694A47F19A64066D455D0806" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>60</column_width>
+    <data_source keyed_name="PM_StatusColor">E9B77A188B124DF5B0A55BED0AE667E2</data_source>
+    <data_type>list</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Status</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>8</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>status</name>
+   </Item>
+   <Item type="Property" id="0E2642A8898543D3890E5C88A330A1A5" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Est</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>6</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>work_est</name>
+   </Item>
+   <Item type="Property" id="A167E6D221AC40798A2D11B1EEEFBB2A" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Current Work Estimate</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>18048</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>work_est_curr</name>
+   </Item>
+   <Item type="Property" id="A03736E19E3D4132BD9810775BCCA7E7" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">X</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>1536</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>x</name>
+   </Item>
+   <Item type="Property" id="EAB7D6B47C2449C7825942E9C406E704" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>integer</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Y</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>1664</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>y</name>
+   </Item>
+   <Item type="View" id="9F7D1518E2AE4C0BA841CA076F4E9E80" action="add">
+    <client>js</client>
+    <display_priority>1</display_priority>
+    <related_id keyed_name="Activity2" type="Form">71A57D814F054F4880559EC0C4D0F153</related_id>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <type>default</type>
+   </Item>
+   <Item type="View" id="F978DE7B8EA5456F93D837066CDE44CB" action="add">
+    <client>js</client>
+    <display_priority>2</display_priority>
+    <related_id keyed_name="Activity Completion Worksheet" type="Form">8BDB522D5E054A97B40D03D9CDA2334F</related_id>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <type>default</type>
+   </Item>
+   <Item type="Server Event" id="36E6FBD7FB2F46C796A68A89C84D4B39" action="add">
+    <related_id keyed_name="onSaveActivity2" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>onSaveActivity2</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterAdd</server_event>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+   </Item>
+   <Item type="Server Event" id="A25E3AAA65A04012BC205C1172A43BC2" action="add">
+    <related_id keyed_name="PM_setFedCss_For_ACW" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PM_setFedCss_For_ACW</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterGet</server_event>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+   </Item>
+   <Item type="Server Event" id="A65D2D50D20B434A893BBF93848A2D85" action="add">
+    <related_id keyed_name="onSaveActivity2" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>onSaveActivity2</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterUpdate</server_event>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+   </Item>
+   <Item type="ItemType Life Cycle" id="66DC354FFC3C401AB0FFE55229A866BF" action="add">
+    <related_id keyed_name="Activity2" type="Life Cycle Map">B075C307CD3D45F3A03C6E0A258403D0</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+   </Item>
+   <Item type="Can Add" id="27F890AE656C48A3A1F0576AE7DE5DFF" action="add">
+    <can_add>1</can_add>
+    <related_id keyed_name="Project Management" type="Identity">5E12CD824411477AA56D9F539FA295EB</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+   </Item>
+   <Item type="Allowed Permission" id="EB322FD9782744EA88125D44CC9F8893" action="add">
+    <is_default>1</is_default>
+    <related_id keyed_name="Project" type="Permission">1E63D742A5794F8DB995A5298A202C4C</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+   </Item>
+  </Relationships>
+ </Item>
+ <Item type="ItemType" id="E236DB697E294C46B630C99A0D20C2B1" action="edit">
+  <Relationships>
+   <Item type="Property" action="edit" where="source_id='E236DB697E294C46B630C99A0D20C2B1' and name='managed_by_id'">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Identity" type="ItemType" name="Identity">E582AB17663F4EF28460015B2BE9E094</data_source>
+    <data_type>item</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>11648</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>managed_by_id</name>
+    <Relationships>
+     <Item type="Grid Event" id="567B092D6FF447DFB9AA479A90332299" action="add">
+      <grid_event>onsearchdialog</grid_event>
+      <related_id keyed_name="Project_cfgSearchDialog4Assgnmts" type="Method">
+       <Item type="Method" action="get" select="id">
+        <name>Project_cfgSearchDialog4Assgnmts</name>
+       </Item>
+      </related_id>
+      <sort_order>128</sort_order>
+      <source_id>
+       <Item type="Property" action="get" select="id">
+        <name>managed_by_id</name>
+        <source_id>E236DB697E294C46B630C99A0D20C2B1</source_id>
+       </Item>
+      </source_id>
+     </Item>
+    </Relationships>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='E236DB697E294C46B630C99A0D20C2B1' and name='owned_by_id'">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Identity" type="ItemType" name="Identity">E582AB17663F4EF28460015B2BE9E094</data_source>
+    <data_type>item</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>11520</sort_order>
+    <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+    <track_history>0</track_history>
+    <name>owned_by_id</name>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

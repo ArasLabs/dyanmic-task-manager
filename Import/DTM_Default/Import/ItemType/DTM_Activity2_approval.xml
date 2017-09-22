@@ -1,0 +1,111 @@
+﻿<AML>
+ <Item type="ItemType" id="3AEE60FC48DD4FE5B6BFC0647C148745" action="add">
+  <allow_private_permission>1</allow_private_permission>
+  <auto_search>0</auto_search>
+  <enforce_discovery>1</enforce_discovery>
+  <hide_where_used>0</hide_where_used>
+  <implementation_type>table</implementation_type>
+  <instance_data>DTM_ACTIVITY2_APPROVAL</instance_data>
+  <is_dependent>0</is_dependent>
+  <is_relationship>0</is_relationship>
+  <is_versionable>0</is_versionable>
+  <label xml:lang="en">Approval</label>
+  <label_plural xml:lang="en">Approval List</label_plural>
+  <revisions keyed_name="Default" type="Revision">7FE395DD8B9F4E1090756A34B733D75E</revisions>
+  <show_parameters_tab>1</show_parameters_tab>
+  <unlock_on_logout>0</unlock_on_logout>
+  <use_src_access>0</use_src_access>
+  <name>DTM_Activity2_approval</name>
+  <Relationships>
+   <Item type="Property" id="A62DF132E9324A50A22E0C1B9B467291" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="DTM_Activity2_approval">EBB5CE06A9494C7BBB155CC8B8769CCA</data_source>
+    <data_type>sequence</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>3072</sort_order>
+    <source_id keyed_name="DTM_Activity2_approval" type="ItemType" name="DTM_Activity2_approval">3AEE60FC48DD4FE5B6BFC0647C148745</source_id>
+    <track_history>0</track_history>
+    <name>_item_number</name>
+   </Item>
+   <Item type="Property" id="BC63F0465F8045F3B27FFF1924837AC5" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <label xml:lang="en">Related Activity</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>3200</sort_order>
+    <source_id keyed_name="DTM_Activity2_approval" type="ItemType" name="DTM_Activity2_approval">3AEE60FC48DD4FE5B6BFC0647C148745</source_id>
+    <track_history>0</track_history>
+    <name>_related_activity2</name>
+   </Item>
+   <Item type="Property" id="83DCBDCC6B47466BBCD55C9BB10894D9" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>3328</sort_order>
+    <source_id keyed_name="DTM_Activity2_approval" type="ItemType" name="DTM_Activity2_approval">3AEE60FC48DD4FE5B6BFC0647C148745</source_id>
+    <track_history>0</track_history>
+    <name>_related_project</name>
+   </Item>
+   <Item type="View" id="0C4BF6E75CE5431DBB7545FEE33E674B" action="add">
+    <client>js</client>
+    <related_id keyed_name="DTM_Activity2_approval" type="Form">AD74F13515D148C793C0F6BC3AAC0667</related_id>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="DTM_Activity2_approval" type="ItemType" name="DTM_Activity2_approval">3AEE60FC48DD4FE5B6BFC0647C148745</source_id>
+    <type>default</type>
+   </Item>
+   <Item type="ItemType Life Cycle" id="B1395685B23848B9B187646F969C0BDB" action="add">
+    <related_id keyed_name="DTM_Act2_aprv" type="Life Cycle Map">CDE2AA93582B4EA0AC10204ABC654252</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="DTM_Activity2_approval" type="ItemType" name="DTM_Activity2_approval">3AEE60FC48DD4FE5B6BFC0647C148745</source_id>
+   </Item>
+   <Item type="Allowed Workflow" id="C10A4EC72C7E4EA48997D9C6E2A6B33F" action="add">
+    <is_default>0</is_default>
+    <related_id keyed_name="Act2_aprv_WF_Temp" type="Workflow Map">4C4F9334E29E43E0A953AE53420A5FF9</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="DTM_Activity2_approval" type="ItemType" name="DTM_Activity2_approval">3AEE60FC48DD4FE5B6BFC0647C148745</source_id>
+   </Item>
+   <Item type="Can Add" id="53488DF72B194CF084797BB2864196F1" action="add">
+    <can_add>1</can_add>
+    <related_id keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="DTM_Activity2_approval" type="ItemType" name="DTM_Activity2_approval">3AEE60FC48DD4FE5B6BFC0647C148745</source_id>
+   </Item>
+   <Item type="Allowed Permission" id="BC1DE1B30C924EA6B035CEFE9746E02F" action="add">
+    <is_default>1</is_default>
+    <related_id keyed_name="DTM_Aprv_Start" type="Permission">422D70C41D7444A5B3A04CDB6CCD7A83</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="DTM_Activity2_approval" type="ItemType" name="DTM_Activity2_approval">3AEE60FC48DD4FE5B6BFC0647C148745</source_id>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

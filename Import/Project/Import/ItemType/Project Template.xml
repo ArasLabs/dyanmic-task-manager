@@ -1,0 +1,214 @@
+﻿<AML>
+ <Item type="ItemType" id="B47D2E8E30484C66A4E9449E394F9456" action="add">
+  <allow_private_permission>1</allow_private_permission>
+  <auto_search>1</auto_search>
+  <close_icon>../images/ProjectTemplate.svg</close_icon>
+  <enforce_discovery>1</enforce_discovery>
+  <help_item>DC9E7E8748B84E8FB7E92E0ABEEB37F4</help_item>
+  <help_url xml:lang="en">mergedProjects/ProgramManagement/Templates.htm</help_url>
+  <hide_where_used>0</hide_where_used>
+  <implementation_type>table</implementation_type>
+  <instance_data>PROJECT_TEMPLATE</instance_data>
+  <is_dependent>0</is_dependent>
+  <is_relationship>0</is_relationship>
+  <is_versionable>0</is_versionable>
+  <label xml:lang="en">Project Template</label>
+  <label_plural xml:lang="en">Project Templates</label_plural>
+  <large_icon>../images/ProjectTemplate.svg</large_icon>
+  <open_icon>../images/ProjectTemplate.svg</open_icon>
+  <revisions keyed_name="Default" type="Revision">7FE395DD8B9F4E1090756A34B733D75E</revisions>
+  <show_parameters_tab>1</show_parameters_tab>
+  <structure_view>tab view</structure_view>
+  <unlock_on_logout>0</unlock_on_logout>
+  <use_src_access>0</use_src_access>
+  <name>Project Template</name>
+  <Relationships>
+   <Item type="Property" id="7457414928D84E19B0B3520603C8B685" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>boolean</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>4096</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+    <track_history>0</track_history>
+    <name>_is_modular</name>
+   </Item>
+   <Item type="Property" id="93B48CBFA85242D2B0B598217D00860C" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>text</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Description</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+    <track_history>0</track_history>
+    <name>description</name>
+   </Item>
+   <Item type="Property" id="10AA16D888DB4EAABF866963A1B9A39C" action="add">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="WBS Element" type="ItemType" name="WBS Element">C2083D2B89174D8B9606625092101640</data_source>
+    <data_type>item</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <label xml:lang="en">WBS</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+    <track_history>0</track_history>
+    <name>wbs_id</name>
+   </Item>
+   <Item type="View" id="E598F71F1DD4402BB9D7B7964D542307" action="add">
+    <client>js</client>
+    <related_id keyed_name="Project Template" type="Form">5DA06BB7FC4844E8BD8024A0935320C9</related_id>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+    <type>default</type>
+   </Item>
+   <Item type="Server Event" id="4B0C4E2C35364195BE943790A99209A2" action="add">
+    <related_id keyed_name="Project_onAfterDelete" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Project_onAfterDelete</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterDelete</server_event>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+   </Item>
+   <Item type="Server Event" id="FF306D0C91844EB4A2DAEA5EA3D30785" action="add">
+    <related_id keyed_name="PM_unlockNeedfulItemsInTree" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PM_unlockNeedfulItemsInTree</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterUnlock</server_event>
+    <sort_order>1</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+   </Item>
+   <Item type="Server Event" id="445A192283CE44619D3A345065BBDEC9" action="add">
+    <related_id keyed_name="Project_saveProjectTree" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Project_saveProjectTree</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeAdd</server_event>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+   </Item>
+   <Item type="Server Event" id="6F3F1EC650B64A0D8149C0AFE8EA3F8B" action="add">
+    <related_id keyed_name="deleteProjectTree" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>deleteProjectTree</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeDelete</server_event>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+   </Item>
+   <Item type="Server Event" id="D92B56F6D48D41C3B6D6E3BE7EC537CE" action="add">
+    <related_id keyed_name="Project_saveProjectTree" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Project_saveProjectTree</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeUpdate</server_event>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+   </Item>
+   <Item type="ItemType Life Cycle" id="2236F1DF3CE34457B8C2985A42DD218C" action="add">
+    <related_id keyed_name="Project Template" type="Life Cycle Map">C1A272E625E3487F99DE088E42F00DC4</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+   </Item>
+   <Item type="TOC Access" id="6C64B77F2A174E22B503BCBEB56EDCEF" action="add">
+    <related_id keyed_name="Project Management" type="Identity">5E12CD824411477AA56D9F539FA295EB</related_id>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+    <category>DTM</category>
+   </Item>
+   <Item type="TOC Access" id="16CC8B85623F4DA0AFF52AF3EEFC59FB" action="add">
+    <related_id keyed_name="Project Management" type="Identity">5E12CD824411477AA56D9F539FA295EB</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+    <category>Templates</category>
+   </Item>
+   <Item type="Can Add" id="93ED39AE11C142BB91FA1273842A7120" action="add">
+    <can_add>1</can_add>
+    <related_id keyed_name="Project Management" type="Identity">5E12CD824411477AA56D9F539FA295EB</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+   </Item>
+   <Item type="Allowed Permission" id="88D8CF788089491C870AA927598C8EE1" action="add">
+    <is_default>1</is_default>
+    <related_id keyed_name="Project" type="Permission">1E63D742A5794F8DB995A5298A202C4C</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+   </Item>
+  </Relationships>
+ </Item>
+ <Item type="ItemType" id="B47D2E8E30484C66A4E9449E394F9456" action="edit">
+  <Relationships>
+   <Item type="Property" id="BABD92BFC30441369C24546C496F1D11" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>100</column_width>
+    <data_type>string</data_type>
+    <default_value xml:lang="en">Template</default_value>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>1</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>1</is_required>
+    <keyed_name_order>1</keyed_name_order>
+    <label xml:lang="en">Name</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>1</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+    <stored_length>128</stored_length>
+    <track_history>0</track_history>
+    <name>name</name>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='B47D2E8E30484C66A4E9449E394F9456' and name='state'">
+    <column_alignment>left</column_alignment>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Status</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>1920</sort_order>
+    <source_id keyed_name="Project Template" type="ItemType" name="Project Template">B47D2E8E30484C66A4E9449E394F9456</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>state</name>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

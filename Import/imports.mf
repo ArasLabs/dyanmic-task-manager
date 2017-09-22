@@ -1,0 +1,9 @@
+<imports>
+  <package name="com.aras.innovator.solution.PLM" path="PLM\Import" />
+  <package name="com.aras.innovator.solution.Project" path="Project\Import">
+    <dependson name="com.aras.innovator.solution.PLM" />
+  </package>
+  <package name="DTM_Default" path="DTM_Default\Import" />
+  <package name="com.aras.innovator.core" path=".\" />
+  <package name="com.aras.innovator.inbasket" path=".\" />
+</imports>

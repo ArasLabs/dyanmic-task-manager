@@ -1,0 +1,571 @@
+﻿<AML>
+ <Item type="ItemType" id="B88C14B99EF449828C5D926E39EE8B89" action="add">
+  <allow_private_permission>1</allow_private_permission>
+  <auto_search>0</auto_search>
+  <class_structure><![CDATA[<class id="B88C14B99EF449828C5D926E39EE8B89"><class name="Drawing" id="8B176CD37558A7F76BB5E0DB670B1B61" /><class name="CAD Model" id="D724E3D6F56931629D758000ED6C47D4" /><class name="Specification" id="B9FA37397257546FF49159A01E8E90F8" /><class name="Software" id="682BC79FB50DCD9B5BDD47E94928DFEA" /><class name="Miscellaneous" id="5C54253BFF858649508647FFE274E5B4" /><class id="BC1087B0D09746DFA7D3F49C7522914E" name="Product" /><class id="DDFA6ECFA05944D5A25D2DBAAB01FA3E" name="Project" /><class id="A0C27A016E814CAB86E28AEF1462B841" name="General" /><class id="BDDFFB63F2D1448498F650F1F248AF8C" name="Email" /><class id="BD5995FECE7849F39836160424E4D905" name="Process" /><class id="A0CA02E683A3477EA79BEA2ED733016B" name="Ad-hoc" /></class>]]></class_structure>
+  <close_icon>../images/Document.svg</close_icon>
+  <default_page_size>25</default_page_size>
+  <enforce_discovery>1</enforce_discovery>
+  <help_url xml:lang="en">mergedProjects/ProductEngineering/plm_Documents.htm</help_url>
+  <hide_where_used>0</hide_where_used>
+  <history_template keyed_name="Default" type="History Template">3BC16EF9E52B4F9792AB76BCE0492F29</history_template>
+  <implementation_type>table</implementation_type>
+  <instance_data>DOCUMENT</instance_data>
+  <is_dependent>0</is_dependent>
+  <is_relationship>0</is_relationship>
+  <is_versionable>1</is_versionable>
+  <label xml:lang="en">Document</label>
+  <label_plural xml:lang="en">Documents</label_plural>
+  <large_icon>../images/Document.svg</large_icon>
+  <manual_versioning>0</manual_versioning>
+  <open_icon>../images/Document.svg</open_icon>
+  <revisions keyed_name="Default" type="Revision">7FE395DD8B9F4E1090756A34B733D75E</revisions>
+  <show_parameters_tab>0</show_parameters_tab>
+  <structure_view>tab view</structure_view>
+  <unlock_on_logout>0</unlock_on_logout>
+  <use_src_access>0</use_src_access>
+  <name>Document</name>
+  <Relationships>
+   <Item type="Property" id="8B905482951A4EB8BA3F70C1FA8309C6" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>150</column_width>
+    <data_source keyed_name="Authoring Tools">11A953CA5A5E4BCD8EC9758C7E4B6E92</data_source>
+    <data_type>list</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Authoring Tool</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>896</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>authoring_tool</name>
+   </Item>
+   <Item type="Property" id="894E0A47F1BC4CA0A40C3DA13CE73EA9" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>100</column_width>
+    <data_type>string</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Authoring Tool Version</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>1024</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>authoring_tool_version</name>
+   </Item>
+   <Item type="Property" id="4655EAC739744E0094364EE3B9875E4D" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>250</column_width>
+    <data_type>string</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Description</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>640</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>128</stored_length>
+    <track_history>0</track_history>
+    <name>description</name>
+   </Item>
+   <Item type="Property" id="1F1141FC77064287BFF8C3E6D7CCD5A0" action="add">
+    <class_path>Drawing</class_path>
+    <column_alignment>left</column_alignment>
+    <column_width>100</column_width>
+    <data_source keyed_name="Drawing Sizes">C686BB9855A446CEBED3A7DE7850823F</data_source>
+    <data_type>list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Drawing Size</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>1280</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>drawing_size</name>
+   </Item>
+   <Item type="Property" id="FA09EAA15E4B43AFB5067957518D39CD" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>string</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>1</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">External Id</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>103456</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>256</stored_length>
+    <track_history>0</track_history>
+    <name>external_id</name>
+   </Item>
+   <Item type="Property" id="ABC1F656C0714035A2F460976B7E5451" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>string</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">External Owner</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>103584</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>128</stored_length>
+    <track_history>0</track_history>
+    <name>external_owner</name>
+   </Item>
+   <Item type="Property" id="8C7F1BE0EA914D6FA72E936CA609DB52" action="add">
+    <column_alignment>left</column_alignment>
+    <data_type>string</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">External Type</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>103712</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>128</stored_length>
+    <track_history>0</track_history>
+    <name>external_type</name>
+   </Item>
+   <Item type="Property" id="63A784E5CFA94A69B663E67E2FB796E5" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>150</column_width>
+    <data_source keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <label xml:lang="en">From Template</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>103968</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <track_history>0</track_history>
+    <name>from_template</name>
+   </Item>
+   <Item type="Property" id="23A9BF24CF17499EAD9BC235C3A134D3" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>60</column_width>
+    <data_type>boolean</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Changes</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>95000</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <track_history>0</track_history>
+    <name>has_change_pending</name>
+   </Item>
+   <Item type="Property" id="7928AFC1D8CB4F64B142289B58E79EE8" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>60</column_width>
+    <data_type>boolean</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Files</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>100000</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <track_history>0</track_history>
+    <name>has_files</name>
+   </Item>
+   <Item type="Property" id="72868A94693C4790AA5D99DAA1EE7906" action="add">
+    <column_alignment>center</column_alignment>
+    <column_width>60</column_width>
+    <data_type>boolean</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Template</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>103840</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <track_history>0</track_history>
+    <name>is_template</name>
+   </Item>
+   <Item type="Property" id="364519C1348C4A57B88D142C3B1F538E" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>200</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Name</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>name</name>
+   </Item>
+   <Item type="Property" id="03A4886FCBDA49F2B6E10E3C48326E99" action="add">
+    <class_path>Drawing</class_path>
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_type>string</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Scale</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>1408</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>16</stored_length>
+    <track_history>0</track_history>
+    <name>scale</name>
+   </Item>
+   <Item type="Property" id="3387411DE4434F128ADAF76E06433F54" action="add">
+    <class_path>Specification</class_path>
+    <column_alignment>left</column_alignment>
+    <column_width>120</column_width>
+    <data_source keyed_name="Specification Types">4C3C5B4E66D54BC3BEAA78ECA047EA70</data_source>
+    <data_type>list</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Specification Type</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>1536</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>64</stored_length>
+    <track_history>0</track_history>
+    <name>specification_type</name>
+   </Item>
+   <Item type="Property" id="61EEC41F3F954342AC675D44D8B5F0A8" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>60</column_width>
+    <data_type>image</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Thumbnail</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>104096</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <track_history>0</track_history>
+    <name>thumbnail</name>
+   </Item>
+   <Item type="View" id="B0A50C5D541441028340799C03074B16" action="add">
+    <client>js</client>
+    <related_id keyed_name="Document" type="Form">D95D1B10CE6D47CDB7AE755108DBA13D</related_id>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <type>default</type>
+   </Item>
+   <Item type="Server Event" id="0A6883D1239449E5845DAB43824C90C4" action="add">
+    <related_id keyed_name="PE_update_has_change_pending" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PE_update_has_change_pending</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterCopy</server_event>
+    <sort_order>1280</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Server Event" id="2646F50E02BF463C88F44A88AF7D6110" action="add">
+    <related_id keyed_name="PE_AffectedItemFloat" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PE_AffectedItemFloat</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterVersion</server_event>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Server Event" id="0463B230610D449CAB449C05D17DEB1F" action="add">
+    <related_id keyed_name="PE_update_has_change_pending" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PE_update_has_change_pending</name>
+     </Item>
+    </related_id>
+    <server_event>onAfterVersion</server_event>
+    <sort_order>1408</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Server Event" id="28C1B46DE93E425DA23ADFD1DBD6E094" action="add">
+    <related_id keyed_name="PE_clean_has_files_prop" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PE_clean_has_files_prop</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeAdd</server_event>
+    <sort_order>896</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Server Event" id="5C25259AEC4B4D4E9A2E52E6B07BA1ED" action="add">
+    <related_id keyed_name="PE_clean_has_change_pending_prop" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PE_clean_has_change_pending_prop</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeAdd</server_event>
+    <sort_order>1152</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Server Event" id="CBD3FFB97AC542729E273B868D0941B9" action="add">
+    <related_id keyed_name="PE_clean_has_files_prop" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PE_clean_has_files_prop</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeUpdate</server_event>
+    <sort_order>768</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Server Event" id="810AA4E9FA1E44BEA59CCE3B0E25FDD8" action="add">
+    <related_id keyed_name="PE_clean_has_change_pending_prop" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>PE_clean_has_change_pending_prop</name>
+     </Item>
+    </related_id>
+    <server_event>onBeforeUpdate</server_event>
+    <sort_order>1024</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Item Action" id="38F2C8EAB5EA490F93BADBDEC93507DE" action="add">
+    <related_id keyed_name="PE_CreateNewRevision" type="Action">39BE6AC491184B979EC03D1400F35F2F</related_id>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Item Action" id="61189913D36D48EEA5ADE1F2C3C36575" action="add">
+    <related_id keyed_name="PE_ManualRelease" type="Action">2CAC9B41B8394D29B89C45C522703BC4</related_id>
+    <sort_order>640</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Item Action" id="97CA41BF7D114CC483F754A3F70A79CC" action="add">
+    <related_id keyed_name="PE_AddToChange" type="Action">83FB72FC3E4D42B8B51BCD7F4194E527</related_id>
+    <sort_order>768</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="ItemType Life Cycle" id="44CA0422059E4A6C99BA1C57BCCE02E0" action="add">
+    <related_id keyed_name="Document" type="Life Cycle Map">3B1C099A970A4E51940CBAE76FF67A7D</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="TOC Access" id="84FD7C09821A401581BE13AEC072BCCC" action="add">
+    <related_id keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <category>Documents</category>
+   </Item>
+   <Item type="TOC Access" id="20B9B147B3244C4AB1EE8890E1AFC292" action="add">
+    <related_id keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </related_id>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <category>DTM</category>
+   </Item>
+   <Item type="Can Add" id="585809AF063F4598A3B7EF30100652C1" action="add">
+    <can_add>1</can_add>
+    <related_id keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+   <Item type="Allowed Permission" id="8C9D3578A5A14E67AFDA5E383DB10DCA" action="add">
+    <is_default>1</is_default>
+    <related_id keyed_name="New Document" type="Permission">F0E3A6D242FC4889A9A119EEBC8EC79E</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+   </Item>
+  </Relationships>
+ </Item>
+ <Item type="ItemType" id="B88C14B99EF449828C5D926E39EE8B89" action="edit">
+  <Relationships>
+   <Item type="Property" id="2A0700C4954641F7A36B026F9134A0EC" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>120</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>1</is_indexed>
+    <is_keyed>1</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>1</is_required>
+    <keyed_name_order>1</keyed_name_order>
+    <label xml:lang="en">Document Number</label>
+    <order_by>1</order_by>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>item_number</name>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='B88C14B99EF449828C5D926E39EE8B89' and name='classification'">
+    <column_alignment>left</column_alignment>
+    <column_width>120</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Type</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>512</stored_length>
+    <track_history>0</track_history>
+    <name>classification</name>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='B88C14B99EF449828C5D926E39EE8B89' and name='major_rev'">
+    <column_alignment>center</column_alignment>
+    <column_width>50</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Revision</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>8</stored_length>
+    <track_history>0</track_history>
+    <name>major_rev</name>
+    <Relationships>
+     <Item type="Grid Event" id="80BAE9AD900745A59372AB52E50A6791" action="add">
+      <grid_event>oneditstart</grid_event>
+      <related_id keyed_name="Grid Cell ReadOnly" type="Method">
+       <Item type="Method" action="get" select="id">
+        <name>Grid Cell ReadOnly</name>
+       </Item>
+      </related_id>
+      <sort_order>128</sort_order>
+      <source_id>
+       <Item type="Property" action="get" select="id">
+        <name>major_rev</name>
+        <source_id>B88C14B99EF449828C5D926E39EE8B89</source_id>
+       </Item>
+      </source_id>
+     </Item>
+    </Relationships>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='B88C14B99EF449828C5D926E39EE8B89' and name='state'">
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">State</label>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>640</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>state</name>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='B88C14B99EF449828C5D926E39EE8B89' and name='superseded_date'">
+    <column_alignment>left</column_alignment>
+    <data_type>date</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Superseded Date</label>
+    <pattern>short_date_time</pattern>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>4864</sort_order>
+    <source_id keyed_name="Document" type="ItemType" name="Document">B88C14B99EF449828C5D926E39EE8B89</source_id>
+    <track_history>0</track_history>
+    <name>superseded_date</name>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

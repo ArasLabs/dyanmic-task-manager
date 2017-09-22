@@ -1,0 +1,224 @@
+﻿<AML>
+ <Item type="List" id="EAB29654E2CD4D30B376957788198B40" action="add">
+  <description>Used to categorize the ItemTypes and to group them on the main tree.</description>
+  <label>Categories</label>
+  <name>Categories</name>
+  <Relationships>
+   <Item type="Value" id="ECA96A5C0D2D41B38DD608B9B7424A7F" action="add">
+    <label xml:lang="en">Administration</label>
+    <sort_order>0</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Administration</value>
+   </Item>
+   <Item type="Value" id="3E5EDCEC127C4E3785771420668CDDB8" action="add">
+    <label xml:lang="en">Users and Groups</label>
+    <sort_order>1</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Users and Groups</value>
+   </Item>
+   <Item type="Value" id="5BAF587E1EB3413FB1CEB056459CDF90" action="add">
+    <label xml:lang="en">Data Modeling</label>
+    <sort_order>2</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Data Modeling</value>
+   </Item>
+   <Item type="Value" id="E0D92BE5B7A34E029BA77FEC8E429626" action="add">
+    <label xml:lang="en">Business Logic</label>
+    <sort_order>3</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Business Logic</value>
+   </Item>
+   <Item type="Value" id="A4A9F520EBAC497B9B582765C74091C8" action="add">
+    <label xml:lang="en">Process Flow</label>
+    <sort_order>4</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Process Flow</value>
+   </Item>
+   <Item type="Value" id="BC3CE8CF73EB49D5BFA6E771F9C76884" action="add">
+    <label xml:lang="en">Searchs And Reports</label>
+    <sort_order>5</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Searchs and Reports</value>
+   </Item>
+   <Item type="Value" id="CDB896F98D834EABB2A08055B2023F56" action="add">
+    <label xml:lang="en">Vaulting Files</label>
+    <sort_order>6</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Vaulting Files</value>
+   </Item>
+   <Item type="Value" id="92FFE624FDEA44A0AA1A2525B216031E" action="add">
+    <label xml:lang="en">User Interface</label>
+    <sort_order>7</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>User Interface</value>
+   </Item>
+   <Item type="Value" id="F5D31268E42E433085FAE2DBCC4C5A12" action="add">
+    <label xml:lang="en">My Innovator</label>
+    <sort_order>8</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>My Innovator</value>
+   </Item>
+   <Item type="Value" id="4E1DF0E94D2D420CBE07D4F3557C24A1" action="add">
+    <label xml:lang="en">Design Innovator</label>
+    <sort_order>9</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Design Innovator</value>
+   </Item>
+   <Item type="Value" id="605198BC1A2E408090CA798892D77E5E" action="add">
+    <label xml:lang="en">Process Innovator</label>
+    <sort_order>10</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Process Innovator</value>
+   </Item>
+   <Item type="Value" id="16B4152DEE0C4B5E8FF55C413437B321" action="add">
+    <label xml:lang="en">Project Innovator</label>
+    <sort_order>11</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Project Innovator</value>
+   </Item>
+   <Item type="Value" id="F3D658B4392A40129C2AF0EFA0B04A98" action="add">
+    <label xml:lang="en">Quality Innovator</label>
+    <sort_order>12</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Quality Innovator</value>
+   </Item>
+   <Item type="Value" id="6800B070142F4DC7B8235966374B841A" action="add">
+    <label xml:lang="en">Supplier Innovator</label>
+    <sort_order>13</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Supplier Innovator</value>
+   </Item>
+   <Item type="Value" id="631836F637F847959F3466D433016CCD" action="add">
+    <label xml:lang="en">Tooling Innovator</label>
+    <sort_order>14</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Tooling Innovator</value>
+   </Item>
+   <Item type="Value" id="695C3E6E2CA644A7AD80026D07B6CC69" action="add">
+    <label xml:lang="en">Sales Innovator</label>
+    <sort_order>15</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Sales Innovator</value>
+   </Item>
+   <Item type="Value" id="9C7E053938BC40CB918A40928DFDB3CD" action="add">
+    <label xml:lang="en">Document Center</label>
+    <sort_order>16</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Document Center</value>
+   </Item>
+   <Item type="Value" id="54B00FBBE6F54EFA9C4572C773DD5A62" action="add">
+    <label xml:lang="en">Package Innovator</label>
+    <sort_order>17</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Package Innovator</value>
+   </Item>
+   <Item type="Value" id="1A144CA23228434FB1AD9B4974D0560E" action="add">
+    <label xml:lang="en">Training Innovator</label>
+    <sort_order>18</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Training Innovator</value>
+   </Item>
+   <Item type="Value" id="5A43F04E53AD420CBD8C0B3EF86DAF39" action="add">
+    <label xml:lang="en">Library</label>
+    <sort_order>146</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Library</value>
+   </Item>
+   <Item type="Value" id="857AF5340B3E414A913794C2AA87CDE6" action="add">
+    <label xml:lang="en">Change Management</label>
+    <sort_order>274</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Change Management</value>
+   </Item>
+   <Item type="Value" id="80A3528A2BDB428D9C39439C34EB6993" action="add">
+    <label xml:lang="en">Dashboards</label>
+    <sort_order>402</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Dashboards</value>
+   </Item>
+   <Item type="Value" id="B3C086E33A5743509CBCAB98A2F2442A" action="add">
+    <label xml:lang="en">Design</label>
+    <sort_order>530</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Design</value>
+   </Item>
+   <Item type="Value" id="5302C8DBEC4447D2AD8860902F8CBB83" action="add">
+    <label xml:lang="en">Documents</label>
+    <sort_order>658</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Documents</value>
+   </Item>
+   <Item type="Value" id="A7200431932C4D8598295BF54AA6D84F" action="add">
+    <label xml:lang="en">Portfolio</label>
+    <sort_order>786</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Portfolio</value>
+   </Item>
+   <Item type="Value" id="AECE6B52DFC6421EA019402BCBBCBFC5" action="add">
+    <label xml:lang="en">Process</label>
+    <sort_order>914</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Process</value>
+   </Item>
+   <Item type="Value" id="A3E2C5A4EC83469BB2A22C952706ACB0" action="add">
+    <label xml:lang="en">Sourcing</label>
+    <sort_order>1042</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Sourcing</value>
+   </Item>
+   <Item type="Value" id="2AAC4694A39646F28F1DBEC8090CAC0E" action="add">
+    <label xml:lang="en">Templates</label>
+    <sort_order>1170</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Templates</value>
+   </Item>
+   <Item type="Value" id="7EF0C11AF2A34E288C71DE7E3ACB39C0" action="add">
+    <label xml:lang="en">Cloud Services</label>
+    <sort_order>1298</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Cloud Services</value>
+   </Item>
+   <Item type="Value" id="A1613B4ED40440518D5C2D6B2B130191" action="add">
+    <label xml:lang="en">File Exchange</label>
+    <sort_order>1426</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Cloud Services/File Exchange</value>
+   </Item>
+   <Item type="Value" id="B414947279784DEB9F1203F70613106F" action="add">
+    <label xml:lang="en">File Handling</label>
+    <sort_order>1536</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Administration/File Handling</value>
+   </Item>
+   <Item type="Value" id="A510887C079C49D0B6921AA3863316BC" action="add">
+    <label xml:lang="en">Localization</label>
+    <sort_order>1664</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Administration/Localization</value>
+   </Item>
+   <Item type="Value" id="CE710042D98740A7B6B866209034A4EF" action="add">
+    <label xml:lang="en">System Events</label>
+    <sort_order>1792</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Administration/System Events</value>
+   </Item>
+   <Item type="Value" id="712769AD781040A68D235BA4C45019C9" action="add">
+    <label xml:lang="en">Configuration</label>
+    <sort_order>1920</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Administration/Configuration</value>
+   </Item>
+   <Item type="Value" id="6A46876753A84E96BD6D710D34325453" action="add">
+    <label xml:lang="en">Notification</label>
+    <sort_order>2048</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>Administration/Notification</value>
+   </Item>
+   <Item type="Value" id="F60C1AA3CC44417B9B5A206B3084BE26" action="add">
+    <sort_order>9000</sort_order>
+    <source_id keyed_name="Categories" type="List">EAB29654E2CD4D30B376957788198B40</source_id>
+    <value>DTM</value>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

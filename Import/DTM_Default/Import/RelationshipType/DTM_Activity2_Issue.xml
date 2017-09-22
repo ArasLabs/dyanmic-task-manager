@@ -1,0 +1,311 @@
+﻿<AML>
+ <Item type="RelationshipType" id="D35332193C854DF8A21B4F1CE2B425C6" action="add" dependencyLevel="0">
+  <auto_search>1</auto_search>
+  <behavior>float</behavior>
+  <copy_permissions>0</copy_permissions>
+  <create_related>0</create_related>
+  <hide_in_all>1</hide_in_all>
+  <inc_rel_key_name>1</inc_rel_key_name>
+  <inc_related_key_name>1</inc_related_key_name>
+  <is_list_type>0</is_list_type>
+  <new_show_related>0</new_show_related>
+  <related_notnull>0</related_notnull>
+  <related_option>2</related_option>
+  <relationship_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">
+   <Item type="ItemType" id="0867C06ED28C4485B49C08009D73A734" action="add">
+    <allow_private_permission>1</allow_private_permission>
+    <auto_search>0</auto_search>
+    <enforce_discovery>0</enforce_discovery>
+    <hide_where_used>0</hide_where_used>
+    <implementation_type>table</implementation_type>
+    <instance_data>DTM_ACTIVITY2_ISSUE</instance_data>
+    <is_dependent>0</is_dependent>
+    <is_relationship>1</is_relationship>
+    <is_versionable>0</is_versionable>
+    <label xml:lang="en">Activity Issue</label>
+    <label_plural xml:lang="en">Activity Issue List</label_plural>
+    <revisions keyed_name="Default" type="Revision">7FE395DD8B9F4E1090756A34B733D75E</revisions>
+    <show_parameters_tab>1</show_parameters_tab>
+    <structure_view>tab view</structure_view>
+    <unlock_on_logout>0</unlock_on_logout>
+    <use_src_access>1</use_src_access>
+    <name>DTM_Activity2_Issue</name>
+    <Relationships>
+     <Item type="Property" id="D41BE6E3A0DD4BDBB2DC405125F653E3" action="add">
+      <column_alignment>left</column_alignment>
+      <data_type>string</data_type>
+      <is_hidden>0</is_hidden>
+      <is_hidden2>0</is_hidden2>
+      <is_indexed>0</is_indexed>
+      <is_keyed>0</is_keyed>
+      <is_multi_valued>0</is_multi_valued>
+      <is_required>0</is_required>
+      <label xml:lang="en">Comment</label>
+      <range_inclusive>0</range_inclusive>
+      <readonly>0</readonly>
+      <sort_order>80</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <stored_length>512</stored_length>
+      <track_history>0</track_history>
+      <name>_comment</name>
+     </Item>
+     <Item type="Property" id="320133CCA5944E41B8FB95FBECD3EBF5" action="add">
+      <column_alignment>left</column_alignment>
+      <data_source keyed_name="Project" type="ItemType" name="Project">02184EDAA80D499CB6EC94B159966DBE</data_source>
+      <data_type>item</data_type>
+      <is_hidden>0</is_hidden>
+      <is_hidden2>1</is_hidden2>
+      <is_indexed>0</is_indexed>
+      <is_keyed>0</is_keyed>
+      <is_multi_valued>0</is_multi_valued>
+      <is_required>0</is_required>
+      <item_behavior>float</item_behavior>
+      <label xml:lang="en">Project</label>
+      <range_inclusive>0</range_inclusive>
+      <readonly>0</readonly>
+      <sort_order>3</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <track_history>0</track_history>
+      <name>_related_project</name>
+     </Item>
+     <Item type="Property" id="6AB166639CDF4B6EB9FB312600FCC11D" action="add">
+      <column_alignment>left</column_alignment>
+      <data_type>date</data_type>
+      <is_hidden>0</is_hidden>
+      <is_hidden2>0</is_hidden2>
+      <is_indexed>0</is_indexed>
+      <is_keyed>0</is_keyed>
+      <is_multi_valued>0</is_multi_valued>
+      <is_required>0</is_required>
+      <range_inclusive>0</range_inclusive>
+      <readonly>0</readonly>
+      <sort_order>60</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <track_history>0</track_history>
+      <name>date_due_act</name>
+     </Item>
+     <Item type="Property" id="E37D05D527F34A6EBE651A38D0AD9DFD" action="add">
+      <column_alignment>left</column_alignment>
+      <data_type>date</data_type>
+      <is_hidden>0</is_hidden>
+      <is_hidden2>0</is_hidden2>
+      <is_indexed>0</is_indexed>
+      <is_keyed>0</is_keyed>
+      <is_multi_valued>0</is_multi_valued>
+      <is_required>0</is_required>
+      <range_inclusive>0</range_inclusive>
+      <readonly>0</readonly>
+      <sort_order>40</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <track_history>0</track_history>
+      <name>date_due_sched</name>
+     </Item>
+     <Item type="Property" id="EF3B5608D95D4B0CA1F6EA96EB10765C" action="add">
+      <column_alignment>left</column_alignment>
+      <data_type>date</data_type>
+      <is_hidden>0</is_hidden>
+      <is_hidden2>0</is_hidden2>
+      <is_indexed>0</is_indexed>
+      <is_keyed>0</is_keyed>
+      <is_multi_valued>0</is_multi_valued>
+      <is_required>0</is_required>
+      <range_inclusive>0</range_inclusive>
+      <readonly>0</readonly>
+      <sort_order>30</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <track_history>0</track_history>
+      <name>date_start_sched</name>
+     </Item>
+     <Item type="Property" id="6DC48F16C2904392AF816CD56AFED125" action="add">
+      <column_alignment>left</column_alignment>
+      <data_source keyed_name="Project Role">E15C81B361CB44F09508F9259D1C5B5D</data_source>
+      <data_type>list</data_type>
+      <is_hidden>0</is_hidden>
+      <is_hidden2>0</is_hidden2>
+      <is_indexed>0</is_indexed>
+      <is_keyed>0</is_keyed>
+      <is_multi_valued>0</is_multi_valued>
+      <is_required>0</is_required>
+      <label xml:lang="en">Lead Role</label>
+      <range_inclusive>0</range_inclusive>
+      <readonly>0</readonly>
+      <sort_order>100</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <stored_length>64</stored_length>
+      <track_history>0</track_history>
+      <name>lead_role</name>
+     </Item>
+     <Item type="Property" id="80F2D18689E54E838FEE27E19458B4DF" action="add">
+      <column_alignment>left</column_alignment>
+      <data_type>string</data_type>
+      <is_hidden>0</is_hidden>
+      <is_hidden2>0</is_hidden2>
+      <is_indexed>0</is_indexed>
+      <is_keyed>0</is_keyed>
+      <is_multi_valued>0</is_multi_valued>
+      <is_required>0</is_required>
+      <range_inclusive>0</range_inclusive>
+      <readonly>0</readonly>
+      <sort_order>10</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <stored_length>128</stored_length>
+      <track_history>0</track_history>
+      <name>name</name>
+     </Item>
+     <Item type="Property" id="0D857294E4E34958ADCBCBBCAA41D3B7" action="add">
+      <column_alignment>left</column_alignment>
+      <data_type>integer</data_type>
+      <is_hidden>0</is_hidden>
+      <is_hidden2>0</is_hidden2>
+      <is_indexed>0</is_indexed>
+      <is_keyed>0</is_keyed>
+      <is_multi_valued>0</is_multi_valued>
+      <is_required>0</is_required>
+      <range_inclusive>0</range_inclusive>
+      <readonly>0</readonly>
+      <sort_order>70</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <track_history>0</track_history>
+      <name>percent_compl</name>
+     </Item>
+     <Item type="Property" id="56803ACCE0544EA3A57717D29F8C4C64" action="add">
+      <column_alignment>left</column_alignment>
+      <data_type>integer</data_type>
+      <is_hidden>0</is_hidden>
+      <is_hidden2>0</is_hidden2>
+      <is_indexed>0</is_indexed>
+      <is_keyed>0</is_keyed>
+      <is_multi_valued>0</is_multi_valued>
+      <is_required>0</is_required>
+      <label xml:lang="en">Work Estimation</label>
+      <range_inclusive>0</range_inclusive>
+      <readonly>0</readonly>
+      <sort_order>50</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <track_history>0</track_history>
+      <name>work_est</name>
+     </Item>
+     <Item type="View" id="20232DE40A134EA3AEF0B668256CD876" action="add">
+      <client>js</client>
+      <related_id keyed_name="DTM_Activity2_Issue" type="Form">14EC2337ADF54538889A4D3B49E3BE5C</related_id>
+      <role keyed_name="World" type="Identity">
+       <Item type="Identity" action="get" select="id">
+        <name>World</name>
+       </Item>
+      </role>
+      <sort_order>128</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <type>default</type>
+     </Item>
+     <Item type="Server Event" id="89FFF23269CC43379193D1E0F9AA78D8" action="add">
+      <related_id keyed_name="DTM_Activity2_Issue_set_Value" type="Method">
+       <Item type="Method" action="get" select="id">
+        <name>DTM_Activity2_Issue_set_Value</name>
+       </Item>
+      </related_id>
+      <server_event>onAfterAdd</server_event>
+      <sort_order>128</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+     </Item>
+     <Item type="TOC Access" id="3B2CB0700F764322B50419359DEFB069" action="add">
+      <related_id keyed_name="World" type="Identity">
+       <Item type="Identity" action="get" select="id">
+        <name>World</name>
+       </Item>
+      </related_id>
+      <sort_order>256</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+      <category>DTM</category>
+     </Item>
+     <Item type="Can Add" id="D84DF18287054AD6AC088B818368CAA1" action="add">
+      <can_add>1</can_add>
+      <related_id keyed_name="World" type="Identity">
+       <Item type="Identity" action="get" select="id">
+        <name>World</name>
+       </Item>
+      </related_id>
+      <sort_order>128</sort_order>
+      <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+     </Item>
+    </Relationships>
+   </Item>
+  </relationship_id>
+  <sort_order>644</sort_order>
+  <source_id keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</source_id>
+  <name>DTM_Activity2_Issue</name>
+ </Item>
+ <Item type="ItemType" id="0867C06ED28C4485B49C08009D73A734" action="edit">
+  <Relationships>
+   <Item type="Property" action="edit" where="source_id='0867C06ED28C4485B49C08009D73A734' and name='managed_by_id'">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Identity" type="ItemType" name="Identity">E582AB17663F4EF28460015B2BE9E094</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>90</sort_order>
+    <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+    <track_history>0</track_history>
+    <name>managed_by_id</name>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='0867C06ED28C4485B49C08009D73A734' and name='related_id'">
+    <column_alignment>left</column_alignment>
+    <data_type>item</data_type>
+    <is_hidden>1</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>1</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>3072</sort_order>
+    <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+    <track_history>0</track_history>
+    <name>related_id</name>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='0867C06ED28C4485B49C08009D73A734' and name='source_id'">
+    <column_alignment>left</column_alignment>
+    <data_source keyed_name="Activity2" type="ItemType" name="Activity2">E236DB697E294C46B630C99A0D20C2B1</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>1</is_hidden2>
+    <is_indexed>1</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>5</sort_order>
+    <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+    <track_history>0</track_history>
+    <name>source_id</name>
+   </Item>
+   <Item type="Property" action="edit" where="source_id='0867C06ED28C4485B49C08009D73A734' and name='state'">
+    <column_alignment>left</column_alignment>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>20</sort_order>
+    <source_id keyed_name="DTM_Activity2_Issue" type="ItemType" name="DTM_Activity2_Issue">0867C06ED28C4485B49C08009D73A734</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>state</name>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>
