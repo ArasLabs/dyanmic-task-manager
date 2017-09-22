@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<toolbarapplet on_click="onToolbarButtonClick" on_load="onToolbarLoad" buttonstyle="windows" buttonsize="26,25" font="Arial-8">
+	<toolbar id="tb1">
+		<drop_down_button image="" id="actions_menu" text="Actions"/>
+		<separator/>
+		<button disabled="true" image="../images/AddWBSElement.svg" id="add_wbs_element" tooltip="Add WBS Element" text="Add WBS Element"/>
+		<button disabled="true" image="../images/AddActivity.svg" id="add_activity" tooltip="Add Activity" text="Add Activity"/>
+		<button disabled="true" image="../images/AddMilestone.svg" id="add_milestone" tooltip="Add Milestone" text="Add Milestone"/>
+		<separator/>
+		<button disabled="true" image="../images/EditItem.svg" id="view_edit_selected_item" tooltip="View/Edit Selected Item" text="View/Edit Selected Item"/>
+		<button disabled="true" image="../images/Delete.svg" id="delete_selected_item" tooltip="Delete Selected Item" text="Delete Selected Item"/>
+		<separator/>
+		<button disabled="true" image="../images/Indent.svg" id="indent" tooltip="Indent" text="Indent"/>
+		<button disabled="true" image="../images/UnIndent.svg" id="outdent" tooltip="Outdent" text="Outdent"/>
+		<separator/>
+		<button disabled="true" image="../images/NextPage.svg" id="move_down" tooltip="Move Down" text="Move Down"/>
+		<button disabled="true" image="../images/PreviousPage.svg" id="move_up" tooltip="Move Up" text="Move Up"/>
+		<separator/>
+		<button disabled="true" image="../images/Cut.svg" id="cut" tooltip="Cut" text="Cut"/>
+		<button disabled="true" image="../images/Paste.svg" id="paste" tooltip="Paste" text="Paste"/>
+		<separator/>
+		<button image="icons/Project/20x20_GanttChart_new.gif" id="show_scheduling_gantt_chart" tooltip="Show Gantt Chart" text="Show Gantt Chart"/>
+		<separator/>
+		<button image="../images/ProjectExpandAll.svg" id="expand_all" tooltip="Expand All" text="Expand All"/>
+		<button image="../images/ProjectCollapseAll.svg" id="collapse_all" tooltip="Collapse All" text="Collapse All"/>
+		<separator/>
+		<button image="../images/ExecuteSearch.svg" id="execute_filter" tooltip="Execute Filter" text="Execute Filter"/>
+    <button image="../images/ClearSearchCriteria.svg" id="clear_filter" tooltip="Clear Filter" text="Clear Filter"/>
+	</toolbar>
+</toolbarapplet>

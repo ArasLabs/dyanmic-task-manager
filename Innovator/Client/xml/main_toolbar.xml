@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<toolbarapplet on_load="onToolbarAppletLoad" on_click="OnToolbarItemClick" buttonstyle="windows" buttonsize="26,25">
+	<toolbar id="main_toolbar">
+		<button image="../images/New.svg" id="new" tooltip="Create a New Item" statusmsg="Create a New Item" disabled="true">New</button>
+		<button image="../images/ViewItem.svg" id="view" tooltip="View Item" statusmsg="View Item" disabled="true">View</button>
+		<button image="../images/EditItem.svg" id="edit" tooltip="Edit Item" statusmsg="Edit Item" disabled="true">Edit</button>
+		<button image="../images/Save.svg" id="save" tooltip="Save Item" statusmsg="Save Item" disabled="true">Save</button>
+		<button image="../images/SaveAs.svg" id="saveAs" tooltip="Copy and Save Item" statusmsg="Copy and Save Item" disabled="true">Save As</button>
+		<button image="../images/DeleteItem.svg" id="delete" tooltip="Delete Item" statusmsg="Delete Item" disabled="true">Delete</button>
+		<separator/>
+		<button text="Printable View" id="print" image="../images/Print.svg" tooltip="Printable View" statusmsg="Printable View" disabled="true"/>
+		<separator/>
+		<button image="../images/ExportToExcel.svg" id="export2Excel" tooltip="Export To Excel" statusmsg="Export To Excel" disabled="true">Export To Excel</button>
+		<button image="../images/ExportToWord.svg" id="export2Word" tooltip="Export To Word" statusmsg="Export To Word" disabled="true">Export To Word</button>
+		<separator/>
+		<button image="../images/LockItem.svg" id="lock" tooltip="Lock Item" statusmsg="Lock Item" disabled="true">Lock</button>
+		<button image="../images/UnlockItem.svg" id="unlock" tooltip="Unlock Item" statusmsg="Unlock Item" disabled="true">Unlock</button>
+		<button image="../images/Rollback.svg" id="undo" tooltip="Undo Changes on Item" statusmsg="Undo Changes on Item" disabled="true">Undo</button>
+		<separator/>
+		<button image="../images/CopyFile.svg" id="get_files" tooltip="Get Copy of Files" statusmsg="Get Copy of Files" disabled="true">Copy files</button>
+		<button image="../images/CheckOut.svg" id="checkout" tooltip="Check Out Files" statusmsg="Check out Files" disabled="true">Check out</button>
+		<button image="../images/CheckIn.svg" id="checkin" tooltip="Check In Files" statusmsg="Check in Files" disabled="true">Check in</button>
+		<separator/>
+		<button image="../images/Promote.svg" id="promote" tooltip="Promote Item" statusmsg="Promote Item" disabled="true">Promote</button>
+		<button image="../images/ViewRevisions.svg" id="revisions" tooltip="View Revisions for Item" statusmsg="View Revisions for Item" disabled="true">All Revs</button>
+		<separator/>
+		<button image="../images/HideTabs.svg" id="no_tabs" tooltip="Hide Tabs In Tab View" statusmsg="Hide Tabs In Tab View" state="0" disabled="true">- Tabs</button>
+		<!--<button image="../images/Copy.svg" id="tear_off" tooltip="Tear Off" statusmsg="Tear Off View" state="1">Tear Off  </button>-->
+		<separator/>
+		<button text="Help" id="help_context" image="../images/Help.svg" tooltip="Help" statusmsg="Help"/>
+		<separator/>
+		<button text="Logout" id="Logout" image="../images/Exit.svg" tooltip="Logout" statusmsg="Logout"/>
+		<separator/>
+		<button image="../images/20x20 DTMLoad.gif" id="show_projects_load_summary" tooltip="Show Projects Load Summary" text="Show Project Load Summary" disabled="true"/>
+	</toolbar>
+	<toolbar id="inbasket_toolbar">
+		<button image="../images/Refresh.svg" id="refresh" tooltip="Refresh" text="Refresh" statusmsg="Refresh" disabled="false" />
+		<button image="../images/ExportToExcel.svg" id="export2Excel" tooltip="Export To Excel" text="Export To Excel" />
+		<button image="../images/ExportToWord.svg" id="export2Word" tooltip="Export To Word" text="Export To Word" />
+		<separator/>
+		<button image="../images/LockItem.svg" text="Lock" id="ClaimActivity" tooltip="Lock Activity" disabled="true" />
+		<button image="../images/UnlockItem.svg" text="Unlock" id="UnclaimActivity" tooltip="Unlock Activity" disabled="true" />
+		<separator/>
+		<button image="../images/ViewItem.svg" text="View Item" id="ViewAttached" tooltip="View the Attached Item" disabled="true" />
+		<button image="../images/EditItem.svg" text="Edit Item" id="EditAttached" tooltip="Edit the Attached Item" disabled="true" />
+		<button image="../images/ViewWorkflow.svg" text="View Workflow" id="ViewProcess" tooltip="View the Workflow Process" disabled="true" />
+		<separator/>
+		<button image="../images/UpdateActivity.svg" text="Update Activity" id="Vote" tooltip="Update the Activity" disabled="true" />
+		<separator/>
+		<button image="../images/Print.svg" text="Printable View" id="Print" tooltip="Printable View" />
+		<separator/>
+		<button image="../images/Exit.svg" text="Logout" id="Logout" tooltip="Logout" />
+	</toolbar>
+</toolbarapplet>

@@ -24,12 +24,14 @@ This project and the following release notes have been migrated from the old Ara
 
 Release | Notes
 --------|--------
+[v1.2](https://github.com/ArasLabs/dyanmic-task-manager/releases/tag/v1.2) | Updating folder structure
 [v1](https://github.com/ArasLabs/dyanmic-task-manager/releases/tag/v1) | DTM 4.0 Install Package
 
 #### Supported Aras Versions
 
 Project | Aras
 --------|------
+[v1.2](https://github.com/ArasLabs/dyanmic-task-manager/releases/tag/v1.2) | 10.0 SP1-SP3
 [v1](https://github.com/ArasLabs/dyanmic-task-manager/releases/tag/v1) | 10.0 SP1-SP3
 
 ## Installation
@@ -45,6 +47,17 @@ Project | Aras
 
 ### Install Steps
 
+These steps are also available in your local `..\dynamic-task-manager\Documentation` folder
+
+#### Code Tree Installation
+
+1. Backup your code tree and store the archive in a safe place.
+2. Copy the `Innovator` folder in your local `..\dynamic-task-manager\` folder
+3. Paste this to the root of your install directory
++ By default your root directory is `C:\Program Files\Aras\Innovator`
+
+#### Database Installation
+
 1. Backup your database and store the BAK file in a safe place.
 2. Open up the Aras Package Import tool.
 3. Enter your login credentials and click **Login**
@@ -55,8 +68,41 @@ Project | Aras
 6. Select all packages in the Available for Import field.
 7. Select Type = **Merge** and Mode = **Thorough Mode**.
 8. Click **Import** in the top left corner.
-9. Close the Aras Package Import tool.
-10. Follow the remaining instructions outlined in `..\dynamic-task-manager\Documentation\DTM_Installation_Guide_v1.0`
+9. Close the Aras Package Import tool
+
+#### Additional Installation
+
+1. Execute the DTM-4.0-setup.exe located in your local `..\dynamic-task-manager\` folder
+2. Set the Destination Folder to to the root of your install directory
++ By default your root directory `C:\Program Files\Aras\Innovator`
+3. Click Next
+4. Select the Aras Database to add the Dynamic Task Manager to
+5. Click Next
+6. Input the Web Alias for your Aras Innovator instance
++ By default your web Alias will be `InnovatorServer`
+7. Input the ID and Password of the admin user
+8. Input the desired web alias of the Dynamic Task Manager
++ By default this will be set to `DTMServer`
+9. Click Next
+10. Select the desired destination folder to install DTM to
++ By default this will be the same as the Aras Innovator installation path
+11. Set up the DTM application in IIS
+	1. Launch IIS
+	2. Expand the Connections window until you reach Default Web Site
+	3. Right click on Default Web Site and select "Add Application..."
+		* Name: Input DTM Web Alias (e.g. DTMServer)
+		* Application program pool: ASP.NET v4.0
+		* Path: Input DTM installation path: (e.g. `C:\Program Files\Aras\Innovator\DTM`)
+    4. Click OK
+
+#### DTM License Key Request & Set-up
+1. Create DTM License Key Request File
+	1. Execute DTMLicenseKeyRequest.exe
+	2. Input your Company Name
+	3. Select an option
+	4. Click Create
+2. Email the resulting dtm_license.lic to sales-j@zionex.com to request a DTM License Key
+3. After receiving the License Code, copy the dtm_license.lic file to your installation folder
 
 ## Contributing
 

@@ -1,0 +1,2721 @@
+﻿<!DOCTYPE html>
+<!-- (c) Copyright by Aras Corporation, 2004-2013. -->
+<html>
+	<head>
+		<title></title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="../styles/default.css" />
+		<style type="text/css">
+			@import "../javascript/dojo/resources/dojo.css";
+			@import "../javascript/dijit/themes/claro/claro.css";
+			@import "../javascript/dojox/grid/resources/claroGrid.css";
+			@import "../javascript/dojox/form/resources/CheckedMultiSelect.css";
+			@import "../styles/controls.css";
+			@import "../styles/common.css";
+			
+			html,body{
+				overflow: hidden;
+				width   : 100%;
+				height  : 100%;
+				margin  : 0px;
+				padding : 0px;
+			}
+			#searchPlaceholderCell{
+				display: table-cell !important;
+			}
+		</style>
+		<script>
+			var aras = arasObj = top.aras;
+		</script>
+		<script LANGUAGE='JavaScript' SRC='itemsGridAdd.js'></script>
+		<script type="text/javascript" src="../javascript/include.aspx?classes=/dojo.js" data-dojo-config="isDebug: false, parseOnLoad: false, baseUrl:'../javascript/dojo'"></script>
+		<script type="text/javascript" src="../javascript/include.aspx?classes=ScriptSet2"></script>
+		<script type="text/javascript" src="../javascript/include.aspx?classes=ScriptSet6"></script>
+		<script type="text/javascript" src="../javascript/include.aspx?classes=Dependencies"></script>
+		<script type="text/javascript" src="../javascript/include.aspx?files=ItemsGridAsyncSoap,ItemsGridAsyncController"></script>
+		<script type="text/javascript">
+			window.addEventListener("beforeunload", function() {
+				arasObj.unregisterEventHandler("PreferenceValueChanged", window, window.onPreferenceValueChanged);
+			});
+
+			window.addEventListener("resize", function () {
+				refreshItemGridSize();
+			});
+
+			clientControlsFactory.createControl("Aras.Client.Controls.Toolbar", {id: "searchbar_toolbar", ImageBase: "../cbin/"}, function(control){
+				document.getElementById("searchPlaceholder").addEventListener("DOMAttrModified", function (event) {
+					if ("attrChange" in event && (event.target.tagName == "DIV" || event.target.tagName == "IFRAME") &&
+						(event.attrChange == MutationEvent.MODIFICATION || event.attrChange == MutationEvent.ADDITION) &&
+						(event.target.id == "searchPlaceholder" || event.target.id == "95A2002E5AD84B9D8B2FA50B742C5973")) {
+						if (itemGridResizeHelper.repeatTimer) {
+							window.clearTimeout(itemGridResizeHelper.repeatTimer);
+							delete itemGridResizeHelper.repeatTimer;
+						}
+						itemGridResizeHelper.repeatTimer = window.setTimeout(function () {
+							var currentoffset = document.getElementById("gridTD").offsetTop;
+							if (currentoffset != itemGridResizeHelper.tmpOffSetTopGrid) {
+								itemGridResizeHelper.diff = itemGridResizeHelper.tmpOffSetTopGrid - currentoffset;
+								itemGridResizeHelper.tmpOffSetTopGrid = currentoffset;
+								if (itemGridResizeHelper.diff != 0) {
+									refreshItemGridSize();
+								}
+							}
+						}, 0);
+					}
+				});
+				searchbar = control;
+				clientControlsFactory.on(searchbar, {
+					"onClick": onClickItem,
+					"onChange": OnChangeItem
+				});
+				var toolbarNode = document.getElementById("toolbarContainer");
+				toolbarNode.appendChild(searchbar.domNode);
+				LoadSearchbar();
+			});
+
+			clientControlsFactory.createControl("Aras.Client.Controls.GridContainer", {onStartSearch: doSearch}, function(control){
+				gridContainer = grid = gridApplet = control;
+
+				clientControlsFactory.on(gridApplet._grid, {
+					"onHeaderCellContextMenu": onHeaderCellContextMenu,
+					"onHeaderContextMenu": onHeaderContextMenu
+				});
+
+				clientControlsFactory.on(gridApplet, {
+					"gridHeaderMenuClick": onHeaderMenuClicked,
+					"gridDoubleClick": onDoubleClick,
+					"gridXmlLoaded": onXmlLoaded,
+					"gridRowSelect": updateInfoTableWithItem,
+					"gridMenuClick": onMenuClicked,
+					"onStartEdit": startCellEditIG,
+					"onApplyEdit": applyCellEditIG,
+					"onInputHelperShow": showInputHelperDialog,
+					"gridClick": function(rowId, col){
+											var forceSyncXmlHttpRequest = top.aras.getVariable("ForceSyncXmlHttpRequest");
+											try{
+												top.aras.setVariable("ForceSyncXmlHttpRequest", "true");
+												onSelectItem(rowId, col);
+											}
+											finally{
+												top.aras.setVariable("ForceSyncXmlHttpRequest", forceSyncXmlHttpRequest);
+											}
+										},
+					"gridLinkClick": function(linkVal){
+											if (linkVal.length){
+												linkVal = linkVal.replace(/'/g, "");
+												var typeName = linkVal.split(",")[0];
+												var id = linkVal.split(",")[1];
+												onLink(typeName, id);
+											}
+										}
+				});
+
+				InitPropertiesContainer();
+				initMenu();
+				initSearch();
+				// refresh method must be called only when toolbar completelly initialized 
+				searchbar._currentToolBar._refresh();
+			});
+		</script>
+
+		<script type="text/javascript">
+			isMainGrid = true; //this variable is defined in SearchGridObject.js and search_container.js
+			var isItemsGrid = true; //flag to identify itemsGrid.html
+			var searchReady = false; //flag to identify that SearchContainer and search controls initialized
+
+			var itemTypeID = QueryString("itemtypeID").toString();
+			var itemTypeName = QueryString("itemtypeName").toString();
+			var savedSearchId = QueryString("savedSearchId").toString();
+			var visiblePropNds;        //array of properties nodes which are visible in grid
+			var filePropNms;
+			var menuFrm = top.main.menu;
+			var itemMenuInitialized;
+			var interval = 0;
+			var addedActionsCount = 0;
+			var itemActionsCount = 0;
+			var addedReportsCount = 0;
+			var itemReportsCount = 0;
+			var varName_queryDate;
+			var userID = arasObj.getUserID();
+			var isVersionableIT, isDependentIT, isRelationshipIT, can_addFlg, isManualyVersionableIT;
+			var use_src_accessIT;
+			var Today = arasObj.getResource("", "itemsgrid.today");
+			var itemGridResizeHelper = {
+				tmpOffSetTopGrid: 0,
+				diff: 0,
+				repeatTimer: null,
+				OldPlaceHolderDisplay: null
+			}
+			var asyncController = new ItemsGridAsyncController(arasObj, window);
+
+			var gridApplet = null;
+			var grid = null;
+
+			//Global cache item files
+			var FilesCache = new Object();
+			var propertiesContainer;
+			searchLocation = "Main Grid";
+
+			if (!onInitialize())
+			{
+				onload = "";
+				onresize = "";
+				onbeforeunload = "";
+				document.write(
+				'	<\/script>\n' +
+				'	<body>\n' +
+				'		<center>' +
+				arasObj.getResource('', 'itemsgrid.item_type_with_id_not_found', itemTypeID) +
+				'		<\/center>' +
+				'	<\/body>' +
+				'<\/html>');
+			}
+
+			function onInitialize()
+			{
+				setControlEnabledProjectsLoadSummary();
+				currItemType = arasObj.getItemTypeDictionary(arasObj.getItemTypeName(itemTypeID));
+				if (!currItemType || currItemType.isError())
+				{
+					currItemType = null;
+					return false;
+				}
+
+				currItemType = currItemType.node;
+
+				varName_queryDate = 'IT_' + itemTypeID + '_queryDate';
+
+				visiblePropNds = new Array();
+				filePropNms = new Array();
+
+				removeItemActionsFromMainMenu();
+				addedActionsCount = 0;
+				addedReportsCount = 0;
+
+				xml_ready_flag = false;
+
+				itemTypeName = arasObj.getItemProperty(currItemType, 'name');
+				itemTypeLabel = arasObj.getItemProperty(currItemType, 'label');
+				if (!itemTypeLabel) itemTypeLabel = itemTypeName;
+
+				isVersionableIT = (arasObj.getItemProperty(currItemType, 'is_versionable') == '1');
+				showReleaseEffectiveDateRows(isVersionableIT);
+				use_src_accessIT = (arasObj.getItemProperty(currItemType, 'use_src_access') == '1');
+				isManualyVersionableIT = (isVersionableIT && arasObj.getItemProperty(currItemType, 'manual_versioning') == '1');
+				isDependentIT = (arasObj.getItemProperty(currItemType, 'is_dependent') == '1');
+				isRelationshipIT = (arasObj.getItemProperty(currItemType, 'is_relationship') == '1');
+				can_addFlg = !isDependentIT && arasObj.getPermissions('can_add', itemTypeID);
+
+				var filePropNds = currItemType.selectNodes(arasObj.getVisiblePropertiesXPath('') + '[data_type=\'item\' and data_source=\'' + arasObj.getItemTypeId('File') + '\']');
+				for (var i = 0; i < filePropNds.length; i++)
+				{
+					filePropNms[i] = arasObj.getItemProperty(filePropNds[i], 'name');
+				}
+
+				visiblePropNds = arasObj.getvisiblePropsForItemType(currItemType);
+				arasObj.uiInitItemsGridSetups(currItemType, visiblePropNds);
+
+				var gridSetups = arasObj.sGridsSetups[itemTypeName];
+				if (!(gridSetups)) return false;
+				
+				gridSetups.query = arasObj.newQryItem(itemTypeName);
+				currQryItem = gridSetups.query;
+				currQryItem.setPage(1);
+				currQryItem.removeAllCriterias();
+
+				return true;
+			}
+
+			function onReinitialize(itemTN, itemTID, _savedSearchId)
+			{
+				if (itemTypeID == itemTID && savedSearchId == _savedSearchId)
+				{
+					setupMenu();
+					return;
+				}
+
+				stopSearch(false);
+				saveSetups(true);
+				resetMainMenuState();
+
+				itemTypeID = itemTID;
+				savedSearchId = _savedSearchId;
+				if(onInitialize())
+				{
+					InitPropertiesContainer();
+					initMenu();
+					initSearch();
+				}
+			}
+
+			function initActionsMenu()
+			{
+				var actions = currItemType.selectNodes("Relationships/Item[@type='Item Action']/related_id/Item[@type='Action' and type='itemtype' and method]");
+
+				if (actions.length > 0)
+				{
+					if (menuFrm.getActionEntriesCount() > 0)
+					{
+						menuFrm.addActionSeparator(true);
+						addedActionsCount++;
+					}
+
+					for (var i = 0; i < actions.length; i++)
+					{
+						var act = actions[i];
+						var lbl = arasObj.getItemProperty(act, 'label');
+						if (!lbl) lbl = arasObj.getItemProperty(act, 'name');
+						menuFrm.addActionEntry(lbl, 'action:' + act.getAttribute('id') + ':' + itemTypeID, true);
+						addedActionsCount++;
+					}
+				}
+			}
+
+			function initReportsMenu()
+			{
+				var repMenu = menuFrm.document.menu.findMenu("reports_menu");
+
+				for (var i = repMenu.getItemsCount() - 1; i >= menuFrm.reportMenuLength; i--)
+					menuFrm.deleteReportEntry(i);
+
+				var reports = currItemType.selectNodes("Relationships/Item[@type='Item Report']/related_id/Item[@type='Report' and type='itemtype']");
+				if (reports.length > 0)
+				{
+					if (menuFrm.getReportEntriesCount() > 0)
+					{
+						menuFrm.addReportSeparator(true);
+						addedReportsCount++;
+					}
+
+					for (var i = 0; i < reports.length; i++)
+					{
+						var rep = reports[i];
+						var lbl = arasObj.getItemProperty(rep, 'label');
+						if (!lbl) lbl = arasObj.getItemProperty(rep, 'name');
+						menuFrm.addReportEntry(lbl, 'report:' + rep.getAttribute('id') + ':' + itemTypeID, true);
+						addedReportsCount++;
+					}
+				}
+			}
+
+			function initMenu()
+			{
+				arasObj.showStatusMessage("branding", "");
+				arasObj.registerEventHandler("PreferenceValueChanged", window, window.onPreferenceValueChanged);
+
+				initActionsMenu();
+				initReportsMenu();
+
+				with (menuFrm)
+				{
+					setControlEnabled('get_files', false);
+					setControlEnabled('checkin', false);
+					setControlEnabled('checkout', false);
+				}
+			}
+
+
+			function initSearch(){
+				searchReady = false;
+				initToolbar();
+				setupPageNumber();
+				setupGrid(true);
+				updateToolStatusBar();
+
+				if (searchContainer) {
+					searchContainer.removeIFramesCollection();
+				}
+
+				searchContainer = new SearchContainer(itemTypeName, searchbar, gridApplet, {object: top.main.menu.menuApplet, dojoOfObject: top.dojo}, searchLocation, document.getElementById("searchPlaceholder"));
+				searchContainer.onStartSearchContainer();
+
+				var spcWidth = document.getElementById("gridTD").offsetWidth;
+				searchContainer.searchPlaceholderCell.style.width = spcWidth + "px";
+
+				if (savedSearchId){
+					searchContainer._onSavedSearchChange(savedSearchId);
+				}
+				searchReady = true;
+
+				//run autosearch if required
+				if (arasObj.getItemProperty(currItemType, 'auto_search') == '1' || Boolean(savedSearchId)){
+					var statusId = arasObj.showStatusMessage("status", arasObj.getResource("", "itemsgrid.populating_grid_with_it_items", itemTypeLabel));
+					var res = doSearch();
+					arasObj.clearStatusMessage(statusId);
+					return res;
+				}
+			}
+
+			function LoadSearchbar()
+			{
+				searchbar.showLabels(arasObj.getPreferenceItemProperty("Core_GlobalLayout", null, "core_show_labels") == "true");
+				searchbar.loadXml(arasObj.getI18NXMLResource("search_toolbar.xml"));
+				searchbar.show();
+			}
+
+			function resetMainMenuState()
+			{
+				for (var i = 0; i < addedActionsCount; i++)
+					menuFrm.deleteActionEntry(menuFrm.getActionEntriesCount() - 1);
+
+				for (var i = 0; i < addedReportsCount; i++)
+					menuFrm.deleteReportEntry(menuFrm.getReportEntriesCount() - 1);
+
+				addedActionsCount = 0;
+				itemActionsCount = 0;
+				addedReportsCount = 0;
+				itemReportsCount = 0;
+			}
+
+			function startCellEditIG(rowId, field, cleanIfNeed) {
+				startCellEditCommon.call(this, rowId, field);
+			}
+
+			function applyCellEditIG(rowId, field, cleanIfNeed) {
+				if ('input_row' == rowId && searchReady) {
+					removeFilterListValueIfNeed(rowId, field);
+				}
+				applyCellEditCommon.call(this, rowId, field);
+			}
+
+			function onPreferenceValueChanged(params)
+			{
+				if (!params) return;
+
+				if (params.type == "Core_GlobalLayout" && params.propertyName == "core_show_labels")
+				{
+					var val = (arasObj.getPreferenceItemProperty(params.type, null, params.propertyName) == "true");
+					window.searchbar.showLabels(val);
+				}
+			}
+
+			var updateToolStatusId;
+			function showStatus()
+			{
+				if (updateToolStatusId) arasObj.clearStatusMessage(updateToolStatusId);
+
+				var statusMsg = getSearchResultStatusMessage();
+				if (statusMsg)
+					updateToolStatusId = arasObj.showStatusMessage("page_status", statusMsg);
+			}
+
+			function showProperties(b) {
+				document.getElementById("itemProperties").style.display = b ? "" : "none";
+				if (b) {
+					showReleaseEffectiveDateRows(isVersionableIT);
+				}
+				else
+				{
+					if (gridApplet){
+						gridApplet._grid.resize();
+					}
+				}
+				top.aras.setPreferenceItemProperties("Core_GlobalLayout", null, {core_show_item_properties: (b ? "true" : "false")});
+				menuFrm.setControlState("show_properties", b);
+			}
+			
+			function showReleaseEffectiveDateRows(isShow) {
+				if (!document.getElementById("release_date_row") || !document.getElementById("effective_date_row")) {
+					return;
+				}
+
+				document.getElementById("release_date_row").style.display = isShow ? "" : "none";
+				document.getElementById("effective_date_row").style.display = isShow ? "" : "none";
+			}
+
+			function generateXML4Item(itemNd)
+			{
+				var tmpDom = createEmptyResultDom();
+				var res = tmpDom.selectSingleNode(arasObj.XPathResult());
+				res.appendChild(itemNd.cloneNode(true));
+
+				arasObj.uiPrepareDOM4XSLT(tmpDom, itemTypeID);
+
+				var grid_xml = arasObj.uiGenerateItemsGridXML(tmpDom, visiblePropNds, itemTypeID);
+				tmpDom.loadXML(grid_xml);
+
+				var nds = tmpDom.selectNodes("/table/*[local-name(.)!='tr']");
+				var tableNd = tmpDom.documentElement;
+
+				for (var i = 0; i < nds.length; i++)
+				{
+					var nd = nds[i];
+					tableNd.removeChild(nd);
+				}
+
+				var elemType = itemNd.getAttribute("type");
+				if (elemType == "RelationshipType")
+				{
+					var tdNodes = tmpDom.selectNodes("/table/tr/td");
+					function correctNames(element, param, cell)
+					{
+						if (element != null && element.selectSingleNode("keyed_name") != null)
+						{
+							cell.firstChild.data = element.selectSingleNode("keyed_name").text;
+						}
+						else if (itemNd.selectSingleNode(param) != null && itemNd.selectSingleNode(param).text != "")
+						{
+							var res = arasObj.getItemById(element, itemNd.selectSingleNode(param).text, 0, '', 'keyed_name');
+							if (!res) res = arasObj.getItemById("ItemType", itemNd.selectSingleNode(param).text, 0, '', 'keyed_name');
+							if (res) cell.firstChild.data = res.selectSingleNode("keyed_name").text;
+						}
+					}
+					correctNames(itemNd.selectSingleNode("related_id/Item"), "related_id", tdNodes[4]);
+					correctNames(itemNd.selectSingleNode("source_id/Item"), "source_id", tdNodes[3]);
+				}
+				return tmpDom;
+			}
+
+			function system_UpdateGridCell(cell, tdNd)
+			{
+				var td_textColor = tdNd.getAttribute("textColor");
+				var td_link = tdNd.getAttribute("link");
+				var td_bgColor = tdNd.getAttribute("bgColor");
+				var td_font = tdNd.getAttribute("font");
+				var td_value = tdNd.text;
+
+				if (td_textColor) try { cell.setTextColor(td_textColor); } catch (excep) { }
+				if (td_link) cell.setLink(td_link);
+				if (td_bgColor) try { cell.setBgColor(td_bgColor); } catch (excep) { }
+				if (td_font) cell.setFont(td_font);
+				cell.setValue(td_value);
+			}
+
+			function updateItemInQueryCache(nd)
+			{
+				var qry = currQryItem.getResult();
+				var oldItm = qry.selectSingleNode("Item[@id=\"" + nd.getAttribute("id") + "\"]");
+				if (oldItm) qry.replaceChild(nd.cloneNode(true), oldItm);
+				else qry.appendChild(nd.cloneNode(true));
+			}
+
+			function insertRow(nd, notupdateMenu)
+			{
+				if (!nd || nd.getAttribute('type') != itemTypeName) return false;
+
+				updateItemInQueryCache(nd);
+
+				var tmpDom = generateXML4Item(nd);
+				var grid_xml = tmpDom.xml;
+
+				xml_ready_flag = false;
+				addRowInProgress_Number++;
+				grid.addXMLRows(grid_xml);
+
+				if (!notupdateMenu) updateToolStatusBar();
+			}
+
+			function checkBeforeUpdateRow()
+			{
+				var colWidths = arasObj.getPreferenceItemProperty('Core_ItemGridLayout', itemTypeID, 'col_widths', null);
+				if (colWidths == null)
+				{
+					resetMainMenuState();
+					onInitialize();
+					initMenu();
+					initSearch();
+					return false;
+				}
+				return true;
+			}
+
+
+			function updateRow(nd, notupdateMenu)
+			{
+				if (!checkBeforeUpdateRow() || !nd) return false;
+
+				var id = nd.getAttribute("id");
+
+				if (grid.getRowIndex(id) == -1){
+					return insertRow(nd, notupdateMenu);
+				}
+
+				updateItemInQueryCache(nd);
+
+				var tmpDom = generateXML4Item(nd);
+				var tds = tmpDom.selectNodes("/table/tr/td");
+
+				for (var i = 0; i < tds.length; i++)
+				{
+					var td = tds[i];
+
+					var cell = grid.cells(id, i);
+
+					system_UpdateGridCell(cell, td);
+				}
+
+				var selId = grid.getSelectedId();
+				if (id == selId) onSelectItem(id, undefined, notupdateMenu);
+				return true;
+			}
+
+			function removeItemActionsFromMainMenu()
+			{
+				for (var i = 0; i < itemActionsCount; i++)
+				{
+					menuFrm.deleteActionEntry(menuFrm.getActionEntriesCount() - 1);
+					addedActionsCount--;
+				}
+				itemActionsCount = 0;
+
+				for (var i = 0; i < itemReportsCount; i++)
+				{
+					menuFrm.deleteReportEntry(menuFrm.getReportEntriesCount() - 1);
+					addedReportsCount--;
+				}
+				itemReportsCount = 0;
+
+				itemMenuInitialized = false;
+			}
+
+			function deleteRow(param, skipQry)
+			{
+				if (!param)
+				{
+					arasObj.uiPopulateInfoTableWithItem(null, document);
+					return false;
+				}
+				if (!skipQry) skipQry = false;
+
+				var itemID = '';
+				if (typeof (param) == 'string') itemID = param;
+				else
+				{
+					if (param.getAttribute('type') != itemTypeName) return false;
+					itemID = param.getAttribute('id');
+				}
+
+				if (itemID == grid.getSelectedId())
+				{
+					arasObj.uiPopulateInfoTableWithItem(null, document);
+
+					removeItemActionsFromMainMenu();
+				}
+
+				grid.deleteRow(itemID);
+
+				if (!skipQry)
+				{
+					var nd2 = currQryItem.getResult().selectSingleNode('Item[@id="' + itemID + '"]');
+					if (nd2)
+					{
+						// If we delete versionable item, all previous versions should be removed to.
+						// IR-008031 "The previous version is shown after manual version".
+						var config_id = arasObj.getItemProperty(nd2, 'config_id');
+						if (isVersionableIT && config_id)
+						{
+							var nodesToDelete = currQryItem.getResult().selectNodes('Item[@type="' + itemTypeName + '"][config_id="' + config_id + '"]');
+
+							for (var i = 0; i < nodesToDelete.length; i++)
+								nodesToDelete[i].parentNode.removeChild(nodesToDelete[i]);
+						}
+						else
+							nd2.parentNode.removeChild(nd2);
+					}
+				}
+
+				updateToolStatusBar();
+			}
+
+			function emptyGrid()
+			{
+				deleteRow(grid.getSelectedId(), true);
+				grid.RemoveAllRows();
+			}
+
+			function setupMenu()
+			{
+				with (menuFrm)
+				{
+					setControlEnabled("new", can_addFlg);
+					setControlEnabled('save', false);
+					setControlEnabled('delete', false);
+					setControlEnabled('edit', false);
+					setControlEnabled('view', false);
+					setControlEnabled('saveAs', false);
+					setControlEnabled('lock', false);
+					setControlEnabled('unlock', false);
+					setControlEnabled('undo', false);
+					setControlEnabled('revisions', false);
+					setControlEnabled('print_view', false);
+					setControlEnabled('print', true);
+					setControlEnabled('export2Excel', true);
+					setControlEnabled('export2Word', true);
+					setControlEnabled('open', itemTypeName == 'File');
+					setControlEnabled('download', itemTypeName == 'File');
+					setControlEnabled('paste_special', false);
+					setControlEnabled('paste', false);
+					setControlEnabled('addItem2Package', false);
+				}
+			}
+
+			var addRowInProgress_Number = 0;
+			var callbackF_afterAddRow = null;
+
+			function onXmlLoaded(){
+				if (addRowInProgress_Number == 0){
+					with (arasObj){
+						if (!sGridsSetups[itemTypeName]['selectedRows']) sGridsSetups[itemTypeName]['selectedRows'] = new Array();
+
+						var selectedRows = sGridsSetups[itemTypeName]['selectedRows'];
+						if (grid.getRowCount() > 0){
+							var rowToSelId = '';
+							var currSelRows = new Array();
+
+							if (selectedRows.length == 0){
+								rowToSelId = grid.getRowId(0);
+								currSelRows[0] = rowToSelId;
+								grid.setSelectedRow(rowToSelId, false, false);
+							}
+							else {
+								var highestRow = 1000000;
+
+								for (var i = 0; i < selectedRows.length; i++){
+									var curId = selectedRows[i];
+									var curNum = grid.getRowIndex(curId);
+
+									if (curNum > -1){
+										if (rowToSelId == '' || curNum < highestRow){
+											highestRow = curNum;
+											rowToSelId = curId;
+										}
+
+										currSelRows[currSelRows.length] = curId;
+										grid.setSelectedRow(curId, true, false);
+									}
+								}
+
+								if (currSelRows.length == 0){
+									rowToSelId = grid.getRowId(0);
+									currSelRows[0] = rowToSelId;
+									grid.setSelectedRow(rowToSelId, true, false);
+								}
+							}
+							grid.setSelectedRow(rowToSelId, true, true);
+							sGridsSetups[itemTypeName]['selectedRows'] = currSelRows;
+
+							onSelectItem(rowToSelId);
+						}
+						else{
+							updateInfoTableWithItem(rowToSelId);
+						}
+					}
+				}
+				else {
+					addRowInProgress_Number--;
+					if (addRowInProgress_Number == 0){
+						if (callbackF_afterAddRow) callbackF_afterAddRow();
+					}
+				}
+
+				xml_ready_flag = true;
+			}
+
+			function updateInfoTableWithItem(rowId){
+				var focusedItemId = grid.getRowId(grid._grid.focus.rowIndex),
+					currentQueryItemResult, sourceItem, requestId;
+				if (focusedItemId === rowId) {
+					currentQueryItemResult = currQryItem.getResult();
+					sourceItem = currentQueryItemResult.selectSingleNode("Item[@id=\"" + rowId + "\"]");
+					requestId = "updateInfoTableWithItem";
+					arasObj.uiPopulateInfoTableWithItem(sourceItem, document, function (soapBody, callback){
+						asyncController.sendRequest(rowId, requestId, soapBody, callback);
+					});
+				}
+			}
+
+			var notExistingId = "-not-existing-id-";
+			function onSelectItem(rowId, col, notupdateMenu){
+				var idsArray = grid.getSelectedItemIds(),
+					isCtrlPressed = document.createEvent("MouseEvent").ctrlKey,
+					rowIsNotSelected = (idsArray.indexOf(rowId) === -1);
+
+				arasObj.sGridsSetups[itemTypeName]["selectedRows"] = idsArray;
+
+				if (rowIsNotSelected){
+					if (!isCtrlPressed){
+						grid.setSelectedRow(rowId, true, false);
+					}
+					else {
+						rowId = idsArray.length ? idsArray[idsArray.length - 1] : notExistingId;
+						updateInfoTableWithItem(rowId);
+					}
+				}
+				else{
+					updateInfoTableWithItem(rowId);
+				}
+
+				if (!notupdateMenu){
+					setMenuState(rowId, col);
+				}
+			}
+
+			var popupMenuSate = {};
+			var popupMenuLabel = {};
+			popupMenuLabel['New'] = arasObj.getResource('', 'common.new');
+			popupMenuLabel['separator0'] = '';
+			popupMenuLabel['Save'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.save');
+			popupMenuLabel['Save As'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.save_as');
+			popupMenuLabel['Edit'] = arasObj.getResource('', 'common.edit');
+			popupMenuLabel['View'] = arasObj.getResource('', 'common.view');
+			popupMenuLabel['Print'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.print');
+			popupMenuLabel['separator1'] = '';
+			popupMenuLabel['Purge'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.purge');
+			popupMenuLabel['Delete'] = arasObj.getResource('', 'common.delete');
+			popupMenuLabel['separator1.5'] = '';
+			popupMenuLabel['Export To Excel'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.export2excel');
+			popupMenuLabel['Export To Word'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.export2word');
+			popupMenuLabel['separator2'] = '';
+			popupMenuLabel['Lock'] = arasObj.getResource('', 'common.lock');
+			popupMenuLabel['Unlock'] = arasObj.getResource('', 'common.unlock');
+			popupMenuLabel['Undo'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.undo');
+			popupMenuLabel['separator3'] = '';
+			popupMenuLabel['Check in'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.check_in_calculating');
+			popupMenuLabel['Check out'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.check_out_calculating');
+			popupMenuLabel['separator4'] = '';
+			popupMenuLabel['Version'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.version');
+			popupMenuLabel['Revisions'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.revisions');
+			popupMenuLabel['separator5'] = '';
+			popupMenuLabel['Promote'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.promote');
+			popupMenuLabel['separator6'] = '';
+			popupMenuLabel['Where Used'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.where_used');
+			popupMenuLabel['Structure Browser'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.structure_browser');
+			popupMenuLabel['separator7'] = '';
+			popupMenuLabel['Properties'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.properties');
+			popupMenuLabel['separator8'] = '';
+			popupMenuLabel['Add to Desktop'] = arasObj.getResource('', 'itemsgrid.cntxt_menu.add2desktop');
+
+			function setMenuStateForFileOperations(itemNd, brokenFlg, itemIdsCount, itemId) {
+				var filePropNamesCount = filePropNms.length,
+					lockFlg, ItemIsLocked,
+					checkinFlg, checkoutFlg, undocheckoutFlg,
+					itemTypeNd, filesIds, filesInDom, fileId2File = {},
+					changeFlagsIfNecessary = function (getFileFunction) {
+						if ("File" === itemTypeName) {
+							checkinFlg = false;
+							checkoutFlg = false;
+							undocheckoutFlg = false;
+							return;
+						}
+
+						getFileFunction = getFileFunction || function (fileId) {
+							return arasObj.getItemFromServer("File", fileId, "locked_by_id").node;
+						};
+
+						var file, relFiles = [], isLockedByUser, i;
+						for (i = 0; i < filePropNamesCount; i++) {
+							file = arasObj.getItemProperty(itemNd, filePropNms[i]);
+							if (!file) {
+								continue;
+							}
+							file = getFileFunction(file);
+							if (!file) {
+								checkinFlg = false;
+								undocheckoutFlg = false;
+								break;
+							}
+
+							relFiles.push(file);
+							isLockedByUser = arasObj.isLockedByUser(file);
+
+							if (undefined === checkinFlg || true === checkinFlg) {
+								checkinFlg = isLockedByUser;
+							}
+							if (undefined === undocheckoutFlg || true === undocheckoutFlg) {
+								undocheckoutFlg = isLockedByUser;
+							}
+						}
+
+						checkoutFlg = (filePropNamesCount > 0 && arasObj.uiIsCheckOutPossible(relFiles, lockFlg, ItemIsLocked, currItemType));
+
+						if (itemIdsCount > 1) {
+							ItemIsLocked = arasObj.isLocked(itemNd);
+
+							if (undefined === checkinFlg || true === checkinFlg || checkoutFlg || undefined === undocheckoutFlg || true === undocheckoutFlg) {
+								itemTypeNd = top.aras.getItemTypeDictionary(itemTypeName).node;
+								relFiles = top.aras.getItemsOfFileProperties(itemNd, itemTypeNd);
+								checkoutFlg = (filePropNamesCount > 0 && arasObj.uiIsCheckOutPossible(relFiles, lockFlg, ItemIsLocked, currItemType));
+
+								for (i = 0; i < filePropNamesCount; i++) {
+									file = arasObj.getItemProperty(itemNd, filePropNms[i]);
+									if (!file) {
+										continue;
+									}
+									file = getFileFunction(file);
+									if (!file) {
+										checkinFlg = false;
+										checkoutFlg = false;
+										undocheckoutFlg = false;
+										break;
+									}
+
+									isLockedByUser = arasObj.isLockedByUser(file);
+									if (undefined === checkinFlg || true === checkinFlg) {
+										checkinFlg = isLockedByUser;
+									}
+									if (undefined === undocheckoutFlg || true === undocheckoutFlg) {
+										undocheckoutFlg = isLockedByUser;
+									}
+								}
+							}
+
+							if (undefined === checkinFlg) {
+								checkinFlg = false;
+							}
+							if (undefined === undocheckoutFlg) {
+								undocheckoutFlg = false;
+							}
+						}
+
+						if (checkinFlg && checkoutFlg) {
+							checkoutFlg = false;
+						}
+					},
+					changeControlsState = function () {
+						var setToolbarItemEnabled = function (itemName, isEnabled) {
+							var toolbarItem = searchbar.getItem(itemName);
+							if (toolbarItem) {
+								toolbarItem.setEnabled(isEnabled);
+							}
+						};
+
+						if (brokenFlg || !currQryItem) {
+							checkinFlg = checkoutFlg = undocheckoutFlg = false;
+						}
+
+						var itmsGrid_PPM = grid.getMenu();
+						popupMenuSate["Check in"] = checkinFlg;
+						popupMenuSate["Check out"] = checkoutFlg;
+						if (!brokenFlg) {
+							itmsGrid_PPM.setDisable("Check in", !checkinFlg);
+							itmsGrid_PPM.setHide("Check in", !checkinFlg);
+							itmsGrid_PPM.setLabel("Check in", arasObj.getResource('', 'itemsgrid.cntxt_menu.check_in'));
+							itmsGrid_PPM.setDisable("Check out", !checkoutFlg);
+							itmsGrid_PPM.setHide("Check out", !checkoutFlg);
+							itmsGrid_PPM.setLabel("Check out", arasObj.getResource('', 'itemsgrid.cntxt_menu.check_out'));
+							itmsGrid_PPM.setHideSeparator("separator3", !checkinFlg && !checkoutFlg); //hide redundant separator if need
+						}
+
+						menuFrm.setControlEnabled("checkin", checkinFlg);
+						menuFrm.setControlEnabled("checkout", checkoutFlg);
+						menuFrm.setControlEnabled("checkout_2dir", checkoutFlg);
+						menuFrm.setControlEnabled("undo_checkout", undocheckoutFlg);
+
+						setToolbarItemEnabled("checkin", checkinFlg);
+						setToolbarItemEnabled("checkout", checkoutFlg);
+					},
+					eachFileCallback, customCallback, soapBody, requestId;
+
+				if (!brokenFlg && currItemType) {
+					lockFlg = arasObj.uiItemCanBeLockedByUser(itemNd, isRelationshipIT, use_src_accessIT);
+					ItemIsLocked = arasObj.isLocked(itemNd);
+					if ("File" === itemTypeName) {
+						checkinFlg = false;
+						checkoutFlg = false;
+						undocheckoutFlg = false;
+					} else {
+						undocheckoutFlg = checkinFlg = (filePropNamesCount > 0 && arasObj.isLockedByUser(itemNd));
+						itemTypeNd = top.aras.getItemTypeDictionary(itemTypeName).node;
+						filesIds = [];
+						eachFileCallback = function (fileId) {
+							filesIds.push(fileId);
+						};
+
+						filesInDom = top.aras.getItemsOfFileProperties(itemNd, itemTypeNd, eachFileCallback) || [];
+						for (var i = 0; i < filesInDom.length; i++) {
+							filesIds.push(filesInDom[i].getAttribute("id"));
+						}
+
+						if (0 < filesIds.length) {
+							requestId = "calculateCheckinCheckoutUndocheckoutRequest";
+							soapBody = "<Item type=\"File\" action=\"get\" select=\"locked_by_id\" idlist=\"" + filesIds + "\"/>";
+							customCallback = function (files) {
+								for (var i = 0; i < files.length; i++) {
+									fileId2File[files[i].getAttribute("id")] = files[i];
+								}
+
+								changeFlagsIfNecessary(function (fileId) {
+									return fileId2File[fileId];
+								});
+
+								changeControlsState();
+							};
+							asyncController.sendRequest(itemId, requestId, soapBody, customCallback);
+							return;
+						}
+					}
+
+					changeFlagsIfNecessary();
+				}
+
+				changeControlsState();
+			}
+
+			function setMenuState(rowId, col)
+			{
+				grid.getMenu().removeAll();
+
+				if (!currQryItem) return;
+				var res = currQryItem.getResult();
+				var itemNd = res.selectSingleNode('Item[@id="' + rowId + '"]')//;arasObj.getFromCache(rowId);
+				if (!itemNd)
+					itemNd = arasObj.getFromCache(rowId); //res.selectSingleNode('Item[@id="' + rowId + '"]');
+
+				var brokenFlg = !Boolean(itemNd);
+				var itemIDs, itemIdsCount, tmpItemNd;
+
+				popupMenuSate['New'] = (can_addFlg); //0
+				popupMenuSate['separator0'] = true;
+				popupMenuSate['Save'] = false; //2
+				popupMenuSate['Save As'] = false;
+				popupMenuSate['Edit'] = false; //3
+				popupMenuSate['View'] = false; //4
+				popupMenuSate['Print'] = false; //5
+				popupMenuSate['separator1'] = true;
+				popupMenuSate['Purge'] = false; //7
+				popupMenuSate['Delete'] = false; //8
+				popupMenuSate['separator1.5'] = true;
+				popupMenuSate['Export To Excel'] = true;
+				popupMenuSate['Export To Word'] = true;
+				popupMenuSate['separator2'] = true;
+				popupMenuSate['Lock'] = false; //10
+				popupMenuSate['Unlock'] = false; //11
+				popupMenuSate['Undo'] = false; //12
+				popupMenuSate['separator3'] = true;
+				popupMenuSate['Check in'] = undefined; //to display "Check In (calculating)" disabled by default
+				popupMenuSate['Check out'] = undefined;  //to display "Check Out (calculating)" disabled by default
+				popupMenuSate['separator4'] = true;
+				popupMenuSate['Version'] = false;
+				popupMenuSate['Revisions'] = false;
+				popupMenuSate['separator5'] = true;
+				popupMenuSate['Promote'] = false;
+				popupMenuSate['separator6'] = true;
+				popupMenuSate['Where Used'] = false;
+				popupMenuSate['Structure Browser'] = false;
+				popupMenuSate['separator7'] = true;
+				popupMenuSate['Properties'] = false;
+				popupMenuSate['separator8'] = true;
+				popupMenuSate['Add to Desktop'] = false;
+
+				if (!brokenFlg && currItemType)
+				{
+					itemIDs = grid.getSelectedItemIds();
+					itemIdsCount = itemIDs.length;
+					var itemID = rowId;
+					var locked_by = arasObj.getItemProperty(itemNd, 'locked_by_id');
+					var isTemp = arasObj.isTempEx(itemNd);
+					var isDirty = arasObj.isDirtyEx(itemNd);
+					var ItemIsLocked = arasObj.isLocked(itemNd);
+
+					var discoverOnlyFlg = (itemNd && itemNd.getAttribute("discover_only") == "1");
+					var editFlg = ((isTemp || locked_by == userID) && !discoverOnlyFlg);
+					var saveFlg = (editFlg && (arasObj.getFromCache(itemID) != null));
+					var viewFlg = (locked_by != userID && itemIdsCount == 1 && !discoverOnlyFlg);
+					var purgeFlg = (isTemp || (locked_by == ''));
+					var lockFlg = arasObj.uiItemCanBeLockedByUser(itemNd, isRelationshipIT, use_src_accessIT);
+					var unlockFlg = (locked_by == userID || (!isTemp && locked_by != '' && arasObj.isAdminUser()));
+					var copyFlg = (itemIdsCount == 1 && !isTemp && can_addFlg);
+					var undoFlg = (!isTemp && isDirty);
+					var promoteFlg = (locked_by == '' && !isTemp);
+					var add2desktopFlg = !isTemp;
+
+					var copy2clipboardFlg = arasObj.getItemProperty(currItemType, "is_relationship") == "1" && arasObj.getItemProperty(currItemType, "is_dependent") != "1" && (!isFunctionDisabled(itemTypeName, 'Copy'));
+					var pasteFlg = !arasObj.clipboard.isEmpty() && (isTemp || (locked_by == userID)) && (!isFunctionDisabled(itemTypeName, 'Paste'));
+					var pasteSpecialFlg = !arasObj.clipboard.isEmpty() && (isTemp || (locked_by == userID)) && (!isFunctionDisabled(itemTypeName, 'Paste Special'));
+					var showClipboardFlg = !arasObj.clipboard.isEmpty();
+					var addItem2PackageFlg = ((itemID == "" || isTemp) ? false : true);
+
+					if (itemIdsCount > 1)
+					{
+						var idsArray = new Array();
+						for (var i = 0; i < itemIdsCount; i++)
+							idsArray.push("@id='" + itemIDs[i] + "'");
+
+						var itemNds = res.selectNodes('Item[' + idsArray.join(' or ') + ']');
+						for (var i = 0; i < itemNds.length; i++)
+						{
+							tmpItemNd = itemNds[i];
+							itemID = arasObj.getItemProperty(tmpItemNd, "id");
+							if (!tmpItemNd)
+							{
+								brokenFlg = true;
+								break;
+							}
+
+							locked_by = arasObj.getItemProperty(tmpItemNd, 'locked_by_id');
+							isTemp = arasObj.isTempEx(tmpItemNd);
+							isDirty = arasObj.isDirtyEx(tmpItemNd);
+
+							editFlg = editFlg && (isTemp || (locked_by == userID));
+							saveFlg = saveFlg && (editFlg && arasObj.getFromCache(itemID));
+							purgeFlg = purgeFlg && (isTemp || (locked_by == ''));
+							lockFlg = lockFlg && arasObj.uiItemCanBeLockedByUser(tmpItemNd, isRelationshipIT, use_src_accessIT);
+							undoFlg = undoFlg && (!isTemp && isDirty);
+
+							unlockFlg = unlockFlg && (locked_by == userID || (!isTemp && locked_by != '' && arasObj.isAdminUser()));
+							add2desktopFlg = add2desktopFlg & !isTemp;
+							pasteFlg = pasteFlg && !arasObj.clipboard.isEmpty() && (isTemp || (locked_by == userID));
+							pasteSpecialFlg = pasteSpecialFlg && !arasObj.clipboard.isEmpty() && (isTemp || (locked_by == userID));
+							addItem2PackageFlg = ((itemID == "" || isTemp) ? false : true);
+						}
+
+						if (pasteFlg) pasteFlg = arasObj.isLCNCompatibleWithIT(itemTypeID);
+					}
+				}
+
+				if (!brokenFlg && currQryItem)
+				{
+					popupMenuSate['Save'] = saveFlg && !isFunctionDisabled(itemTypeName, 'Save');
+					popupMenuSate['Save As'] = (!(isFunctionDisabled(itemTypeName, 'Save As')) && copyFlg);
+					popupMenuSate['Edit'] = ((lockFlg || editFlg) && itemIDs && itemIdsCount == 1 && !discoverOnlyFlg) &&  !isFunctionDisabled(itemTypeName, 'Edit');
+					popupMenuSate['View'] = (viewFlg && itemIDs && itemIdsCount == 1) &&  !isFunctionDisabled(itemTypeName, 'View');
+					popupMenuSate['Print'] = (itemIDs && itemIdsCount == 1);
+					popupMenuSate['Purge'] = (purgeFlg && isVersionableIT);
+					popupMenuSate['Delete'] = purgeFlg &&  !isFunctionDisabled(itemTypeName, 'Delete'); //delete is always available, but purge is only for versioanble
+					popupMenuSate['Lock'] = lockFlg && !isFunctionDisabled(itemTypeName, 'Lock');
+					popupMenuSate['Unlock'] = unlockFlg && !isFunctionDisabled(itemTypeName, 'Unlock');
+					popupMenuSate['Undo'] = undoFlg;
+					popupMenuSate['Version'] = (!(isFunctionDisabled(itemTypeName, 'Version')) && isManualyVersionableIT && itemIDs && itemIdsCount == 1 && !isTemp && (locked_by == userID || locked_by == ''));
+					popupMenuSate['Revisions'] = (isVersionableIT && !isTemp && itemIDs && itemIdsCount == 1);
+					popupMenuSate['Promote'] = (promoteFlg && itemIDs && itemIdsCount == 1 && !(isFunctionDisabled(itemTypeName, 'Promote')));
+					popupMenuSate['Where Used'] = (itemIDs && itemIdsCount == 1);
+					popupMenuSate['Structure Browser'] = (itemIDs && itemIdsCount == 1);
+					popupMenuSate['Properties'] = (itemIDs && itemIdsCount == 1);
+					popupMenuSate['Add to Desktop'] = add2desktopFlg;
+
+					with (menuFrm)
+					{
+						setControlEnabled('new', can_addFlg);
+						setControlEnabled('view', popupMenuSate['View']);
+						setControlEnabled('edit', popupMenuSate['Edit']);
+						setControlEnabled('save', popupMenuSate['Save']);
+						setControlEnabled('purge', popupMenuSate['Purge']);
+						setControlEnabled('delete', popupMenuSate['Delete']);
+						setControlEnabled('print', popupMenuSate['Print']);
+						setControlEnabled('saveAs', popupMenuSate['Save As']);
+						setControlEnabled('export2Excel', popupMenuSate['Export To Excel']);
+						setControlEnabled('export2Word', popupMenuSate['Export To Word']);
+						setControlEnabled('lock', popupMenuSate['Lock']);
+						setControlEnabled('unlock', popupMenuSate['Unlock']);
+						setControlEnabled('undo', popupMenuSate['Undo']);
+						setControlEnabled('promote', popupMenuSate['Promote']);
+						setControlEnabled('revisions', popupMenuSate['Revisions']);
+						
+						setControlEnabled('get_files', filePropNms.length > 0);
+
+						setControlEnabled('copy2clipboard', copy2clipboardFlg);
+						setControlEnabled('paste', pasteFlg);
+						setControlEnabled('paste_special', pasteSpecialFlg);
+						setControlEnabled('show_clipboard', showClipboardFlg);
+						setControlEnabled('addItem2Package', addItem2PackageFlg);
+					}
+
+					var itmsGrid_PPM = grid.getMenu();
+					itmsGrid_PPM.removeAll();
+					var newSeparatorId = false;
+					for (var menuCmd in popupMenuSate)
+					{
+						var isSeparator = (menuCmd.search(/^separator/) == 0);
+						if ((popupMenuSate[menuCmd] || popupMenuSate[menuCmd] === undefined) && !isSeparator)
+						{
+							if (newSeparatorId)
+							{
+								itmsGrid_PPM.addSeparator(false, newSeparatorId);
+								newSeparatorId = false;
+							}
+							itmsGrid_PPM.add(menuCmd, popupMenuLabel[menuCmd]);
+
+							if (popupMenuSate[menuCmd] === undefined) {
+								itmsGrid_PPM.setDisable(menuCmd, true);
+							}
+						}
+						if (isSeparator) newSeparatorId = menuCmd;
+					}
+				}
+				else
+				{
+					with (menuFrm)
+					{
+						setControlEnabled('new', can_addFlg);
+						setControlEnabled('view', false);
+						setControlEnabled('edit', false);
+						setControlEnabled('save', false);
+						setControlEnabled('purge', false);
+						setControlEnabled('delete', false);
+						setControlEnabled('print', true);
+						setControlEnabled('export2Excel', true);
+						setControlEnabled('export2Word', true);
+						setControlEnabled('saveAs', false);
+						setControlEnabled('lock', false);
+						setControlEnabled('unlock', false);
+						setControlEnabled('undo', false);
+						setControlEnabled('promote', false);
+						setControlEnabled('revisions', false);
+
+						setControlEnabled('copy2clipboard', false);
+						setControlEnabled('paste', false);
+						setControlEnabled('paste_special', false);
+						setControlEnabled('show_clipboard', false);
+						setControlEnabled('addItem2Package', false);
+					}
+				}
+
+				initItemMenu(rowId);
+
+				setMenuStateForFileOperations(itemNd, brokenFlg, itemIdsCount, rowId);
+			}
+
+			function initItemMenu(rowId)
+			{
+				if (notExistingId == rowId)
+				{
+					removeItemActionsFromMainMenu();
+					return;
+				}
+
+				var act, actLbl, val;
+				var actions = currItemType.selectNodes("Relationships/Item[@type='Item Action']/related_id/Item[@type='Action' and type='item' and method]");
+
+				var itmsGrid_PPM = grid.getMenu();
+				if (actions.length > 0)
+				{
+					if (itmsGrid_PPM.getItemCount() > 0)
+						itmsGrid_PPM.addSeparator();
+
+					if (!itemMenuInitialized && menuFrm.getActionEntriesCount() > 0)
+					{
+						menuFrm.addActionSeparator();
+						addedActionsCount++;
+						itemActionsCount++;
+					}
+
+					for (var i = 0; i < actions.length; i++)
+					{
+						act = actions[i];
+						actLbl = arasObj.getItemProperty(act, 'label');
+						if (!actLbl) actLbl = arasObj.getItemProperty(act, 'name');
+						val = 'action:' + act.getAttribute('id') + ":" + itemTypeID;
+						itmsGrid_PPM.add(val, actLbl);
+
+						if (!itemMenuInitialized)
+						{
+							menuFrm.addActionEntry(actLbl, val, true);
+							addedActionsCount++;
+							itemActionsCount++;
+						}
+					}
+				}
+
+				var rep, repLbl;
+				var reports = currItemType.selectNodes("Relationships/Item[@type='Item Report']/related_id/Item[@type='Report' and type='item']");
+
+				if (reports.length > 0)
+				{
+					if (itmsGrid_PPM.getItemCount() > 0)
+						itmsGrid_PPM.addSeparator();
+					if (!itemMenuInitialized && menuFrm.getReportEntriesCount() > 0)
+					{
+						menuFrm.addReportSeparator();
+						addedReportsCount++;
+						itemReportsCount++;
+					}
+
+					for (var i = 0; i < reports.length; i++)
+					{
+						rep = reports[i];
+						repLbl = arasObj.getItemProperty(rep, 'label');
+						if (!repLbl) repLbl = arasObj.getItemProperty(rep, 'name');
+						val = 'report:' + rep.getAttribute('id') + ":" + itemTypeID;
+						itmsGrid_PPM.add(val, repLbl);
+
+						if (!itemMenuInitialized)
+						{
+							menuFrm.addReportEntry(repLbl, val, true);
+							addedReportsCount++;
+							itemReportsCount++;
+						}
+					}
+				}
+
+				itemMenuInitialized = true;
+			}
+
+			function onDoubleClick(rowID)
+			{
+				if (popupMenuSate['View'] || popupMenuSate['Edit'] || !isFunctionDisabled(itemTypeName, 'DoubleClick'))
+				{
+					arasObj.uiShowItem(itemTypeName, rowID);
+				}
+			}
+
+			function onHeaderCellContextMenu(e)
+			{
+				if (e.rowIndex == "-1")
+				{
+					var itmsGrid_PPM = grid.getHeaderMenu();
+					if (!itmsGrid_PPM.initialized || itmsGrid_PPM.insertOnly)
+					{
+						itmsGrid_PPM.removeAll();
+						itmsGrid_PPM.add("hideCol", arasObj.getResource('', 'itemsgrid.cntxt_menu.hide_column'));
+						itmsGrid_PPM.add("insertCol", arasObj.getResource('', 'itemsgrid.cntxt_menu.insert_column'));
+						itmsGrid_PPM.initialized = true;
+						itmsGrid_PPM.insertOnly = false;
+					}
+				}
+				return true;
+			}
+
+			function onHeaderContextMenu(e)
+			{
+				if (e.rowIndex == "-1")
+				{
+					var itmsGrid_PPM = grid.getHeaderMenu();
+					if (!itmsGrid_PPM.initialized || !itmsGrid_PPM.insertOnly)
+					{
+						itmsGrid_PPM.removeAll();
+						itmsGrid_PPM.add("insertCol", arasObj.getResource('', 'itemsgrid.cntxt_menu.insert_column'));
+						itmsGrid_PPM.initialized = true;
+						itmsGrid_PPM.insertOnly = true;
+					}
+				}
+				return true;
+			}
+
+			var obj4propsDlg = new Object();
+			obj4propsDlg.aras = arasObj;
+
+			function hideColumn(col)
+			{
+				grid.SetColumnVisible(col, false);
+			}
+
+			function showColumn(col)
+			{
+				var propsToShow = new Array();
+				var colOrderArr = grid.getLogicalColumnOrder().split(";");
+				for (var i = 0; i < colOrderArr.length; i++)
+				{
+					if (grid.getColWidth(i) == 0)
+					{
+						var propLabel = "";
+						var propWidth = 100;
+						var colNm = grid.GetColumnName(i);
+						if (colNm == "L")
+						{
+							propLabel = "Locked";
+							propWidth = 24;
+						}
+						else
+						{
+							var propertyName = colNm.substr(0, colNm.length - 2);
+							for (var j = 0; j < visiblePropNds.length; j++)
+							{
+								if (arasObj.getItemProperty(visiblePropNds[j], "name") == propertyName)
+								{
+									propLabel = arasObj.getItemProperty(visiblePropNds[j], "label");
+									if (propLabel == "") propLabel = propertyName;
+									var tempWidth = parseInt(arasObj.getItemProperty(visiblePropNds[j], "column_width"));
+									if (!isNaN(tempWidth)) propWidth = tempWidth;
+									break;
+								}
+							}
+						}
+						propsToShow.push({ colNumber: i, label: propLabel, width: propWidth });
+					}
+				}
+
+				if (!propsToShow.length)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.no_additional_columns_available'));
+					return;
+				}
+				var params = new Object;
+				params.aras = arasObj;
+				params.propsToShow = propsToShow;
+				var options = {
+					dialogWidth: 350,
+					dialogHeight: 500,
+					resizable: true
+				};
+				var resArr = top.aras.modalDialogHelper.show('DefaultModal', window, params, options, 'SitePreference/showColumnDialog.html');
+				if (!resArr) return;
+				for (var j = 0; j < resArr.length; j++)
+				{
+					for (var i = 0; i < propsToShow.length; i++)
+					{
+						if (propsToShow[i].label == resArr[j])
+						{
+							grid.SetColumnVisible(propsToShow[i].colNumber, true, propsToShow[i].width);
+							break;
+						}
+					}
+				}
+			}
+
+			function onHeaderMenuClicked(m, rowsId, col)
+			{
+				if (m == 'hideCol') { hideColumn(col); return; }
+				else if (m == 'insertCol') { showColumn(col); return; }
+			}
+			
+			function onMenuClicked(m, rowId, col)
+			{
+				if (m == 'Properties')
+				{
+					var itm = currQryItem.getResult().selectSingleNode('Item[@id="' + rowId + '"]');
+					if (itm)
+					{
+						obj4propsDlg.item = itm;
+						obj4propsDlg.itemType = currItemType;
+						var options = {
+							dialogWidth: 225,
+							dialogHeight: 350,
+							resizable: true
+						};
+						top.aras.modalDialogHelper.show('DefaultModal', window, obj4propsDlg, options, 'propsDialog.html');
+					}
+					return;
+				}
+				else if (m == 'New') m = 'new';
+				else if (m == 'Save') m = 'save';
+				else if (m == 'Purge') m = 'purge';
+				else if (m == 'Delete') m = 'delete';
+				else if (m == 'Edit') m = 'edit';
+				else if (m == 'View') m = 'view';
+				else if (m == 'Save As') m = 'saveAs';
+				else if (m == 'Print') m = 'print';
+				else if (m == 'Export To Excel') m = 'export2Excel';
+				else if (m == 'Export To Word') m = 'export2Word';
+				else if (m == 'Lock') m = 'lock';
+				else if (m == 'Unlock') m = 'unlock';
+				else if (m == 'Undo') m = 'undo';
+				else if (m == 'Check in') m = 'checkin';
+				else if (m == 'Check out') m = 'checkout';
+				else if (m == 'Promote') m = 'promote';
+				else if (m == 'Revisions') m = 'revisions';
+				else if (m == 'Version') m = 'version_item';
+				else if (m == 'Add to Desktop')
+				{
+					var itemIDs = grid.getSelectedItemIds();
+					for (var i = 0; i < itemIDs.length; i++)
+					{
+						var itemID = itemIDs[i];
+						var xml = '<Item type="' + itemTypeName + '" id="' + itemID + '" action="Add to Desktop"/>';
+						var res = arasObj.soapSend('ApplyItem', xml);
+						if (res.getFaultCode() == 0)
+						{
+							var itm = currQryItem.getResult().selectSingleNode('Item[@id="' + itemID + '"]');
+							var keyed_name = (itm ? arasObj.getKeyedNameEx(itm) : arasObj.getKeyedName(itemID));
+							arasObj.AlertSuccess(arasObj.getResource('', 'itemsgrid.item_with_kn_on_desktop', keyed_name));
+						}
+						else
+							arasObj.AlertError(res);
+					}
+					return true;
+				}
+				else if (currItemType && (m == 'Where Used' || m == 'Structure Browser'))
+				{
+					return Dependencies.View(itemTypeName, rowId, (m == 'Where Used'));
+				}
+				else
+				{
+					menuFrm.onClickMenuItem(m);
+					return;
+				}
+
+				top.main.menu.onClickMenuItem(m);
+			}
+
+			function onLink(typeName, id)
+			{
+				var itemType = arasObj.getItemTypeDictionary(typeName, "name");
+				if (itemType && !itemType.isError() && arasObj.isPolymorphic(itemType.node))
+				{
+					var item = arasObj.getItemById(typeName, id, 0);
+					if (item.getAttribute("type") === typeName)
+					{
+						var polyTypeId = arasObj.getItemProperty(item, "itemtype");
+						typeName = arasObj.getItemTypeName(polyTypeId);
+						arasObj.removeFromCache(item);
+					}
+				}
+				
+				arasObj.uiShowItem(typeName, id);
+			}
+
+			function onClickItem(tbItem)
+			{
+				var cmdID = tbItem.getId();
+				if (cmdID == 'newsearch') clearSearchCriteria();
+				else if (cmdID == 'checkin') onCheckInCommand();
+				else if (cmdID == 'checkout') onCheckOutCommand();
+				else if (cmdID == 'get_files') onGetFilesCommand();
+				else if (cmdID == 'query_date_calendar') setQueryDate();
+			}
+
+			function clearSearchCriteria()
+			{
+				if (isVersionableIT)
+				{
+					searchbar.getActiveToolbar().getElement('query_type').setSelected("Current");
+					searchbar.getActiveToolbar().getElement('query_date').setText("");
+					arasObj.setPreferenceItemProperties("Core_ItemGridLayout", itemTypeID, { query_type: "Current" });
+					arasObj.setVariable(varName_queryDate, Today);
+				}
+			}
+
+			function OnChangeItem(tbItem)
+			{
+				var cmdID = tbItem.getId();
+				if (cmdID != "search_mode" && cmdID != "saved_search" && cmdID != "query_type")
+					return;
+
+				var selected_item = tbItem.getSelectedItem();
+				if (cmdID == "query_type")
+				{
+					var dateTextBox = searchbar.getItem('query_date');
+					if (selected_item == "Current")
+					{
+						dateTextBox.setText("");
+						dateTextBox.setEnabled(false);
+						searchbar.getItem('query_date_calendar').setEnabled(false);
+
+						var query_date = arasObj.getVariable(varName_queryDate);
+						if (query_date != Today && query_date != null)
+							arasObj.setVariable(varName_queryDate, query_date);
+					}
+					else
+					{
+						var prev_queryType = arasObj.getPreferenceItemProperty("Core_ItemGridLayout", itemTypeID, "query_type", null);
+						var prev_datePattern = GetDatePattern(prev_queryType);
+						var query_date;
+						if (!prev_queryType || prev_queryType == "Current")
+						{
+							query_date = arasObj.getVariable(varName_queryDate, query_date);
+							if (query_date == null)
+								query_date = Today;
+						}
+						else
+						{
+							query_date = dateTextBox.getText();
+							if (query_date != Today)
+								query_date = arasObj.convertToNeutral(query_date, "date", prev_datePattern);
+						}
+
+						var s = arasObj.convertFromNeutral(query_date, "date", GetDatePattern(tbItem.getSelectedItem()));
+						dateTextBox.setText(s);
+						dateTextBox.setEnabled(true);
+						searchbar.getItem('query_date_calendar').setEnabled(true);
+						arasObj.setVariable(varName_queryDate, query_date);
+					}
+
+					arasObj.setPreferenceItemProperties("Core_ItemGridLayout", itemTypeID, { query_type: selected_item });
+				}
+			}
+
+			function GetDatePattern(query_type)
+			{
+				var prop_name;
+				switch (query_type)
+				{
+					case "Released": prop_name = "release_date";
+						break;
+					case "Effective": prop_name = "effective_date";
+						break;
+					case "Latest":
+					default: prop_name = "modified_on";
+						break;
+				}
+				var ptrn = arasObj.getItemProperty(currItemType.selectSingleNode("Relationships/Item[@type='Property' and name='" + prop_name + "']"), "pattern");
+				if (!ptrn) ptrn = "short_date_time";
+				return arasObj.getDotNetDatePattern(ptrn);
+			}
+
+			function initEffectivityControls()
+			{
+				searchbar.getItem('query_type').setEnabled(isVersionableIT);
+				if (isVersionableIT)
+				{
+					var queryType = arasObj.getPreferenceItemProperty("Core_ItemGridLayout", itemTypeID, "query_type", null);
+					if (queryType == null) queryType = "Current";
+					var queryDate = (queryType == "Current") ? "" : arasObj.getVariable(varName_queryDate);
+				}
+
+				searchbar.getItem('query_date').setEnabled(isVersionableIT && queryType != "Current");
+				searchbar.getItem('query_date_calendar').setEnabled(isVersionableIT && queryType != "Current");
+
+				searchbar.getItem('query_date').setText(queryDate != null ? arasObj.convertFromNeutral(queryDate, "date", GetDatePattern(queryType)) : Today);
+				searchbar.getItem('query_type').setSelected(queryType != null ? queryType : "Current");
+			}
+
+			var tmp_qry2item_cssValue = '';
+
+			function qry2item()
+			{
+				var res = currQryItem.item.cloneNode(true);
+				res.setAttribute('id', 'form_search_item_id');
+				res.setAttribute('isTemp', '1');
+
+				var itms = res.selectNodes('./*/Item[not(keyed_name)]');
+				for (var i = 0; i < itms.length; i++)
+				{
+					var itm = itms[i];
+					itm.parentNode.removeChild(itm);
+				}
+
+				var itms = res.selectNodes('./*/Item[keyed_name]');
+				for (var i = 0; i < itms.length; i++)
+				{
+					var itm = itms[i];
+					var keyed_name = arasObj.getItemProperty(itm, 'keyed_name');
+					itm.parentNode.text = keyed_name;
+				}
+
+				if (arasObj.getItemProperty(res, 'css') != '') return res;
+
+				var props = currItemType.selectNodes("Relationships/Item[@type='Property']");
+				var css = '';
+				for (var i = 0; i < props.length; i++)
+				{
+					css += "." + arasObj.getItemProperty(props[i], "name") + " { background-color:#BDDEF7; }" + '\n';
+				}
+
+				arasObj.setItemProperty(res, 'css', css);
+				tmp_qry2item_cssValue = css;
+
+				return res;
+			}
+
+			function item2qry()
+			{
+				var criterias = formSearchItem.selectNodes("./*");
+				var condition = (arasObj.getPreferenceItemProperty("Core_GlobalLayout", null, "core_use_wildcards") == 'true' ? 'like' : 'eq');
+
+				for (var i = 0; i < criterias.length; i++)
+				{
+					var criteria = criterias[i];
+					var critName = criteria.nodeName;
+					var critVal = criteria.text;
+					var critBaseName = criteria.nodeName;
+					var prefix = criteria.prefix;
+
+					if (critName == 'css' && critVal == tmp_qry2item_cssValue) continue;
+
+					if (critVal == '')
+					{
+						var languageCode = undefined;
+						if (prefix)
+						{
+							languageCode = criteria.getAttribute("xml:lang");
+						}
+
+						currQryItem.removeCriteria(critBaseName, languageCode);
+					}
+					else
+					{
+						var data_type = currItemType.selectSingleNode('Relationships/Item[@type="Property" and name="' + critBaseName + '"]');
+
+						if (data_type) data_type = arasObj.getItemProperty(data_type, 'data_type');
+						else data_type = '';
+
+						if (data_type == 'item')
+							currQryItem.setPropertyCriteria(critName, 'keyed_name', critVal, condition);
+						else if (data_type == 'ml_string')
+							currQryItem.setCriteriaForMlString(criteria, condition);
+						else
+							currQryItem.setCriteria(critName, critVal, condition);
+					}
+				}
+			}
+
+			function execInTearOffWin(itemID, cmdID, param)
+			{
+				if (cmdID == undefined || cmdID == '') return false;
+
+				var win = arasObj.uiFindWindowEx(itemID);
+				var res = null;
+				if (win && win.name != 'work') {
+					if (!arasObj.isWindowClosed(win)) {
+						arasObj.browserHelper.setFocus(win);
+						var tearoff_menu = win.tearOffMenuController;
+						if (tearoff_menu && tearoff_menu.onClickMenuItem) {
+							res = tearoff_menu.onClickMenuItem(cmdID, param);
+							if (!res || !res['result']) res = true;
+						}
+					}
+					if (res == null) res = true;
+				}
+
+				if (win && arasObj.isWindowClosed(win)) arasObj.uiUnregWindowEx(itemID);
+
+				return res;
+			}
+
+			function onNewCommand() {
+				var newItm = arasObj.uiNewItemEx(itemTypeName);
+				if (newItm) {
+					var win = arasObj.uiFindWindowEx(newItm.getAttribute('id'));
+					if (win) {
+						insertRow(newItm);
+					}
+				}
+			}
+
+			function onViewCommand()
+			{
+				var itemID = grid.getSelectedId();
+				if (!itemID)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				if (execInTearOffWin(itemID, 'view')) return true;
+
+				var itemNd = arasObj.getItemById(itemTypeName, itemID, 0);
+				if (!itemNd)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.failed2get_itemtype', itemTypeLabel));
+					return false;
+				}
+
+				var myLock = (!arasObj.isTempEx(itemNd) && arasObj.getItemProperty(itemNd, 'locked_by_id') == userID);
+
+				if (myLock)
+				{
+					if (!arasObj.unlockItemEx(itemNd)) return false;
+					itemNd = arasObj.getItemById(itemTypeName, itemID, 0);
+					if (updateRow(itemNd) === false) return;
+					onSelectItem(itemID);
+				}
+
+				arasObj.uiShowItemEx(itemNd, arasObj.getPreferenceItemProperty("Core_GlobalLayout", null, "core_view_mode"));
+			}
+
+			function onEditCommand()
+			{
+				if (arasObj.isPolymorphic(currItemType))
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.polyitem_cannot_be_edited_from_the_location'));
+					return false;
+				}
+				var itemID = grid.getSelectedId();
+				if (!itemID)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				if (execInTearOffWin(itemID, 'edit')) return true;
+
+				var itemNd = null;
+
+				if (itemTypeName != 'Form')
+				{
+					itemNd = arasObj.getItemById(itemTypeName, itemID, 0);
+					if (!itemNd)
+					{
+						arasObj.AlertError(arasObj.getResource('', 'itemsgrid.failed2get_itemtype', itemTypeLabel));
+						return false;
+					}
+				}
+				else
+				{
+					itemNd = arasObj.getItemById(itemTypeName, itemID, 0);
+					if (!itemNd)
+					{
+						itemNd = arasObj.getItemFromServer(itemTypeName, itemID, 'locked_by_id').node;
+						if (!itemNd)
+						{
+							arasObj.AlertError(arasObj.getResource('', 'itemsgrid.failed2get_itemtype', itemTypeLabel));
+							return false;
+						}
+					}
+				}
+
+				var notlocked = (!arasObj.isTempEx(itemNd) && arasObj.getItemProperty(itemNd, 'locked_by_id') == '');
+				if (notlocked)
+				{
+					if (!arasObj.lockItemEx(itemNd)) return false;
+					itemNd = arasObj.getItemById(itemTypeName, itemID, 0);
+					if (updateRow(itemNd) === false) return;
+					onSelectItem(itemID);
+				}
+
+				arasObj.uiShowItemEx(itemNd, arasObj.getPreferenceItemProperty("Core_GlobalLayout", null, "core_view_mode"));
+			}
+
+			function onSaveCommand()
+			{
+				var itemIDs = grid.getSelectedItemIds();
+				if (itemIDs.length == 0)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				var itemID, oldID, itemNd;
+				var res;
+
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					if (execInTearOffWin(itemID, 'save')) continue;
+
+					itemNd = arasObj.getItemById('', itemID, 0);
+					if (!itemNd) continue;
+
+					if (!arasObj.isTempEx(itemNd) && !arasObj.isDirtyEx(itemNd)) continue;
+
+					if (itemTypeName == 'Form')
+					{
+						res = false;
+						itemNd.setAttribute('levels', 3);
+					}
+
+					oldID = itemID;
+					res = arasObj.saveItemEx(itemNd);
+					if (!res) continue;
+
+					if (isVersionableIT){
+						itemNd = arasObj.getItemLastVersion(itemTypeName, oldID);
+						if (!itemNd) continue;
+						itemID = itemNd.getAttribute("id");
+					}
+					itemNd = arasObj.getItemById(itemTypeName, itemID, 0);
+					if (!itemNd) continue;
+
+					if (isVersionableIT)
+					{
+						var oldItm = currQryItem.getResult().selectSingleNode('Item[@id="' + oldID + '"]');
+						deleteRow(oldItm);
+					}
+
+					if (updateRow(itemNd) === false) return;
+					onSelectItem(itemID);
+				}
+
+				if (itemTypeName == 'ItemType')
+					top.main.tree.updateTree(itemIDs);
+				else if (itemTypeName == 'Action')
+					menuFrm.updateGenericActions();
+				else if (itemTypeName == 'Report')
+					menuFrm.updateGenericReports();
+
+				if (itemIDs.length == 1) arasObj.uiReShowItemEx(oldID, itemNd);
+			}
+
+			function onPurgeCommand() {
+				return onPurgeDeleteCommand("purge");
+			}
+
+			function onDeleteCommand() {
+				return onPurgeDeleteCommand("delete");
+			}
+
+			var purgeDlgParams = new Object();
+			purgeDlgParams.buttons = new Object();
+
+			with (purgeDlgParams) {
+				buttons.btnYes = arasObj.getResource("", "itemsgrid.purgedlg_yes");
+				buttons.btnYes4All = arasObj.getResource("", "itemsgrid.purgedlg_yes_for_all");
+				buttons.btnSkip = arasObj.getResource("", "itemsgrid.purgedlg_skip");
+				buttons.btnCancel = arasObj.getResource("", "itemsgrid.purgedlg_cancel");
+			}
+
+			purgeDlgParams.defaultButton = "btnCancel";
+			purgeDlgParams.aras = arasObj;
+
+			function onPurgeDeleteCommand(command) {
+				var res;
+				var itemIDs = grid.getSelectedItemIds();
+				if (itemIDs.length == 0) {
+					arasObj.AlertError(arasObj.getResource("", "itemsgrid.select_item_type_first", itemTypeLabel));
+					return false;
+				}
+
+				var itemID, itemNd;
+
+				var delAllFlg = false;
+				var delFlg = false;
+				var rowIndex = top.main.work.grid.getRowIndex(itemIDs[0]);
+				var unselIds = new Array();
+				var msg;
+
+				var clientCache = currQryItem.getResult();
+				if (!clientCache) return;
+
+				for (var i = 0; i < itemIDs.length; i++) {
+					itemID = itemIDs[i];
+					delFlg = false;
+
+					itemNd = clientCache.selectSingleNode('Item[@id="' + itemID + '"]');
+					if (!itemNd)
+					{
+						deleteRow(itemID);
+						continue;
+					}
+
+					var tearOffAnsw = execInTearOffWin(itemID, command);
+					if (tearOffAnsw) {
+						if (tearOffAnsw["result"]) {
+							if (tearOffAnsw["result"] == "Deleted") {
+								deleteRow(itemNd);
+								focus();
+							}
+							continue;
+						}
+					}
+
+					if (!delAllFlg) {
+						if (command == "purge") {
+							msg = arasObj.getResource("", "itemsgrid.purge_confirmation", itemTypeLabel, arasObj.getKeyedNameEx(itemNd));
+						}
+						else {
+							msg = arasObj.getResource("", "itemsgrid.delete_confirmation", itemTypeLabel, arasObj.getKeyedNameEx(itemNd));
+						}
+
+						if (i == itemIDs.length - 1) {
+							res = top.aras.confirm(msg);
+							res = res ? "btnYes" : "btnCancel";
+						}
+						else {
+							purgeDlgParams.message = msg;
+							var options = {
+								dialogWidth: 400,
+								dialogHeight: 200,
+								center: true
+							};
+							res = top.aras.modalDialogHelper.show("DefaultModal", window, purgeDlgParams, options, "groupChgsDialog.html");
+						}
+
+						if (res == "btnCancel") {
+							for (var j = i; j < itemIDs.length; j++) {
+								itemID = itemIDs[j];
+								grid.setSelectedRow(itemID, true, false);
+								unselIds[unselIds.length] = itemID;
+							}
+							break;
+						}
+
+						if (res == "btnYes4All") {
+							delAllFlg = true;
+							delFlg = true;
+						}
+						else if (res == "btnYes") {
+							delFlg = true;
+						}
+						else if (res == "btnSkip") {
+							delFlg = false;
+						}
+					}
+					else {
+						delFlg = true;
+					}
+
+					if (delFlg)
+					{
+						res = false;
+						if (command == 'purge') res = arasObj.purgeItem(itemTypeName, itemID, true);
+						else res = arasObj.deleteItem(itemTypeName, itemID, true);
+
+						if (res)
+						{
+							deleteRow(itemNd);
+							if (grid.getRowIndex(itemID) > -1)
+							{
+								grid.setSelectedRow(itemID, true, false);
+								unselIds[unselIds.length] = itemID;
+							}
+						}
+					}
+				}
+
+				if (itemTypeName == 'ItemType') top.main.tree.updateTree(itemIDs);
+				else if (itemTypeName == 'Action') menuFrm.updateGenericActions();
+				else if (itemTypeName == 'Report') menuFrm.updateGenericReports();
+
+				if (unselIds.length > 0)
+				{
+					for (var i = 1; i < unselIds.length; i++) grid.setSelectedRow(unselIds[i], true, false);
+					grid.setSelectedRow(unselIds[0], true, true);
+					if (itemIDs.length > 1){
+						onSelectItem(unselIds[0]);
+					}
+				}
+				else
+				{
+					var rowsNum = grid.getRowCount();
+					if (rowsNum > 0)
+					{
+						var idToSel = grid.getRowId(0);
+						if (rowIndex > -1)
+						{
+							if (rowsNum - 1 >= rowIndex) idToSel = grid.getRowId(rowIndex);
+							else idToSel = grid.getRowId(rowsNum - 1);
+						}
+						grid.setSelectedRow(idToSel, false, true);
+						onSelectItem(idToSel);
+					}
+					else setupGrid(false);
+				}
+			}
+
+			function onSaveAsCommand() {
+				var itemID = grid.selection.get("id");
+				if (!itemID) {
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				if (execInTearOffWin(itemID, 'saveAs')) return true;
+				var res = arasObj.copyItem(itemTypeName, itemID);
+				if (!res) return false;
+
+				if (itemTypeName == 'ItemType') {
+					top.main.tree.updateTree(itemID.split(';'));
+				}
+				grid.selection.clear();
+
+				var row_id = res.getAttribute('id');
+
+				callbackF_afterAddRow = function f()
+				{
+					callbackF_afterAddRow = null;
+					onSelectItem(row_id);
+					onEditCommand();
+				}
+
+				insertRow(res);
+			}
+
+			var contentOfPrintWindow = '';
+
+			function onPrintCommand()
+			{
+				//arasObj.printPreview(window);
+				var gridDom = arasObj.createXMLDocument();
+			//	var grid_xml = //gridElement.getXML(false);
+				var grid_xml = gridApplet.getXML();//'<table  font="Microsoft Sans Serif-8" sel_bgColor="#3399ff" sel_TextColor="#ffffff" draw_grid="True" multiselect="True" column_draggable="True" enableHtml="False" enterAsTab="False" bgInvert="False"><thead><th bgColor="#f0f0f0" align="c"></th><th bgColor="#f0f0f0" align="c">Name</th><th bgColor="#f0f0f0" align="c">Singular Label</th><th bgColor="#f0f0f0" align="c">Plural Label</th><th bgColor="#f0f0f0" align="c">Versionable</th><th bgColor="#f0f0f0" align="c">Dependent</th><th bgColor="#f0f0f0" align="c">Relationship</th><th bgColor="#f0f0f0" align="c">Core</th><th bgColor="#f0f0f0" align="c">Use Src Access</th><th bgColor="#f0f0f0" align="c">Description [...]</th><th bgColor="#f0f0f0" align="c">Help Url</th><th bgColor="#f0f0f0" align="c">Help Item [...]</th><th bgColor="#f0f0f0" align="c">History Template [...]</th><th bgColor="#f0f0f0" align="c">Allow Private Permissions</th><th bgColor="#f0f0f0" align="c">MaxRecords</th></thead><columns><column width="24" edit="FIELD" align="c" order="0" /><column width="120" edit="FIELD" align="l" order="1" /><column width="120" edit="FIELD" align="l" order="2" /><column width="120" edit="FIELD" align="l" order="3" /><column width="70" edit="FIELD" align="c" order="4" /><column width="70" edit="FIELD" align="c" order="5" /><column width="70" edit="FIELD" align="c" order="6" /><column width="30" edit="FIELD" align="c" order="7" /><column width="80" edit="FIELD" align="c" order="8" /><column width="100" edit="FIELD" align="l" order="9" /><column width="100" edit="FIELD" align="l" order="10" /><column width="100" edit="FIELD" align="l" order="11" /><column width="100" edit="FIELD" align="l" order="12" /><column width="100" edit="FIELD" align="c" order="13" /><column width="100" edit="FIELD" sort="NUMERIC" locale="ruRU" align="l" order="14" /></columns><list id="0"></list><list id="1"></list><tr id="AEFCD3D2DC1D4E3EA126D49D68041EB6" action="AEFCD3D2DC1D4E3EA126D49D68041EB6" selected="True"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Access</td><td>Access</td><td>Permissions</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="483228BE6B9A4C0E99ACD55FDF328DEC" action="483228BE6B9A4C0E99ACD55FDF328DEC"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Action</td><td>Action</td><td>Actions</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td></td><td>mergedProjects/Just Ask Innovator/About_Actions.htm</td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="937CE47DE2854308BE6FF5AB1CFB19D4" action="937CE47DE2854308BE6FF5AB1CFB19D4"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity</td><td>Activity</td><td>Activities</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="85924010F3184E77B24E9142FDBB481B" action="85924010F3184E77B24E9142FDBB481B"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Assignment</td><td>Activity Assignment</td><td>My InBasket</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="90D8880C29CD45C3AA8DAFF1DAEBC60E" action="90D8880C29CD45C3AA8DAFF1DAEBC60E"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity EMail</td><td>Activity EMail</td><td>Activity EMails</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="BF3EAD31AAA2403592CAAC2446FF7797" action="BF3EAD31AAA2403592CAAC2446FF7797"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Method</td><td>Activity Method</td><td>Activity Methods</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="46BDE53304404C28B5C45610E41C1DD5" action="46BDE53304404C28B5C45610E41C1DD5"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Task</td><td>Activity Task</td><td>Activity Tasks</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="BD4A250787A742A484C7B174A4AED1E2" action="BD4A250787A742A484C7B174A4AED1E2"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Task Value</td><td>Activity Task Value</td><td>Activity Task Values</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="7A3EFE7242DB4403965890C053A57A0B" action="7A3EFE7242DB4403965890C053A57A0B"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Template</td><td>Activity Template</td><td>Actvity Templates</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="96C238700CD840DEBE512EE85D440AF3" action="96C238700CD840DEBE512EE85D440AF3"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Template Assignment</td><td>Activity Template Assignment</td><td>Activity Template Assignments</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="67735DF455F54736A9D51CB53AB129E3" action="67735DF455F54736A9D51CB53AB129E3"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Template EMail</td><td>Activity Template EMail</td><td>Activity Template EMails</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="05A68B0BC74C47A6A2FD4404A73C815F" action="05A68B0BC74C47A6A2FD4404A73C815F"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Template Method</td><td>Activity Template Method</td><td>Activity Template Methods</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="E32DB4E6E3B64F98A12B550C578E6A01" action="E32DB4E6E3B64F98A12B550C578E6A01"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Template Task</td><td>Activity Template Task</td><td>Activity Template Tasks</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="F88A91D29C4F446BB309BEEE925AADD1" action="F88A91D29C4F446BB309BEEE925AADD1"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Template Transition</td><td>Activity Template Transition</td><td>Activity Template Transitions</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="FA1755A31ACF4EDFBBFFCD6A8C6F7AF8" action="FA1755A31ACF4EDFBBFFCD6A8C6F7AF8"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Template Variable</td><td>Activity Template Variable</td><td>Activity Template Variables</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="EB4ADB2BC83C410FB265CB42ED5C633B" action="EB4ADB2BC83C410FB265CB42ED5C633B"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Transition</td><td>Activity Transition</td><td>Activity Transitions</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td></td></tr><tr id="8B58025F8E504DBDADF0E1176D3CE178" action="8B58025F8E504DBDADF0E1176D3CE178"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Variable</td><td>Activity Variable</td><td>Activity Variables</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="CB7696CC33EC4D1BB98716465F1AD580" action="CB7696CC33EC4D1BB98716465F1AD580"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity Variable Value</td><td>Activity Variable Value</td><td>Activity Variable Values</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="E236DB697E294C46B630C99A0D20C2B1" action="E236DB697E294C46B630C99A0D20C2B1"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity2</td><td>Activity2</td><td>Project Activities</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="A695D18AC34A46D5B99B778918839490" action="A695D18AC34A46D5B99B778918839490"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity2 Assignment</td><td>Activity2 Assignment</td><td>Activity2 Assignments</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="2AED1CA849DB4D4382B2472569BFAD31" action="2AED1CA849DB4D4382B2472569BFAD31"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity2 Comments</td><td>Activity2 Comments</td><td>Activity2 Comments</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="0CCA05E05A104F2E88CF123EF4F5171E" action="0CCA05E05A104F2E88CF123EF4F5171E"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity2 Deliverable</td><td>Activity2 Deliverable</td><td>Activity2 Deliverables</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="4D7ABF1B8D8A4542AD8DDECA14DC5F58" action="4D7ABF1B8D8A4542AD8DDECA14DC5F58"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Activity2 Task</td><td>Activity2 Task</td><td>Activity2 Tasks</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="BFAAB0F6838D4F80BF12CB328FF5B097" action="BFAAB0F6838D4F80BF12CB328FF5B097"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Affected Item</td><td>Affected Item</td><td>Affected Items</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff" link="&apos;History Template&apos;,&apos;3BC16EF9E52B4F9792AB76BCE0492F29&apos;">Default</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr><tr id="2E0E4A152F3443509E5EEB774AC8AB5C" action="2E0E4A152F3443509E5EEB774AC8AB5C"><td>&lt;img src=&apos;&apos;/&gt;</td><td>Affected Item Property</td><td></td><td></td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td>&lt;checkbox state=&quot;0&quot;/&gt;</td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td><td></td><td textColor="#0000ff"></td><td textColor="#0000ff"></td><td>&lt;checkbox state=&quot;1&quot;/&gt;</td><td></td></tr></table>';
+				gridDom.loadXML(grid_xml);
+
+				if (gridDom.parseError.errorCode != 0)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.error_malformed_xml'), arasObj.getResource('', 'itemsgrid.bad_grid_xml', gridDom.parseError.reason), arasObj.getResource('', 'common.client_side_err'));
+					return false;
+				}
+				var elem = gridDom.createElement('printGrid');
+				elem.appendChild(gridDom.documentElement);
+				gridDom.appendChild(elem);
+				elem = gridDom.createElement('itemTypeName');
+				elem.text = itemTypeName;
+				gridDom.documentElement.appendChild(elem);
+				contentOfPrintWindow = arasObj.applyXsltFile(gridDom, arasObj.getScriptsURL() + '../styles/printgrid.xsl');
+
+				window.open(arasObj.getScriptsURL() + 'printGridDialog.html', '_blank', 'menubar=0, resizable=1, scrollbars=1, location=0, toolbar=0, status=0');
+			}
+
+			function getRealItemTypeNames(itemIdsOrId) {
+				var i, itm, items, idlist, tmpRes, res = {}, itemIds = itemIdsOrId;
+				if (typeof(itemIds) === "string"){
+					itemIds = [itemIds];
+				}
+				if (!itemIds.length) throw new Error(1, "Item ids are not specified");
+
+				if (arasObj.isPolymorphic(currItemType)) {
+					idlist = itemIds.join(",");
+					if (!idlist) throw new Error(1, "IDs list is empty");
+					tmpRes = arasObj.soapSend("ApplyItem", "<Item type='"+itemTypeName+"' action='get' select='itemtype' idlist='"+idlist+"'/>");
+					if (tmpRes.getFaultCode() != 0)
+					{
+						arasObj.AlertError(tmpRes);
+						return res;
+					}
+
+					items = tmpRes.getResult().selectNodes("Item");
+					for (i = 0; i < items.length; i++){
+						itm = items[i];
+						res[itm.getAttribute("id")] = arasObj.getItemTypeName(arasObj.getItemProperty(itm, "itemtype"));
+					}
+				} else {
+					for (i = 0; i < itemIds.length; i++){
+						res[itemIds[i]] = itemTypeName;
+					}
+				}
+				return res;
+			}
+
+			function onLockCommand(ignorePolymophicWarning, itemIDs)
+			{
+				if (!ignorePolymophicWarning && arasObj.isPolymorphic(currItemType))
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.poly_item_cannot_be_locked_from_location'));
+					return false;
+				}
+
+				var itemID;
+				itemIDs = itemIDs || grid.getSelectedItemIds();
+
+				if (itemIDs.length == 0)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				var realItemTypeName, realItemTypeNames = getRealItemTypeNames(itemIDs);
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					var res = execInTearOffWin(itemID, 'lock');
+					if (res) continue;
+
+					realItemTypeName = realItemTypeNames[itemID];
+					if (!realItemTypeName) continue;
+
+					focus();
+
+					if (arasObj.lockItem(itemID, realItemTypeName))
+					{
+						var itemNd = arasObj.getItemById('', itemID, 0);
+						if (itemNd)
+						{
+							if (updateRow(itemNd) === false) return;
+						}
+					}
+				}
+
+				onSelectItem(itemIDs[0]);
+			}
+
+			function onUnlockCommand(ignorePolymophicWarning, itemIDs)
+			{
+			
+				if (!ignorePolymophicWarning && arasObj.isPolymorphic(currItemType))
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.poly_item_cannot_be_unlocked_from_location'));
+					return false;
+				}
+
+				var itemID;
+				itemIDs = itemIDs || top.main.work.grid.getSelectedItemIds();
+				if (itemIDs.length == 0)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				var res, msg, itemNd;
+
+				var realItemTypeName, realItemTypeNames = getRealItemTypeNames(itemIDs);
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					if (execInTearOffWin(itemID, 'unlock')) continue;
+
+					realItemTypeName = realItemTypeNames[itemID];
+					if (!realItemTypeName) continue;
+
+					focus();
+
+					itemNd = arasObj.getFromCache(itemID);
+					if (!itemNd) itemNd = arasObj.unlockItem(itemID, realItemTypeName);
+					else
+					{
+						res = arasObj.unlockItemEx(itemNd);
+						if (!res) continue;
+						if (itemNd && res.getAttribute('id') != itemNd.getAttribute('id')) deleteRow(itemNd);
+						itemNd = res;
+					}
+
+					if (itemNd)
+					{
+						if (updateRow(itemNd) === false) return;
+					}
+				}
+
+				onSelectItem(itemIDs[0]);
+			}
+
+			function onRevisionsCommand() {
+				var itemID = grid.getSelectedId();
+				if (!itemID) {
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				if (execInTearOffWin(itemID, 'revisions')) return true;
+
+				var param = new Object();
+				param.aras = arasObj;
+				param.itemID = itemID;
+				param.itemTypeName = itemTypeName;
+
+				var dlgWidth = 500;
+				var minDlgWidth = 500;
+				var maxDlgWidth = dlgWidth = document.getElementById("grid_table").offsetWidth - document.getElementById("itemProperties").offsetWidth;
+				var colWidths = arasObj.getPreferenceItemProperty("Core_ItemGridLayout", itemTypeID, "col_widths", null);
+				if (colWidths) {
+					dlgWidth = 0;
+					var colWidthsArr = colWidths.split(";");
+					for (var i = 0; i < colWidthsArr.length; i++)
+						dlgWidth += parseInt(colWidthsArr[i]);
+				}
+
+				dlgWidth = (dlgWidth < minDlgWidth) ? minDlgWidth : (dlgWidth > maxDlgWidth) ? maxDlgWidth : dlgWidth;
+				var options = {
+					dialogWidth: dlgWidth,
+					resizable: true
+				};
+				top.aras.modalDialogHelper.show('RevisionsDialog', window.parent, param, options);
+			}
+
+			function onUndoCommand() {
+				var itemID, 
+					itemIDs = top.main.work.grid.getSelectedItemIds();
+				if (itemIDs.length == 0) {
+					arasObj.AlertError(arasObj.getResource("", "itemsgrid.select_item_type_first", itemTypeLabel));
+					return false;
+				}
+
+				var itemNd, res;
+
+				var undoDlgParams = new Object();
+				undoDlgParams.buttons = new Object();
+				with (undoDlgParams) {
+					buttons.btnYes = arasObj.getResource("", "itemsgrid.undodlg.yes");
+					buttons.btnYes4All = arasObj.getResource("", "itemsgrid.undodlg.yes4all");
+					buttons.btnSkip = arasObj.getResource("", "itemsgrid.undodlg.skip");
+					buttons.btnCancel = arasObj.getResource("", "itemsgrid.undodlg.cancel");
+				}
+				undoDlgParams.defaultButton = "btnSkip";
+				undoDlgParams.aras = arasObj;
+				var yes4All = false;
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					itemNd = arasObj.getFromCache(itemID);
+					if (!itemNd) continue;
+
+					if (execInTearOffWin(itemID, "undo")) {
+						continue;
+					}
+
+					if (!yes4All) {
+						var msg = arasObj.getResource("", "itemsgrid.undo_will_discard_changes", itemTypeLabel, arasObj.getKeyedNameEx(itemNd));
+						if (i == itemIDs.length - 1) {
+							res = top.aras.confirm(msg);
+							res = res ? "btnYes" : "btnCancel";
+						}
+						else {
+							undoDlgParams.message = msg;
+							var options = {
+								dialogWidth: 400,
+								dialogHeight: 200,
+								center: true
+							};
+							res = top.aras.modalDialogHelper.show("DefaultModal", window, undoDlgParams, options, "groupChgsDialog.html");
+						}
+					}
+					else {
+						res = "btnYes";
+					}
+					if (res == "btnYes4All") {
+						yes4All = true;
+						res = "btnYes";
+					}
+					else if (res == "tnCancel") {
+						break;
+					}
+					if (res == "btnYes") {
+						arasObj.removeFromCache(itemID);
+						itemNd = arasObj.getItemById(itemTypeName, itemID, 0);
+						if (itemNd) {
+							if (updateRow(itemNd) === false) {
+								return;
+							}
+						}
+					}
+				}
+
+				onSelectItem(itemIDs[0]);
+			}
+
+			function onOpenCommand()
+			{
+				if (itemTypeName != 'File') return false;
+				var itemID = grid.getSelectedId();
+				if (!itemID)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+				if (execInTearOffWin(itemID, 'open')) return true;
+				var file = arasObj.getItemById('File', itemID, 0);
+				if (file) arasObj.uiShowItemEx(file, 'openFile');
+			}
+
+			function onDownloadCommand()
+			{
+				if (itemTypeName != 'File') return false;
+
+				var itemIDs = grid.getSelectedItemIds();
+				if (!itemIDs || !itemIDs.length)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				var workDir = arasObj.getWorkingDir(false, window);
+				if (workDir == '') return true;
+
+				var itemID;
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					var file = arasObj.getItemById('File', itemID, 0);
+					if (file)
+					{
+						var filename = arasObj.getItemProperty(file, 'filename');
+						var res = arasObj.downloadPhysicalFileTo(file, workDir, window);
+						if (res) arasObj.AlertSuccess(arasObj.getResource('', 'itemsgrid.file_succesfully_downloaded', filename, workDir));
+					}
+				}
+			}
+
+			function onGetFilesCommand()
+			{
+				var itemID, itemIDs = top.main.work.grid.getSelectedItemIds();
+				if (itemIDs.length == 0)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+				var itemNd, res;
+				var qry = currQryItem.getResult();
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					itemNd = arasObj.getFromCache(itemID);
+					if (!itemNd) itemNd = qry.selectSingleNode('Item[@id="' + itemID + '"]');
+					if (itemNd) arasObj.downloadItemFiles(itemNd, arasObj.getWorkingDir(true, window));
+				}
+				arasObj.AlertSuccess('Ready');
+			}
+
+			function onCheckInCommand()
+			{
+				var itemID, itemIDs = top.main.work.grid.getSelectedItemIds();
+				if (itemIDs.length == 0)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				var itemNd, res;
+				var check_ok = true;
+				var check_count = 0;
+
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					if (execInTearOffWin(itemID, 'checkin')) continue;
+
+					itemNd = arasObj.getItemById(itemTypeName, itemID, 0);
+					if (!itemNd) continue;
+
+					if (isVersionableIT && arasObj.getItemProperty(itemNd, 'new_version') != '1')
+					{
+						if (arasObj.confirm(arasObj.getResource('', 'itemsgrid.need2save_item', itemTypeLabel, arasObj.getKeyedNameEx(itemNd))))
+						{
+							var newItemNd = arasObj.saveItemEx(itemNd);
+							if (newItemNd)
+							{
+								deleteRow(itemNd);
+								insertRow(newItemNd);
+							}
+						}
+					}
+					else
+					{
+						for (var j = 0; j < filePropNms.length; j++)
+						{
+							var propNm = filePropNms[j];
+							var file = itemNd.selectSingleNode(propNm + '/Item');
+							if (!file)
+							{
+								file = arasObj.getItemProperty(itemNd, propNm);
+								if (file)
+								{
+									file = arasObj.getItemById('File', file, 0);
+									itemNd.selectSingleNode(propNm).text = "";
+									itemNd.selectSingleNode(propNm).appendChild(file);
+								}
+							}
+
+							if (file)
+							{
+								check_count++;
+								if (arasObj.checkinFile(file, window) == null)
+								{
+									check_ok = false;
+								}
+								if (updateRow(itemNd) === false) return;
+							}
+						}
+					}
+				}
+
+				onSelectItem(itemIDs[0]);
+
+				if (check_count)
+				{
+					if (check_ok)
+					{
+						arasObj.AlertSuccess(arasObj.getResource('', 'itemsgrid.checkin_completed'));
+					}
+					else
+					{
+						arasObj.AlertError(arasObj.getResource('', 'itemsgrid.checkin_not_completed'));
+					}
+				}
+			}
+
+			function onCheckOutCommand()
+			{
+				var itemID, itemIDs = top.main.work.grid.getSelectedItemIds();
+				if (itemIDs.length == 0)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+				var checkoutStatus = true;
+				var itemNd, res;
+				var checkoutMessage = arasObj.getResource('', 'itemsgrid.checkout_completed');
+				var qry = currQryItem.getResult();
+
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					if (execInTearOffWin(itemID, 'checkout'))
+					{
+						checkoutStatus = false;
+						continue;
+					}
+
+					itemNd = arasObj.getFromCache(itemID);
+					if (!itemNd) itemNd = qry.selectSingleNode('Item[@id="' + itemID + '"]');
+
+					if (itemNd)
+					{
+						if (arasObj.isLockedByUser(itemNd))
+						{
+							if (!arasObj.checkoutFiles(itemNd, arasObj.getWorkingDir(true, window)))
+							{
+								checkoutStatus = false;
+								arasObj.AlertError(arasObj.getResource('', 'itemsgrid.checkout_not_completed'));
+							}
+						}
+						else
+						{
+							var res = arasObj.lockItemEx(itemNd, arasObj.getWorkingDir(true, window), false);
+							if (res)
+							{
+								checkoutStatus = false;
+								if (updateRow(res) === false) return;
+							}
+						}
+					}
+				}
+
+				onSelectItem(itemIDs[0]);
+				if (checkoutStatus) arasObj.AlertSuccess(checkoutMessage);
+			}
+
+			function onCheckOut2DirCommand()
+			{
+				var itemID, itemIDs = top.main.work.grid.getSelectedItemIds();
+				if (itemIDs.length == 0)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				var itemNd;
+				var qry = currQryItem.getResult();
+
+				var checkout_path = arasObj.vault.selectFolder();
+				if (!checkout_path) return true;
+
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					if (execInTearOffWin(itemID, 'checkout_2dir')) continue;
+
+					itemNd = arasObj.getFromCache(itemID);
+					if (!itemNd) itemNd = qry.selectSingleNode('Item[@id="' + itemID + '"]');
+					if (itemNd)
+					{
+						if (arasObj.isLockedByUser(itemNd))
+						{
+							arasObj.checkoutFiles(itemNd, checkout_path);
+							arasObj.AlertSuccess(arasObj.getResource('', 'itemsgrid.checkout_completed'));
+						}
+						else
+						{
+							var res = arasObj.lockItemEx(itemNd, checkout_path, false);
+							if (res)
+							{
+								if (updateRow(res) === false) return;
+							}
+						}
+					}
+				}
+
+				onSelectItem(itemIDs[0]);
+			}
+
+			function onUndoCheckOutCommand()
+			{
+				var itemID, itemIDs = top.main.work.grid.getSelectedItemIds();
+				if (itemIDs.length == 0)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				var itemNd;
+				var qry = currQryItem.getResult();
+
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					itemID = itemIDs[i];
+					if (execInTearOffWin(itemID, 'undo_checkout')) continue;
+
+					itemNd = arasObj.getFromCache(itemID);
+					if (!itemNd) itemNd = qry.selectSingleNode('Item[@id="' + itemID + '"]');
+					if (itemNd) arasObj.undoCheckOut(itemNd);
+				}
+
+				onSelectItem(itemIDs[0]);
+				arasObj.AlertSuccess(arasObj.getResource('', 'itemsgrid.ready'));
+			}
+
+			// We put timeout here to fix IR-006691 "Promote dialog does't work"
+			// Because this method when called from another toolbar makes impossible to display a new toolbar in a modal dialog.
+			function onPromoteCommand() { setTimeout("onPromoteCommand2()", 1); }
+			function onPromoteCommand2()
+			{
+				var itemID = grid.getSelectedId();
+				if (!itemID)
+				{
+					arasObj.AlertError(arasObj.getResource('', 'itemsgrid.select_item_type_first', itemTypeLabel));
+					return false;
+				}
+
+				var itemNd;
+				var qry = currQryItem.getResult();
+
+				itemNd = arasObj.getFromCache(itemID);
+				if (!itemNd) itemNd = qry.selectSingleNode('Item[@id="' + itemID + '"]');
+				if (!itemNd) return false;
+
+				if (execInTearOffWin(itemID, 'promote')) return true;
+
+				var param = { item: itemNd, aras: arasObj };
+				var options = {
+						dialogHeight: 300,
+						dialogWidth: 400,
+						resizable: true
+					},
+					res = top.aras.modalDialogHelper.show('DefaultModal', window, param, options, 'promoteDialog.html');
+				if (typeof (res) == 'string' && res == 'null')
+				{
+					return true;
+				}
+				if (!res) return false;
+				if (isVersionableIT)
+				{
+					var oldID = itemID;
+					var result = arasObj.getItemLastVersion(itemTypeName, itemID);
+					if (result)
+					{
+						itemID = result.getAttribute('id');
+						if (oldID != itemID)
+						{
+							deleteRow(itemNd);
+							res = result;
+						}
+					}
+				}
+				if (updateRow(res) === false) return;
+				onSelectItem(itemID);
+			}
+
+			function onCopy2clipboardCommand()
+			{
+				var itemID, itemIDs = top.main.work.grid.getSelectedItemIds();
+
+				var itemArr = new Array();
+				for (var counter = 0; counter < itemIDs.length; counter++)
+				{
+					itemID = itemIDs[counter];
+					var clItem = arasObj.copyRelationship(itemTypeName, itemID);
+					if (clItem) itemArr.push(clItem);
+					else arasObj.AlertError(arasObj.getResource('', 'itemsgrid.failed2get_itemtype_with_id', itemTypeLabel, itemID));
+				}
+				arasObj.clipboard.copy(itemArr);
+				onSelectItem(itemIDs[0]);
+			}
+
+			function onPasteCommand()
+			{
+				var itemID, itemIDs = top.main.work.grid.getSelectedItemIds();
+				var itemArr = arasObj.clipboard.paste();
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					var item = arasObj.getItemById(itemTypeName, itemIDs[i]);
+					if (!item)
+					{
+						arasObj.AlertError(arasObj.getResource('', 'itemsgrid.failed2get_itemtype_with_id', itemTypeLabel, itemIDs[i]));
+						return;
+					}
+					for (var j = 0; j < itemArr.length; j++)
+					{
+						if (!arasObj.pasteRelationship(item, itemArr[j]))
+						{
+							arasObj.AlertError(arasObj.getResource('', 'itemsgrid.pasting_failed'));
+							return;
+						}
+					}
+					item.setAttribute("isDirty", "1");
+					if (updateRow(item) === false) return;
+				}
+				arasObj.AlertSuccess(arasObj.getResource('', 'itemsgrid.pasting_success'));
+			}
+
+			function onPaste_specialCommand()
+			{
+				var itemsArr = new Array();
+				var itemIDs = top.main.work.grid.getSelectedItemIds();
+				for (var i = 0; i < itemIDs.length; i++)
+				{
+					var item = arasObj.getItemById(itemTypeName, itemIDs[i]);
+					if (!item)
+					{
+						arasObj.AlertError(arasObj.getResource('', 'itemsgrid.failed2get_itemtype_with_id', itemTypeLabel, itemIDs[i]));
+						continue;
+					}
+					itemsArr.push(item);
+				}
+
+				var arguments = new Object();
+				arguments.aras = arasObj;
+				arguments.itemsArr = itemsArr;
+				arguments.srcItemTypeId = itemTypeID;
+				var options = {
+					dialogWidth: 700,
+					dialogHeight: 450
+				};
+
+				var res = top.aras.modalDialogHelper.show('DefaultModal', window, arguments, options, 'ClipboardManager.html');
+				if (res && res.ids)
+				{
+					var clipboardItems = arasObj.clipboard.clItems;
+					for (var i = 0; i < res.ids.length; i++)
+					{
+						for (var j = 0; j < itemsArr.length; j++)
+						{
+							var item = itemsArr[j];
+							var clipboardItem = clipboardItems[res.ids[i]];
+
+							if (!arasObj.pasteRelationship(item, clipboardItem, res.as_is, res.as_new))
+							{
+								arasObj.AlertError(arasObj.getResource('', 'itemsgrid.pasting_failed'));
+								return;
+							}
+							item.setAttribute("isDirty", "1");
+							if (updateRow(item) === false) return;
+						}
+					}
+					arasObj.AlertSuccess(arasObj.getResource('', 'itemsgrid.pasting_success'));
+				}
+				onSelectItem(itemIDs[0]);
+			}
+
+			function onShow_clipboardCommand()
+			{
+				var params = {
+						aras: arasObj
+					},
+					options = {
+						dialogWidth: 700,
+						dialogHeight: 450
+					};
+				top.aras.modalDialogHelper.show('DefaultModal', window, params, options, 'ClipboardManager.html');
+				var itemIDs = top.main.work.grid.getSelectedItemIds();
+				onSelectItem(itemIDs[0]);
+			}
+
+			function setQueryDate()
+			{
+				var queryType = searchbar.getItem('query_type').getSelectedItem();
+				var queryDateStr = String(searchbar.getItem('query_date').getText());
+
+				var params = {};
+				params.format = GetDatePattern(queryType);
+
+				var today = arasObj.parse2NeutralEndOfDayStr(new Date());
+				today = arasObj.convertFromNeutral(today, 'date', params.format);
+
+				if (queryDateStr == Today)
+				{
+					queryDateStr = today;
+				}
+
+				params.date = queryDateStr;
+				params.aras = arasObj;
+
+				// We create buttonRect because TButton doesn't support GetBounds method
+				var buttonRect = { x: 596, y: 1, height: 24, width: 26 };
+
+				var res = arasObj.uiShowDialogNearElement(searchbar._currentToolBar.domNode, arasObj.getScriptsURL() + 'dateDialog.html', params, undefined, undefined, buttonRect);
+
+				if (res == '')
+					queryDateStr = Today;
+				else if (res !== undefined)
+					queryDateStr = res;
+
+				searchbar.getItem("query_date").setText(queryDateStr);
+			}
+
+			function InitPropertiesContainer()
+			{
+				var propertiesTr = document.getElementById("itemProperties");
+				
+				if (propertiesTr && currItemType) {
+					propertiesTr.setAttribute("style", "width: 200px !important; display: 'table-cell'; float: left;");
+					propertiesTr.innerHTML = arasObj.uiDrawItemInfoTable4ItemsGrid(currItemType);
+					showProperties(top.aras.getPreferenceItemProperty("Core_GlobalLayout", null, "core_show_item_properties") == 'true');
+				}
+			}
+
+			function refreshItemGridSize() {
+				var toolbarPanel = document.getElementById("toolbarContainer"),
+					searchPanel = document.getElementById("searchPlaceholder"),
+					searchPanelHeight = searchPanel.style.display != "none" ? searchPanel.offsetHeight : 0,
+					gridRequiredHeight = dojo.window.getBox().h - toolbarPanel.offsetHeight - searchPanelHeight,
+					newGridHeight = gridRequiredHeight > 0 ? gridRequiredHeight : 0;
+				if (grid && grid._grid) grid._grid.resize({ h: newGridHeight });
+			}
+		</script>
+	</head>
+	<body class="claro">
+			<div id="itemProperties" class="table-col properties-block" style="float: left;" >
+			</div>
+			<div id="grid_table" style="width: 100%; height : 100%; display: block;" >
+				<div id="toolbarContainer" style="height: 30px;" ></div>
+				<div id="searchPlaceholder"></div>
+				<div id="gridTD" style="height: 100%;" ></div>
+			</div>
+	</body>
+</html>

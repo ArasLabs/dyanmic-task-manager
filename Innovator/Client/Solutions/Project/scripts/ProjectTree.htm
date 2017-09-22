@@ -1,0 +1,4468 @@
+﻿<!DOCTYPE html>
+<!-- (c) Copyright by Aras Corporation, 2004-2012. -->
+<html>
+	<head>
+		<title></title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<style type="text/css" media="print">
+			#toolbar_container {
+				display: none;
+			}
+		</style>
+		<style type="text/css">
+			@import "../../../javascript/dojo/resources/dojo.css";
+			@import "../../../javascript/dijit/themes/claro/claro.css";
+			@import "../../../javascript/dojox/grid/resources/claroGrid.css";
+			@import "../../../javascript/dojox/form/resources/CheckedMultiSelect.css";
+			@import "../../../styles/controls.css";
+			@import "../../../styles/common.css";
+			@import "../../../styles/default.css";
+
+			html, body
+			{
+				overflow: hidden;
+				width   : 100%;
+				height  : 100%;
+				margin  : 0px;
+				padding : 0px;
+			}
+		</style>
+		<script>
+			var aras = a = top.aras;
+		</script>
+		<script type="text/javascript" src="../../../javascript/include.aspx?classes=/dojo.js" data-dojo-config="isDebug: false, parseOnLoad: false, baseUrl:'../../../javascript/dojo'"></script>
+		<script type="text/javascript" src="../../../javascript/include.aspx?classes=ScriptSet2"></script>
+		<script type="text/javascript" src="../../../javascript/include.aspx?classes=XmlDocument"></script>
+		<script type="text/javascript" src="../javascript/gantt_methods.js"></script>
+		<script type="text/javascript" src="../javascript/scheduling_methods.js"></script>
+		<script type="text/javascript">
+			var activeToolbar = null,
+				treeApplet = null,
+				gridApplet = null,
+				grid = null;
+			var instance_frame;
+			function startLoading(){
+				instance_frame = parent.parent.document.getElementById('instance');
+				if (instance_frame && instance_frame.contentWindow){
+				 instance_frame = instance_frame.contentWindow;
+				 if (instance_frame.document.isFormPopulated){
+				  onLoadGrid_handler();
+				 } else {
+				  setTimeout(startLoading, 100);
+				 }
+				} else {
+				 setTimeout(startLoading, 100);
+				}
+			}
+			
+			window.onload = function onload_projectTreeHandler()
+			{
+				loadToolbar();
+				loadTreeGrid();
+				top.aras.browserHelper.adjustGridSize(window, function () {
+					document.getElementById("main_table").style.height = (dojo.window.getBox().h - 30) + "px";
+				}, false);
+				startLoading();
+			}
+
+			window.onresize = function () {
+				var gridElement = document.getElementById("grid");
+				aras.fixLiquidContainerHeight(document, gridElement);
+				gridElement.style.height = window.innerHeight - toolbar_container.offsetHeight + "px";
+			};
+
+			function loadToolbar() {
+				clientControlsFactory.createControl("Aras.Client.Controls.Toolbar", {id: "top_toolbar", ImageBase: "../../../cbin/"}, function(control) {
+					activeToolbar = control;
+					var toolbarNode = document.getElementById("toolbar_container");
+					toolbarNode.appendChild(activeToolbar.domNode);
+					clientControlsFactory.on(activeToolbar, {
+						"onClick": onToolbarButtonClick,
+						"onDropDownItemClick": onCustomActionsMenuItemClick
+					});
+					onToolbarLoad();
+				});
+			}
+
+			function loadTreeGrid() {
+				clientControlsFactory.createControl("Aras.Client.Controls.TreeGridContainer", { canEdit: canEditCell, connectId: "grid", validateCell: validateCell }, function(control) {
+					treeApplet = control;
+					clientControlsFactory.on(treeApplet,{
+						"gridXmlLoaded": onXmlLoaded,
+						"onGetChildren": getChildren,
+						"onApplyEdit": onApplyEdit,
+						"gridRowSelect": onRowSelect,
+						"gridLinkClick": onLink,
+						"gridMenuInit": initmenu,
+						"gridMenuClick": onmenu,
+						"gridKeyPress": onKeyPressed,
+						"onInputHelperShow": onInputHelperShow,
+						"onStartEdit": onStartEdit,
+						"onStartSearch": setFlagsAndExecuteFilterOrClearFilter
+					});
+					treeApplet.setMultiselect(false);
+					grid = gridApplet = treeApplet;
+				});
+			}
+
+			function onLoadGrid_handler()
+			{
+				initGlobVars();
+				initColumns(1);
+				initTreeLoadXml();
+				initWbs();
+				initActNums();
+				initTree();
+				initCustomActionsMenu();
+			}
+
+		</script>
+	</head>
+	<body class="claro">
+		<script type="text/javascript">
+		var RootITNm = parent.item.getAttribute("type");
+
+		var bInputInProgress = false;
+		var bOnEditCellM2Halt = false;
+		var bNeedToReloadXmlWithActions = false;
+		var expandingMode = "none";
+
+		var projectItem = parent.item;
+		var projectId = projectItem.getAttribute("id");
+
+		top.aras.getItemRelationships("Project", projectId, "Project Team");
+
+		var treeLevelsConst = 2; // Count of levels, which will be loaded from server for dynamical tree building.
+		var arrTreeLoadXml = new Array();  // cache for XmlDocuments, contained XML for query levels of tree
+		var isInitActNums = false; //flag to know if initActNums was called already. this is required to eliminate redundant calls to server.
+
+		var openedItems = [];
+		var selectedItem = null;
+
+		var stylesFileBase = a.getScriptsURL() + "../Solutions/Project/styles/";
+		var xmlFileBase = a.getScriptsURL() + "../Solutions/Project/xml/";
+		var xmlParentUrl = a.getScriptsURL() + "../Solutions/Project/";
+
+		var actNums; // xml with numbers of activities
+
+		var wbs;  // the root WBS Element
+		var wbsId;
+
+		var treeDOM; // XML Tree
+
+		var tempDom = null; // currently used in ptNewItem and ptNewRelationship
+
+		var editingCell = {};
+
+		// add new/existing deliverables
+
+		var deliverableItemTypeList = null;
+
+		// cut/paste
+		var cutBuffer;
+
+		var projTeamElems = null;  // { array of role: ... , identityId: ... } role - role string, identityId - id of leader
+
+
+		var rowToExpand = null; // only for IR-004898 "WBS Element not displayed on add"
+		var focusData = null; // only for IR-005418 "Add row should bring focus to name field"
+
+		var queryCache = new ptCache();
+		var identitiesCache = []; // keeps identity items for setLeader
+
+		//var uniCache = {identities:{},queryDom:null,xsltWbs:null,xsltWbsBranch:null};
+
+		// +++ ER-000785
+
+		var filterApplied = false;
+		var isFilterCriteriaInputted = false;
+		var execureFilterTimeOut;
+
+		// --- ER-000785
+
+		function getCellSrcType(chkItem)
+		{
+			var type = chkItem.getAttribute("type");
+			var ret;
+			if (type == "WBS Element")
+			{
+				ret = wbsRowType;
+			}
+			else if (type == "Activity2")
+			{
+				if (a.getItemProperty(chkItem, "is_milestone") == "1")
+				{
+					ret = milRowType;
+				}
+				else
+				{
+					ret = actRowType;
+				}
+			}
+			return ret;
+		}
+
+		// --- ER
+
+		function ptCache()
+		{
+			this.links = { from: [], to: [] };
+		}
+
+		function onSaveCommand()
+		{
+			top.onSaveCommand();
+		}
+
+		function onAfterSaveCommand()
+		{
+			clearBuffer();
+		}
+
+		function clearBuffer()
+		{
+			cutBuffer = null;
+		}
+
+		function getTreeLoadXml(level)
+		{
+			if (!level) level = treeLevelsConst;
+			if (!arrTreeLoadXml[level]) initTreeLoadXml(level);
+			var repeatItem = arrTreeLoadXml[level].selectSingleNode("//*[@repeatTimes]");
+			if (repeatItem)
+				if (repeatItem.getAttribute("repeatTimes") != level + 1)
+				repeatItem.setAttribute("repeatTimes", level + 1);
+			return arrTreeLoadXml[level];
+		}
+
+		function initTreeLoadXml(level)
+		{
+			if (!level) level = treeLevelsConst;
+
+			arrTreeLoadXml[level] = a.createXMLDocument();
+
+			var treeLoadXml = uniCache.queryDom;
+			if (!treeLoadXml)
+			{
+				treeLoadXml = arrTreeLoadXml[level];
+				if (RootITNm == "Project")
+					treeLoadXml.load(xmlFileBase + "query.xml");
+				else if (RootITNm == "Project Template")
+					treeLoadXml.load(xmlFileBase + "queryTemplate.xml");
+
+				if (treeLoadXml.parseError.errorCode != 0)
+				{
+					var loadError = treeLoadXml.parseError;
+					a.AlertError("You have error:\n" + loadError.reason);
+					return;
+				}
+
+				// +++ we need to initialize query.xml for support custom column sources
+
+				var propsHash = {};
+				var delivWbs = false;
+				var delivAct = false;
+
+				for (var i = 0; i < columns.length; i++)
+				{
+					var column = columns[i];
+					if (column.is_system) continue;
+					for (var src in column.sources)
+					{
+						propsHash[column.sources[src].val] = propsHash[column.sources[src].val] | (src == wbsRowType ? 1 : src == actRowType || src == milRowType ? 2 : 0)
+					}
+				}
+
+				function addPropToRelated(itemNode, propName)
+				{
+					var selectVal = itemNode.getAttribute("select");
+					if (selectVal.indexOf("related_id") != -1)
+					{
+						if (selectVal.indexOf("related_id(") != -1)
+						{
+							var m = selectVal.match(/related_id\((.*)\)/);
+							if (m[1].indexOf(propName) == -1)
+							{
+								var relatedVal = "related_id(" + m[1] + ", " + propName + ")";
+								selectVal = selectVal.replace(/related_id\(.*\)/, relatedVal);
+								itemNode.setAttribute("select", selectVal);
+							}
+						}
+						else
+						{
+							var relatedVal = "related_id(" + propName + ")";
+							selectVal = selectVal.replace(/related_id/, relatedVal);
+							itemNode.setAttribute("select", selectVal);
+						}
+					}
+					else
+					{
+						itemNode.setAttribute("select", selectVal + ",related_id(" + propName + ")");
+					}
+				}
+
+				for (var prop in propsHash)
+				{
+					var pSplit = prop.split("/");
+					if (pSplit.length != 2)
+					{
+						a.AlertError(a.getResource("project", "project_tree.wrong_property_data_source", prop));
+						return;
+					}
+
+					var iType = pSplit[0];
+					var propName = pSplit[1];
+
+					var qItem = treeLoadXml.selectSingleNode("//Item[@type='" + iType + "']");
+					if (!qItem) // probably related item, Deliverable
+					{
+						if (iType == "Deliverable")
+						{
+							var xPath = "//Item";
+							if (propsHash[prop] == 1) xPath += "[@type='WBS Deliverable']";
+							else if (propsHash[prop] == 2) xPath += "[@type='Activity2 Deliverable']";
+							else if (propsHash[prop] == 3) xPath += "[@type='WBS Deliverable' or @type='Activity2 Deliverable']";
+							else
+							{
+								a.AlertError(a.getResource("project", "project_tree.wrong_value_of_propshash"));
+								return;
+							}
+							qItems = treeLoadXml.selectNodes(xPath);
+							for (var i = 0; i < qItems.length; i++)
+							{
+								var qItem = qItems[i];
+								addPropToRelated(qItem, propName);
+							}
+						}
+					}
+					else // item type is present in query xml
+					{
+						var selectVal = qItem.getAttribute("select");
+						if (selectVal.indexOf(propName) == -1)
+						{
+							selectVal += ", " + propName;
+							qItem.setAttribute("select", selectVal);
+						}
+					}
+				}
+
+				uniCache.queryDom = treeLoadXml;
+				initColumns(2);
+				// ---
+			}
+
+			var subWbs = treeLoadXml.selectSingleNode("//*[@repeatTimes]");
+			var queryLevel = level + 1;
+			subWbs.setAttribute("repeatTimes", queryLevel);
+			arrTreeLoadXml[level] = treeLoadXml;
+		}
+
+		//this function inits global variables projTeamElems
+		function initGlobVars()
+		{
+			if (RootITNm == "Project")
+				initProjTeamElems();
+		}
+
+		function initProjTeamElems()
+		{
+			//this function inits global variable projTeamElems
+			projTeamElems = [];
+			var projTeamItems = [];
+
+			projTeamItems = projectItem.selectNodes("descendant::Item[@type='Project Team' and not(@action='delete')]");
+
+			for (var i = 0; i < projTeamItems.length; i++)
+			{
+				var projTeamItem = projTeamItems[i];
+				var role = a.getItemProperty(projTeamItem, "role");
+				var related = a.getItemProperty(projTeamItem, "related_id");
+				var keyed_name = "";
+				var relatedItem = projTeamItem.selectSingleNode("related_id/Item");
+				if (relatedItem)
+					keyed_name = a.getKeyedNameEx(relatedItem);
+
+				var idx = seekInArray(projTeamElems, role, "role");
+				if (idx == -1) projTeamElems.push({ role: role, identityId: related, identityKeyedName: keyed_name });
+				else projTeamElems[idx] = { role: role, identityId: related, identityKeyedName: keyed_name };
+				/*
+				role - role string
+				identityId - id of leader
+				*/
+			}
+		}
+
+		function initWbs()
+		{
+			var flg = false;
+			if (bNeedToReloadXmlWithActions)
+			{
+				bNeedToReloadXmlWithActions = false;
+				if (projectItem.selectSingleNode("wbs_id//Item[@action]")) flg = true;
+			}
+
+			if (!flg)
+			{
+				var res = projectItem.selectSingleNode("wbs_id/Item");
+				if (res)
+				{
+					wbs = res;
+					wbsId = a.getItemProperty(wbs, "id");
+					if (projectItem.getAttribute("newProject") == "true") sortItems(wbs);
+					return;
+				}
+			}
+
+			wbsId = a.getItemProperty(projectItem, "wbs_id");
+			if (wbsId == '')
+			{
+				wbs = ptNewItem("WBS Element");
+				a.setItemProperty(wbs, "name", "New Element");
+				a.setItemProperty(wbs, "is_top", "1");
+				a.setItemProperty(wbs, "wbs_index", "0");
+				if (instance_frame.handleItemChange) instance_frame.handleItemChange('wbs_id', wbs);
+				wbs = projectItem.selectSingleNode("wbs_id/Item");
+				wbsId = a.getItemProperty(wbs, "id");
+				return;
+			}
+
+			var levelsExpanded = 0;
+			var allExpandedWbsIds = treeApplet.getOpenedItems();
+			for (var i = 0; i < allExpandedWbsIds.length; i += 1) {
+				var parentId = allExpandedWbsIds[i];
+				var levelsAbove = 0;
+				while (parentId) {
+					parentId = treeApplet.items.get(parentId, "value", "parent");
+					levelsAbove++;
+				}
+
+				if (levelsAbove > levelsExpanded) {
+					levelsExpanded = levelsAbove;
+				}
+			}
+
+
+			if (levelsExpanded == 0 && wbs != undefined) {
+				wbs = projectItem.selectSingleNode("wbs_id/Item");
+			}
+
+			if (wbs == undefined || (levelsExpanded > 0 && !treeIsFullyLoaded)) {
+				var res = queryBranch(wbsId, levelsExpanded + 1);
+
+				if (res) {
+					wbs = projectItem.selectSingleNode("wbs_id");
+					wbs.text = '';
+					wbs = wbs.appendChild(res.cloneNode(true));
+				} else {
+					a.AlertError(a.getResource("project", "project_tree.failed_get_wbs_with_id_and_level", wbsId, (levelsExpanded + 1)));
+				}
+			}
+		}
+
+		function initActNums()
+		{
+			//there is no sence to call initActNums second time untill project is saved (refreshed somehow)
+			if (!isInitActNums)
+			{
+				actNums = a.createXMLDocument();
+				var result = a.applyMethod("GetActivitiesNumbers", "<rootWBS>" + wbsId + "</rootWBS>");
+				actNums.loadXML(result);
+			}
+			if (projectItem.selectSingleNode("wbs_id//Item[@action]")) mergeActNums();
+			isInitActNums = true;
+		}
+
+		function onToolbarLoad()
+		{
+			if (RootITNm == "Project Template")
+				activeToolbar.loadXml(top.aras.getI18NXMLResource("projectTemplateTree_toolbar.xml", xmlParentUrl));
+			else if (RootITNm == "Project")
+				activeToolbar.loadXml(top.aras.getI18NXMLResource("projectTree_toolbar.xml", xmlParentUrl));
+			activeToolbar.show();
+		}
+
+		function setControlEnabled(ctrlName, b)
+		{
+			if (b == undefined) b = true;
+			else b = Boolean(b);
+
+			var tbi = activeToolbar.getElement(ctrlName);
+			if (tbi) tbi.setEnabled(b);
+		}
+
+		function reInitTree(editModeChanged)
+		{
+			var editStance = gridApplet._grid.edit;
+			if (editStance.isEditing()) {
+				editStance.cancel();
+			}
+
+			disableAllMenuItems();
+			updateToolbarState();
+
+			selectedItem = treeApplet.getSelectedId();
+			if (expandingMode == "expand")
+			{
+				openedItems = [];
+				var wbses = wbs.selectNodes("descendant-or-self::Item[@type='WBS Element'][not(@action='delete')]");
+				for (var i = 0; i < wbses.length; i++)
+				{
+					var expandId = wbses[i].getAttribute("id");
+					openedItems.push(expandId);
+				}
+				expandingMode = "none";
+			}
+			else if (expandingMode == "collapse")
+			{
+				openedItems = [];
+				expandingMode = "none";
+				selectedItem = wbsId;
+			}
+			else
+			{
+				openedItems = treeApplet.getOpenedItems();
+				if (rowToExpand)
+				{
+					if (dojo.indexOf(openedItems, rowToExpand) == -1) openedItems.push(rowToExpand);
+					rowToExpand = null;
+				}
+			}
+
+			var inputRowVals = getInputRowVals();
+			initGlobVars();
+			initWbs();
+			initActNums();
+			initTree(true, editModeChanged);
+			setInputRowVals(inputRowVals);
+		}
+
+		function initTree(reInit, reloadXSLT)
+		{
+			if (!reInit)
+				clearFilterInTree();
+
+			var branchDOM = a.createXMLDocument();
+			if (!wbs)
+			{
+				a.AlertError(a.getResource("project", "project_tree.wbs_not_initialized"));
+				return;
+			}
+
+			// +++ ER
+
+			branchDOM.loadXML(wbs.xml);
+
+			var xsltString = uniCache.xsltWbs;
+
+			// --- ER
+
+			if (!xsltString || reloadXSLT)
+			{
+				resXslt = generateXSLT(RootITNm, columns);
+
+				xsltString = resXslt.xsltWbs;
+				uniCache.xsltWbs = xsltString;
+
+				xsltBranchString = resXslt.xsltWbsBranch;
+				uniCache.xsltWbsBranch = xsltBranchString;
+			}
+			else
+			{
+				var tmpXsltDom = a.createXMLDocument();
+				tmpXsltDom.loadXML(xsltString);
+
+				var columns2 = tmpXsltDom.selectNodes("//columns/column");
+				var columnsWith = treeApplet.GetColWidths().split(';');
+				for (var i = 0; i < columns2.length; i++)
+					columns2[i].setAttribute("width", columnsWith[parseInt(columns2[i].getAttribute("order"))]);
+
+				xsltString = tmpXsltDom.xml;
+			}
+
+			var treeXML = a.applyXsltString(branchDOM, xsltString);
+
+			treeDOM = a.createXMLDocument();
+			treeDOM.loadXML(treeXML);
+
+			addListItemsToTableData(treeDOM.documentElement, "0", "Project Role");
+			if (RootITNm == "Project Template")
+				addListItemsToTableData(treeDOM.documentElement, "1", "Deliverable");
+			processLoadedTree(treeDOM.documentElement);
+
+			if (treeDOM.xml)
+				treeApplet.InitXML(treeDOM.xml);
+			else
+				a.AlertError(a.getResource("project", "project_tree.trying_initialize_tree_applet_by_not_xml"));
+		}
+
+
+		function processLoadedTree(node)
+		{
+			addExpandedFlag(node);
+			processPredecessors(node);
+			processNfields(node);
+		}
+
+		///Filling of list in table.
+		//Param node: Xml node with table data
+		//Param listId: Id of list in node
+		//Param list: Name of list of ItemType "List"
+		function addListItemsToTableData(node, listId, listName)
+		{
+			var list = node.selectSingleNode("/table/list[@id='" + listId + "']");
+
+			var listID = a.getItemByName("List", listName, 0, '', 'name').getAttribute("id");
+			var valsArr = a.getListValues(listID);
+
+			listItem = treeDOM.createElement("listitem");
+			listItem.setAttribute("value", "");
+			listItem.setAttribute("label", "");
+			list.appendChild(listItem);
+			for (var i = 0; i < valsArr.length; i++)
+			{
+				listItem = treeDOM.createElement("listitem");
+				listItem.setAttribute("value", a.getItemProperty(valsArr[i], "value"));
+				listItem.setAttribute("label", a.getItemProperty(valsArr[i], "label"));
+				list.appendChild(listItem);
+			}
+		}
+
+		function addExpandedFlag(node)
+		{
+			if (openedItems.length == 0) return;
+			var condition = "@id='" + openedItems.join("' or @id='") + "'";
+			var trsToExpand = node.selectNodes("descendant::tr[" + condition + "]");
+			for (var i = 0; i < trsToExpand.length; i++)
+			{
+				var trToExpand = trsToExpand[i];
+				trToExpand.setAttribute("expanded", "true");
+			}
+			openedItems = [];
+		}
+
+		function ptNewItem(typeName)
+		{
+			return a.newItem(typeName);
+		}
+
+		/*-- newRelationship
+		*
+		*   Method to create a new Relationship for an item
+		*   relTypeId = the RelatinshpType id
+		*   srcItem   = the source item in the relationship (may be null:i.e. when created with mainMenu)
+		*   searchDialog = true or false : if search dialog to be displayed
+		*   wnd =  the window from which the dialog is opened
+		*
+		*/
+		//Aras.prototype.newRelationship = function(relTypeId,srcItem,searchDialog,wnd,relatedItem, relatedTypeName, bTestRelatedItemArg, bIsDoGetItemArg, descByTypeName)
+
+		function ptNewRelationship(relTypeName, sourceItem, relatedItem, relatedTypeName)
+		{
+			var retNode = null;
+			if (!tempDom) tempDom = a.createXMLDocument();
+			retNode = ptNewItem(relTypeName);
+
+			var relsNode = sourceItem.selectSingleNode("Relationships");
+			if (!relsNode) relsNode = sourceItem.appendChild(tempDom.createElement("Relationships"));
+			relsNode.appendChild(retNode);
+
+			if (relatedItem)
+			{
+				var relatedIdNode = retNode.appendChild(tempDom.createElement("related_id"));
+				relatedIdNode.appendChild(relatedItem);
+				retNode.appendChild(relatedIdNode);
+			}
+			else if (relatedTypeName)
+			{
+				var relatedNode = ptNewItem(relatedTypeName);
+				var relatedIdNode = retNode.appendChild(tempDom.createElement("related_id"));
+				relatedIdNode.appendChild(relatedNode);
+				retNode.appendChild(relatedIdNode);
+			}
+
+			return retNode;
+		}
+
+		function processStatusFields(xmlDOM)
+		{
+			return;
+			// not implemented yet - need spec update
+		}
+
+		// _oninit(4) treeTable by XML
+		function onXmlLoaded()
+		{
+			addFakesToLastWBSes(wbs, true);
+
+			if (selectedItem) {
+				treeApplet.setSelectedRow(selectedItem, false, false);
+			} else {
+				initMenuItems();
+				updateToolbarState();
+			}
+		}
+
+		function addFakesToLastWBSes(parentWBS, checkByOneLevel)
+		{
+			var level = checkByOneLevel ? 1 : null;
+			var tmpPath = getXPathForLastNodes(true, level);
+			var childWBSes = parentWBS.selectNodes(tmpPath);
+
+			var expandedNodes = treeApplet.getOpenedItems("|");
+			for (var i = 0; i < childWBSes.length; i++)
+			{
+				var childWBS = childWBSes[i];
+				if (childWBS.selectSingleNode("Relationships[Item[@type!='WBS Deliverable']]"))
+				{
+					addFakesToLastWBSes(childWBS, checkByOneLevel)
+				}
+				else
+				{
+					var childWBSId = a.getItemProperty(childWBS, "id");
+					if (expandedNodes.indexOf(childWBSId) == -1)
+					{
+						var curNdExpanded = treeDOM.selectSingleNode("//tr[@id='" + childWBSId + "'][@expanded='true']");
+						if (!curNdExpanded)
+						{
+							//set children true
+							var isNewItemXPath = "//Item[@type='WBS Element'][@id='" + childWBSId + "'][@action='add']";
+							var isNewItem = projectItem.selectSingleNode(isNewItemXPath);
+							if (!isNewItem) {
+								treeApplet.items.set(childWBSId, "value", "children", true);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		function onToolbarButtonClick(btn)
+		{
+			if (expandingMode != "none") return;
+
+			var r = treeApplet.getSelectedId();
+
+			var btnId = btn.getId();
+			switch (btnId)
+			{
+				case 'add_wbs_element':
+					if (r == "") return;
+					addWbsElement(r);
+					break;
+				case 'add_activity':
+					if (r == "") return;
+					addActivityMilestone(r, 0);
+					break;
+				case 'add_milestone':
+					if (r == "") return;
+					addActivityMilestone(r, 1);
+					break;
+				case 'add_existing_deliverable':
+					setTimeout("addExistingDeliverable('" + r + "')", 100);
+					break;
+				case 'add_new_deliverable':
+					setTimeout("addNewDeliverable('" + r + "')", 100);
+					break;
+				case 'view_edit_selected_item':
+					if (r == "") return;
+					setTimeout("viewEditSelectedItem('" + r + "')", 100);
+					break;
+				case 'delete_selected_item':
+					if (r == "") return;
+					deleteSelectedItem(r);
+					break;
+				case 'execute_scheduling':
+					setTimeout(executeScheduling, 100);
+					break;
+				case 'open_completion_dialog':
+					setTimeout("openCompletionDialog('" + r + "')", 100);
+					break;
+				case 'view_edit_assignments':
+					viewEditAssignments();
+					break;
+				case 'view_edit_precedents':
+					viewEditPrecedents();
+					break;
+				case 'indent':
+					if (r == "") return;
+					indent(r);
+					break;
+				case 'outdent':
+					if (r == "") return;
+					outdent(r);
+					break;
+				case "move_down":
+					moveDownOrUp(r, true);
+					break;
+				case "move_up":
+					moveDownOrUp(r, false);
+					break;
+				case 'cut':
+					if (r == "") return;
+					cut(r);
+					break;
+				case 'paste':
+					if (r == "") return;
+					paste(r);
+					break;
+				case 'expand_all':
+					expandAll();
+					break;
+				case 'collapse_all':
+					treeApplet.expandAll(false);
+					break;
+				case 'save_unlock':
+					saveUnlock();
+					break;
+				case 'show_gantt_chart':
+					showGantt();
+					break;
+				case 'show_scheduling_gantt_chart':
+					showGanttChartView();
+					break;
+				case 'execute_filter':
+					setFlagsAndExecuteFilterOrClearFilter();
+					break;
+				case 'clear_filter':
+					clearFilter(false, true);
+					break;
+				case 'actions_menu':
+					defineCurCustomActionsMenu();
+					break;
+				case "print":
+					window.print();
+					break;
+				default:
+					onCustomActionsMenuItemClick(btnId);
+					break;
+			}
+		}
+
+		function getChildren(rowId)
+		{
+			var openingItem = wbs.selectSingleNode("descendant-or-self::Item[@type='WBS Element' and @id='" + rowId + "']");
+			var openingItemAction = openingItem.getAttribute("action");
+			if (openingItemAction != "add")
+			{
+				var statusId = a.showStatusMessage(0, top.aras.getResource("project", "project_tree.loading_data_for_opening_node"));
+
+				var res = queryBranch(rowId);
+
+				var parent = openingItem.parentNode;
+				parent.removeChild(openingItem);
+				openingItem = parent.appendChild(res.cloneNode(true));
+
+				makeBranch(openingItem, rowId);
+				a.clearStatusMessage(statusId);
+				addFakesToLastWBSes(openingItem);
+			}
+		}
+
+		function makeBranch(node, rowId)
+		{
+			var branchDOM = a.createXMLDocument();
+			branchDOM.loadXML(node.xml);
+
+			var treeXML = a.applyXsltString(branchDOM, uniCache.xsltWbsBranch);
+
+			var tmpDOM = a.createXMLDocument();
+			tmpDOM.loadXML(treeXML);
+
+			var treeTR = treeDOM.selectSingleNode("//tr[@id='" + rowId + "']");
+			if (!treeTR) {
+				a.AlertError(a.getResource("project", "project_tree.situation_inadmissible_can_not_find_TR", rowId));
+			}
+			var tmpTRs = tmpDOM.selectNodes("/tr/tr");
+
+			initActNums();
+			if (tmpTRs.length > 0) {
+				for (var i = 0; i < tmpTRs.length; i++) {
+					treeTR.appendChild(tmpTRs[i]);
+				}
+
+				processLoadedTree(treeTR);
+				treeApplet.addXMLRows("<table>" + treeTR.xml + "</table>");
+			} else {
+				treeApplet.items.set(rowId, "value", "children", false);
+			}
+		}
+
+		function queryBranch(id, level, doRemoveRedundant) // gets tree branch from server
+		{
+			if (!level) level = treeLevelsConst;
+			if (doRemoveRedundant === undefined) doRemoveRedundant = true;
+			var treeLoadXml = getTreeLoadXml(level);
+
+			if (!treeLoadXml || !treeLoadXml.xml) { a.AlertError(a.getResource("project", "project_tree.treeloadxml_not_initialized")); return; }
+
+			var qry = new top.Item();
+			qry.loadAML(treeLoadXml.xml);
+			qry.setID(id);
+			var results = qry.apply();
+			var res = null;
+			if (!results.isError()) res = results.getItemByIndex(0).node;
+			if (!res) { a.AlertError(a.getResource("project", "project_tree.error_applying_query_can_not_get_item", id)); return; }
+			if (doRemoveRedundant) removeRedundant(res, level);
+			sortItems(res);
+
+			return res;
+		}
+
+		function removeRedundant(node, level)
+		{
+			var xpath = getXPathForLastNodes(null, level);
+			var lastNodes = node.selectNodes(xpath);
+			for (var i = 0; i < lastNodes.length; i++)
+			{
+				var lastNode = lastNodes[i];
+				var toDel = lastNode.selectNodes("Relationships/Item[@type!='WBS Deliverable']");
+				for (var j = 0; j < toDel.length; j++)
+					toDel[j].parentNode.removeChild(toDel[j]);
+				var rels = node.selectNodes("descendant::Relationships[not(*)]");
+				for (var j = 0; j < rels.length; j++)
+					rels[j].parentNode.removeChild(rels[j]);
+			}
+		}
+
+		function getXPathForLastNodes(withoutDeleted, level)
+		{
+			if (!level) level = treeLevelsConst;
+
+			var cond = "[not(@pt_filtered)]";
+			if (withoutDeleted) cond += "[not(@action='delete')]";
+
+			var lastNodesXPath = "";
+			for (var i = 0; i < level; i++)
+				lastNodesXPath += "Relationships/Item[@type='Sub WBS']" + cond + "/related_id/Item" + cond + "/";
+
+			lastNodesXPath = lastNodesXPath.substr(0, lastNodesXPath.length - 1);
+
+			return lastNodesXPath;
+		}
+
+		var treeIsFullyLoaded = top.aras.isTempEx(projectItem);
+		function LoadFullTree_implementation()
+		{
+			if (treeIsFullyLoaded) return;
+
+			var resWbs = queryBranch(wbsId, -2, false); //select all levels of preject tree in one request
+			if (resWbs)
+			{
+				var _wbs = projectItem.selectSingleNode("wbs_id/Item");
+				if (_wbs)
+					top.aras.mergeItem(_wbs, resWbs);
+				else
+				{
+					wbs = projectItem.selectSingleNode("wbs_id");
+					wbs.text = '';
+					wbs = wbs.appendChild(resWbs.cloneNode(true));
+					top.aras.mergeItem(wbs, resWbs);
+				}
+			}
+			else
+				return;
+			treeIsFullyLoaded = true;
+		}
+
+		function LoadFullTree()
+		{
+			//It makes sence to keep Project AML configuration and treegridApplet in sync.
+			//Thus I created this function.
+			if (treeIsFullyLoaded) return;
+
+			LoadFullTree_implementation();
+			reInitTree();
+		}
+
+		function getBranch(node, deep)  // adds to node all possible levels
+		{
+			var lastNodesXPath = getXPathForLastNodes();
+
+			var nodesToCheck = node.selectNodes("descendant-or-self::Item[@type='WBS Element'][not(Relationships/* or @action='add' or action='delete')]");
+			for (var i = 0; i < nodesToCheck.length; i++)
+			{
+				var checkNode = nodesToCheck[i];
+				var checkId = checkNode.getAttribute("id");
+				if (true === treeApplet.items.get(checkId, "value", "children"))
+					recursiveLoad(checkNode);
+			}
+
+			function recursiveLoad(node)
+			{
+				var newNode = loadBranch(node, deep);
+
+				var nodesToLoad = newNode.selectNodes(lastNodesXPath);
+				for (var i = 0; i < nodesToLoad.length; i++)
+					recursiveLoad(nodesToLoad[i]);
+			}
+		}
+
+		function loadBranch(node, deep) // adds to node deep number of levels
+		{
+			if (!deep) deep = treeLevelsConst;
+			var nodeId = node.getAttribute("id");
+			var res = queryBranch(nodeId, deep);
+
+			var newNode = res.cloneNode(true);
+			node.parentNode.replaceChild(newNode, node);
+
+			return newNode;
+		}
+
+		/*
+		setLeader
+		-----------
+		params:
+		node - activity2
+		keyed_name - keyed_name of leader, must be null if id used
+		id - id of leader, must be null if keyed_name used
+		result:
+		returns keyed_name of set assignee
+		*/
+		function setLeader(node, keyed_name, id)
+		{
+			var bUseId = keyed_name == null && id != null;
+			if (!bUseId && (keyed_name == null || id != null)) return null;
+
+			var relItem = null;
+			var relId = "";
+			var retVal;
+
+			if (!bUseId && keyed_name != "")
+				relItem = a.uiGetItemByKeyedName("Identity", keyed_name);
+
+			var leader = node.selectSingleNode("managed_by_id");
+			if (leader) // check if new leader is not the same as old
+			{
+				var oldRelId = a.getItemProperty(node, "managed_by_id");
+				if (bUseId && oldRelId == id) return null;
+				if (!bUseId && relItem && oldRelId == relItem.getAttribute("id"))
+				{
+					var kd_name = relItem.selectSingleNode('keyed_name').text;
+					if (kd_name && kd_name.toLowerCase() == keyed_name.toLowerCase())
+						return kd_name;
+					else
+						relItem = null;
+				}
+			}
+
+			if (bUseId) // need to find relItem for the id
+			{
+				if (identitiesCache[id])
+				{
+					relItem = identitiesCache[id].cloneNode(true);
+				}
+				else
+				{
+					relItem = a.getItemById("Identity", id, 0);
+					if (relItem) identitiesCache[id] = relItem.cloneNode(true);
+				}
+			}
+
+			if (relItem)
+			{
+				retVal = bUseId ? a.getItemProperty(relItem, "keyed_name") : keyed_name;
+				relId = relItem.getAttribute("id");
+				retVal = relItem.selectSingleNode('keyed_name').text;
+			}
+			else
+			{
+				retVal = "";
+			}
+
+			if (relItem || bOnEditCellM2Halt || !keyed_name)
+			{
+				a.setItemProperty(node, "managed_by_id", relId);
+				a.setItemPropertyAttribute(node, "managed_by_id", "keyed_name", retVal);
+			}
+
+			return retVal;
+		}
+
+		function act()
+		{
+			top.aras.prompt('projectItem', projectItem.xml);
+			top.aras.prompt('treeDOM', treeDOM.xml);
+			top.aras.prompt('actNums', actNums.xml);
+		}
+
+		function setEditMode(item)
+		{
+			isInitActNums = false;
+
+			treeApplet.setEditable(true);
+			projectItem = item;
+
+			if (isDirty(projectItem))
+			{
+				treeIsFullyLoaded = true;
+			}
+			else
+			{
+				treeIsFullyLoaded = false;
+			}
+
+			queryCache = new ptCache();
+			bNeedToReloadXmlWithActions = true;
+			clearFilter(false, false);
+			clearBuffer();
+			top.aras.getItemRelationships("Project", projectId, "Project Team");
+			reInitTree(true);
+		}
+
+		function setViewMode(item)
+		{
+			isInitActNums = false;
+			treeIsFullyLoaded = false;
+
+			treeApplet.setEditable(false);
+			projectItem = item;
+			clearFilter(false, false);
+			reInitTree(true);
+		}
+
+		function onTabSelected()
+		{
+			if (RootITNm == "Project")
+				initProjTeamElems(true);
+		}
+
+		function getTreeItemById(id, includeDeleted, type)
+		{
+			var retItem = null;
+			var cond = "";
+			if (!includeDeleted) cond = "[not(@action='delete')]"
+			if (type)
+			{
+				if (type == "WBS Element") retItem = wbs.selectSingleNode("descendant-or-self::Item[@type='WBS Element'][@id='" + id + "']" + cond);
+				if (type == "Activity2") retItem = wbs.selectSingleNode("descendant::Item[@type='WBS Activity2']/related_id/Item[@type='Activity2'][@id='" + id + "']" + cond);
+				if (!retItem) { a.AlertError(a.getResource("project", "project_tree.can_not_find_item_of_type_with_id", type, id)); return null; }
+			}
+			else
+			{
+				retItem = wbs.selectSingleNode("descendant-or-self::Item[@id='" + id + "']" + cond);
+				if (!retItem) { a.AlertError(a.getResource("project", "project_tree.can_not_find_item_with_id_removedFrom", id)); return null; }
+				if (retItem.getAttribute("type") == 'Activity2')
+				{
+					parentItem = retItem.parentNode.parentNode;
+					if (parentItem.getAttribute("type") != "WBS Activity2") retItem = wbs.selectSingleNode("descendant::Item[@type='WBS Activity2']/related_id/Item[@type='Activity2'][@id='" + id + "']" + cond);
+				}
+			}
+			return retItem;
+		}
+
+		function updateRow(itemNd, oldVals)
+		{
+			var id = itemNd.getAttribute("id");
+			for (var elem in oldVals)
+			{
+				var oldVal = oldVals[elem];
+				var cellVal = getCellValue(id, fld[elem]);
+				var newVal = cellVal.retVal;
+
+				if (oldVal != newVal || elem == "Attach" && cellVal.isMilestone)
+				{
+					setCellValue(id, fld[elem], oldVal, newVal);
+				}
+			}
+		}
+
+		function setCellValue(rowId, colId, prevVal, val)
+		{
+			if (isInputRow(rowId)) {
+				treeApplet.inputRow.set(colId, "value", val);
+				return;
+			}
+
+			var cell = treeApplet.cells(rowId, colId);
+			var doSetCellValue = true;
+			var editItem = getTreeItemById(rowId);
+			if (!editItem) { a.AlertError(a.getResource("project", "project_tree.can_not_find_type_with_id", type, rowId)); return; }
+			var type = editItem.getAttribute("type");
+
+			var hasAsmnts = editItem.selectSingleNode("Relationships/Item[@type='Activity2 Assignment' and string(@action)!='delete']");
+			switch (colId)
+			{
+				case fld['tree_node']: // for wbs_element and activity2
+					if (a.getItemProperty(editItem, "name") != val)
+					{
+						a.setItemProperty(editItem, "name", val);
+						//a.setItemPropertyAttribute(editItem, "name", "changed" , "1");
+					}
+					else
+						doSetCellValue = false;
+					break;
+				case fld['predecessor']: // for activity2
+					if (type != 'Activity2') return;
+
+					var cond = "";
+					if (val != "")
+					{
+						var preds = val.split(',');
+						for (var i = 0; i < preds.length; i++)
+						{
+							var pred = new Predecessor(preds[i]);
+							var predId = getActIdByNum(pred.GetNumber());
+							cond += " and related_id!='" + predId + "'";
+
+							var predItem = editItem.selectSingleNode("Relationships/Item[@type='Predecessor'][related_id='" + predId + "']");
+							var predAction;
+							if (!predItem)
+							{
+								var relationshipsNode = editItem.selectSingleNode('Relationships');
+								if (!relationshipsNode)
+								{
+									relationshipsNode = editItem.appendChild(editItem.ownerDocument.createElement('Relationships'));
+								}
+
+								var predItem = ptNewItem("Predecessor");
+								var related = editItem.ownerDocument.createElement('related_id');
+								related.text = predId;
+								predItem.appendChild(related);
+								relationshipsNode.appendChild(predItem);
+							}
+							else
+							{
+								predAction = predItem.getAttribute("action");
+								if (predAction == "delete") predItem.removeAttribute("action");
+								else if (predAction != "add") predItem = getItemForEdit(predItem);
+							}
+							a.setItemProperty(predItem, "precedence_type", pred.GetPrecedenceType());
+							a.setItemProperty(predItem, "lead_lag", pred.GetLeadLag());
+						}
+					}
+
+					var predItems = editItem.selectNodes("Relationships/Item[@type='Predecessor' " + cond + "]");
+					for (i = 0; i < predItems.length; i++)
+					{
+						predItem = predItems[i];
+						predAction = predItem.getAttribute("action");
+						if (predAction == "add")
+						{
+							predItem.parentNode.removeChild(predItem);
+						}
+						else if (predAction != "delete")
+						{
+							predItem.setAttribute("action", "delete");
+						}
+					}
+					break;
+				case fld['status']: // for activity2
+					if (type != "Activity2") return;
+					if (!hasAsmnts)
+					{
+						var newColor = getStatusColor(val);
+						cell.setBgColor(newColor);
+						a.setItemProperty(editItem, "percent_compl", val);
+						a.setItemProperty(editItem, "status", newColor.toUpperCase());
+					}
+					break;
+				case fld['plan_start']: // for activity2
+				case fld['plan_finish']: // for activity2
+				case fld['duration']: // for activity2
+					if (type != "Activity2") return;
+					if (RootITNm == "Project")
+					{
+						var res = onChangeSchedProps(editItem, colId, val);
+						if (res.start != null || res.finish != null || res.d != null) doSetCellValue = false;
+
+						if (res.start != null)
+						{
+							a.setItemProperty(editItem, "date_start_sched", res.start);
+							var planStartCell = treeApplet.cells(rowId, fld['plan_start']);
+							if (planStartCell) {
+								planStartCell.setValue(res.start)
+							}
+						}
+						if (res.finish != null)
+						{
+							a.setItemProperty(editItem, "date_due_sched", res.finish);
+							var planFinishCell = treeApplet.cells(rowId, fld['plan_finish']);
+							if (planFinishCell) {
+								planFinishCell.setValue(res.finish);
+							}
+						}
+						if (res.d != null)
+						{
+							a.setItemProperty(editItem, "expected_duration", res.d);
+
+							var durationCell = treeApplet.cells(rowId, fld['duration']);
+							if (durationCell) {
+								durationCell.setValue(res.d);
+							}
+
+							var propNm = "date_start_target";
+							var date_start_target = a.getItemProperty(editItem, propNm);
+							if (date_start_target)
+							{
+								var date_due_target = incDate(date_start_target, ((res.d == "0") ? 0 : parseInt(res.d) - 1));
+								propNm = "date_due_target";
+								a.setItemProperty(editItem, propNm, date_due_target);
+							}
+						}
+					}
+					else//Project Template
+					{
+						top.aras.setItemProperty(editItem, "expected_duration", val);
+					}
+					break;
+				case fld['hours']: // for activity2
+					if (type != "Activity2") return;
+					if (!hasAsmnts) a.setItemProperty(editItem, "work_est", val);
+					break;
+				case fld['deliv_type']: //for Project Template : Activity2
+					a.setItemProperty(editItem, "deliv_type", val);
+					break;
+				case fld['role']: // for activity2
+					if (type != "Activity2") return;
+					a.setItemProperty(editItem, "lead_role", val);
+					if (val != "" && projTeamElems != null)
+					{
+						for (var i = 0; i < projTeamElems.length; i++)
+						{
+							if (val == projTeamElems[i].role)
+							{
+								var lead = setLeader(editItem, projTeamElems[i].identityKeyedName, null);
+								treeApplet.cells(rowId, fld['leader']).setValue(lead);
+							}
+						}
+					}
+					break;
+				case fld['leader']:
+					setLeader(editItem, val, null);
+					break;
+				case fld['attach']:
+					var attachments = editItem.selectNodes("Relationships/Item[@type='" + getDelivType(editItem) + "'][not(@action='delete')]/related_id/Item[not(@action='delete')]");
+					if (attachments.length == 1)
+					{
+						var attachmentItem = attachments[0];
+						a.setItemProperty(attachmentItem, "keyed_name", val);
+					}
+					cell.setLink(rowId);
+					break;
+				case fld['n']:
+					return;
+				case fld['required']: //for Project Template : Activity2
+					var propNm = "is_required";
+				case fld['deliv_required']: //for Project Template : Activity2, WBS
+					if (propNm == undefined) var propNm = "deliv_required";
+					v = val ? 1 : 0;
+					a.setItemProperty(editItem, propNm, v);
+					if (editItem.getAttribute("action") != "add") editItem.setAttribute("action", "edit");
+					val = "<checkbox state='" + v + "'/>";
+					break;
+				default:
+					var cellType = getCellSrcType(editItem);
+					var srcs = columns[fldToCol[colId]].sources[cellType];
+					if (srcs)
+					{
+						var xpath = srcs.xpath;
+						var params = srcs.params;
+						var propName = params.name;
+						var ft = params.field_type;
+						xpath = xpath.substring(0, xpath.length - propName.length - 1); // xpath to select item to set property
+						if (!xpath) xpath = ".";
+						var v = val; // v is to set to item property, val will be set to cell
+						if (ft == "checkbox")
+						{
+							v = val ? 1 : 0;
+							val = "<checkbox state='" + v + "'/>";
+						}
+						if (ft == "color")
+						{
+							cell.setBgColor(val);
+							val = "";
+						}
+						if (ft == "image")
+						{
+							val = "<img style='max-height: 18px; max-width: 18px; height: auto; width: auto;' src='" + v + "' />";
+						}
+						var setValItem = editItem.selectSingleNode(xpath);
+						if (ft == "item")
+						{
+							if (v)
+							{
+								var q = new Item("", "get");
+								q.removeAttribute("type");
+								q.setAction("get");
+								q.setAttribute("typeId", params["data_source"]);
+								q.setAttribute("select", "id");
+								q.setProperty("keyed_name", v);
+
+								var r = q.apply();
+
+								if (r.isError() || r.isCollection())
+								{
+									a.AlertError(a.getResource("project", "project_tree.value_invalid_for_param", v, params["name"]));
+									setCellValue(rowId, colId, v, "");
+									return null;
+								}
+								else
+								{
+									v = r.getID();
+									a.setItemProperty(setValItem, propName, v);
+									a.setItemPropertyAttribute(setValItem, propName, "keyed_name", v);
+									a.setItemPropertyAttribute(setValItem, propName, "type", r.getType());
+								}
+							}
+						}
+						if (v != null && setValItem && setValItem.getAttribute("action") != "delete")
+						{
+							a.setItemProperty(setValItem, propName, v);
+						}
+					}
+					break;
+			}
+
+			if (doSetCellValue)
+			{
+				setDirty();
+				cell.setValue(val);
+			}
+
+			return true;
+		}
+
+		function getCellLabel(rowId, col, bUseTreeDom)
+		{
+			return getCellValueOrLabel(rowId, col, bUseTreeDom, false);
+		}
+
+		function getCellValue(rowId, col, bUseTreeDom)
+		{
+			return getCellValueOrLabel(rowId, col, bUseTreeDom, true);
+		}
+
+		function getCellValueOrLabel(rowId, col, bUseTreeDom, isVal)
+		{
+			var rowItem = getTreeItemById(rowId);
+			var rowType = rowItem.getAttribute("type");
+			var ret = {};
+			/*
+			ret.retValue
+			ret.aloneDeliv
+			ret.isMilestone
+			*/
+			var retVal = "";
+			var propDt, propPtrn;
+
+			if (bUseTreeDom)
+			{
+				var tr = treeDOM.selectSingleNode("descendant::tr[@id='" + rowId + "']");
+				var tds = tr.selectNodes("td");
+				retVal = tds[col].text;
+			}
+			else
+			{
+				var hasAsmnts = rowItem.selectSingleNode("Relationships/Item[@type='Activity2 Assignment' and string(@action)!='delete']");
+				switch (col)
+				{
+					case fld['tree_node']:
+						retVal = a.getItemProperty(rowItem, "name");
+						break;
+					case fld['n']:
+						if (rowType != "WBS Element") retVal = getActNum(rowId);
+						break;
+					case fld['predecessor']:
+						if (rowType != "WBS Element")
+						{
+							var preds = rowItem.selectNodes("Relationships/Item[@type='Predecessor'][not(@action='delete')]");
+							for (var i = 0; i < preds.length; i++)
+							{
+								predId = a.getItemProperty(preds[i], "related_id");
+								if (i != 0) retVal += ", ";
+								retVal += getActNum(predId);
+							}
+						}
+						break;
+					case fld['status']:
+						if (rowType != "WBS Element")
+						{
+							var tmpPropNm = (hasAsmnts) ? "rollup_percent_compl" : "percent_compl";
+							retVal = a.getItemProperty(rowItem, tmpPropNm);
+							if (!retVal) retVal = "0";
+						}
+						break;
+					case fld['leader']:
+						if (rowType != "WBS Element")
+						{
+							var leaderName = rowItem.selectSingleNode("managed_by_id");
+							retVal = (leaderName) ? leaderName.getAttribute("keyed_name") : "";
+						}
+						break;
+					case fld['plan_start']:
+						var propNm = (rowType == "WBS Element" ? "rollup_date_sched_start" : "date_start_sched");
+						retVal = a.getItemProperty(rowItem, propNm);
+						propDt = "date";
+						propPtrn = getDatePropertyPattern(rowType, propNm);
+						break;
+					case fld['plan_finish']:
+						var propNm = (rowType == "WBS Element" ? "rollup_date_sched_due" : "date_due_sched");
+						retVal = a.getItemProperty(rowItem, propNm);
+						propDt = "date";
+						propPtrn = getDatePropertyPattern(rowType, propNm);
+						break;
+					case fld['duration']:
+						if (rowType == "WBS Element") retVal = a.getItemProperty(rowItem, "rollup_duration");
+						else
+						{
+							var isMilestone = a.getItemProperty(rowItem, "is_milestone") == '1' ? true : false;
+							retVal = !isMilestone ? a.getItemProperty(rowItem, "expected_duration") : '0';
+							ret.isMilestone = true;
+						}
+						break;
+					case fld['hours']:
+						if (rowType != "WBS Element")
+						{
+							var tmpPropNm = (hasAsmnts) ? "rollup_work_est" : "work_est";
+							retVal = a.getItemProperty(rowItem, tmpPropNm);
+							if (!retVal) retVal = "";
+						}
+						break;
+					case fld['role']:
+						if (rowType != "WBS Element")
+						{
+							roleNode = rowItem.selectSingleNode("lead_role");
+							if (roleNode) retVal = roleNode.text;
+						}
+						break;
+					case fld['deliv_type']:
+						if (rowType == 'Activity2')
+						{
+							var deliv_type = rowItem.selectSingleNode("deliv_type");
+							if (deliv_type) retVal = deliv_type.text;
+						}
+						break;
+					case fld['attach']:
+						var delivType = getDelivType(rowItem);
+						var delivs = rowItem.selectNodes("Relationships/Item[@type='" + delivType + "'][not(@action='delete')]/related_id/Item");
+						if (delivs.length == 0)
+						{
+							if ('1' == a.getItemProperty(rowItem, "deliv_required"))
+								retVal = "<img src='../images/Deliverable.svg'>";
+							else
+								retVal = '';
+						}
+						else if (delivs.length == 1)
+						{
+							var deliv = delivs[0];
+							ret.aloneDeliv = deliv;
+							retVal = a.getKeyedNameEx(deliv);
+						}
+						else if (delivs.length > 1)
+						{
+							retVal = "Multiple";
+						}
+						break;
+					case fld['deliv_required']:
+						var propNm = 'deliv_required';
+					case fld['required']:
+						if (propNm == undefined) propNm = "is_required";
+						retVal = a.getItemProperty(rowItem, propNm);
+						break;
+					default:
+						var cellType = getCellSrcType(rowItem);
+						var srcs = columns[fldToCol[col]].sources[cellType];
+						if (srcs)
+						{
+							if (srcs.params)
+							{
+								propDt = srcs.params.data_type;
+								propPtrn = srcs.params.pattern;
+								if (propDt == "date") propPtrn = a.getDotNetDatePattern(propPtrn);
+							}
+							var xpath = srcs.xpath;
+							var retValNode = rowItem.selectSingleNode(xpath);
+							if (retValNode)
+							{
+								if (propDt && "item" === propDt)
+								{
+									retVal = retValNode.getAttribute("keyed_name");
+									break;
+								}
+								retVal = retValNode.text;
+							}
+						}
+						break;
+				}
+			}
+
+			if (!isVal && propDt) retVal = a.convertFromNeutral(retVal, propDt, propPtrn);
+
+			ret.retVal = retVal;
+			return ret;
+		}
+
+		function validateCell(rowId, field, value)
+		{
+			if ("input_row" === rowId)
+			{
+				return true;
+			}
+
+			var colId = treeApplet.columns.get(field, "index");
+
+			if (colId == fld['duration'] || colId == fld['hours'])
+			{
+				var mayBeZero = (colId == fld['duration']);
+				var _val = parseInt(value);
+				selectProp = (mayBeZero ? 'expected_duration' : 'work_est');
+
+				if (!(colId == fld['hours'] && value == '') &&
+					(!top.aras.isInteger(value) || top.aras.isNegativeInteger(value) || (_val == 0 && !mayBeZero)))
+				{
+					treeApplet.edit.setErrorMessage(top.aras.getResource("project", "project_tree.fieled_value_must_be_positive_integer", (mayBeZero ? "nonnegative" : "positive")));
+					return false;
+				}
+			}
+			else if (colId == fld['status'])
+			{
+				if (!top.aras.isInteger(value) || top.aras.isNegativeInteger(value) || parseInt(value) > 100)
+				{
+					treeApplet.edit.setErrorMessage(top.aras.getResource("project", "project_tree.status_value_must_be_nonnegative_integer"));
+					return false;
+				}
+			}
+			else if (colId == fld['predecessor'])
+			{
+				return checkPredecessor(rowId, value);
+			}
+			else if (colId == fld['leader'])
+			{
+				var selItem = getTreeItemById(rowId);
+				var leaderVal = setLeader(selItem, value, null);
+
+				if (leaderVal == "" && value != "" && !bOnEditCellM2Halt)
+				{
+					treeApplet.edit.setErrorMessage(top.aras.getResource("project", "project_tree.value_invalid", value));
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		function onApplyEdit(rowId, field, value) {
+			bInputInProgress = false;
+			var isInput = isInputRow(rowId);
+			var colId = treeApplet.columns.get(field, "index");
+			var val = isInput ? treeApplet.inputRow.get(fldToCol[colId], "value") : treeApplet.items.get(rowId, "value", field);
+
+			var selItem = !isInput ? getTreeItemById(rowId) : null;
+			var rowType = !isInput ? selItem.getAttribute("type") : null;
+
+			//++++ special checks for non system columns
+			var curColumn = columns[fldToCol[colId]];
+			var shortType = selItem ? getCellSrcType(selItem) : null;
+			if (curColumn && !curColumn.is_system && !isInput && shortType) {
+				if (onEditCellM2(val) === false) {
+					return false;
+				}
+				return;
+			}
+
+			var _bENTER_KEY_PRESSED = bENTER_KEY_PRESSED;
+			bENTER_KEY_PRESSED = false;
+
+			if (editingCell.row != rowId || editingCell.col != colId) {
+				if ("number" === typeof execureFilterTimeOut) {
+					editingCell.row = rowId;
+					editingCell.col = colId;
+					editingCell.val = val;
+				} else {
+					return;
+				}
+			}
+
+			if (!isInput)
+			{
+				if (!errorMessageAlreadyDisplayedToUser) {
+					var selectProp = "";
+
+					if (colId == fld['duration'] || colId == fld['hours'])
+					{
+						var mayBeZero = (colId == fld['duration']);
+						selectProp = (mayBeZero ? 'expected_duration' : 'work_est');
+					}
+					else if (colId == fld['status']) {
+						selectProp = 'percent_compl';
+					}
+					else if (colId == fld['predecessor']) {
+						selectProp = 'predecessor';
+					}
+					else if (colId == fld['leader']) {
+						selectProp = 'managed_by_id';
+						val = setLeader(selItem, value, null);
+					}
+
+					if (selectProp == 'managed_by_id')
+					{
+						val = a.getItemPropertyAttribute(selItem, "managed_by_id", "keyed_name");
+						if (val == null) val = "";
+					}
+
+					bENTER_KEY_PRESSED = false;
+				}
+				else
+				{
+					errorMessageAlreadyDisplayedToUser = false;
+					return false;
+				}
+			}
+
+			if (onEditCellM2(val) === false)
+			{
+				bENTER_KEY_PRESSED = _bENTER_KEY_PRESSED;
+				return false;
+			}
+		}
+
+		// Flag created to prevent two error dialog appearance if user input wrong value into cell and press Enter.
+		var errorMessageAlreadyDisplayedToUser = false;
+		function canEditCell(rowId, field)
+		{
+			/*
+			TreeNode
+			N
+			Predecessor
+			Status
+			Leader
+			Plan Start
+			Plan Finish
+			Duration
+			Hours
+			Role
+			Attach
+			*/
+			var colId = treeApplet.columns.get(field, "index");
+			var val = treeApplet.items.get(rowId, "value", field);
+
+			var isInput = isInputRow(rowId);
+			var selItem = !isInput ? getTreeItemById(rowId) : null;
+			var rowType = !isInput ? selItem.getAttribute("type") : null;
+
+			//++++ special checks for non system columns
+			var curColumn = columns[fldToCol[colId]];
+			var shortType = selItem ? getCellSrcType(selItem) : null;
+			if (curColumn && !curColumn.is_system && !isInput && shortType)
+			{
+				var curColumnSrc = curColumn.sources[shortType];
+				var curColumnParams = (curColumnSrc) ? curColumnSrc.params : null;
+				if (!curColumnParams)
+				{
+					a.AlertError(a.getResource("project", "project_tree.property_not_specified_for_cell"));
+					return false;
+				}
+
+				editingCell = { row: rowId, col: colId, val: val, type: rowType, item: selItem };
+
+				if (selItem) selItem = getItemForEdit(selItem);
+
+				if (curColumnParams.readonly == "1") return false;
+				var res = false;
+				var dt = curColumnParams.data_type;
+				var canEdit = (parent.isEditMode && !(dt == "foreign" || dt == "federated"));
+				var ft = curColumnParams.field_type;
+				switch (ft)
+				{
+					case "date":
+						if (canEdit) showDateDialog(val, getDatePropertyPattern(curColumnParams.itemTypeName, curColumnParams.name));
+						break;
+					case "dropdown":
+						if (dt == "filter list" && canEdit) {
+							var listObj = a.uiGetFilteredObject4Grid(curColumnParams["itemTypeId"], curColumnParams["name"], ""); // "" is used to have no filtering, i.e. list is returned
+							if (listObj.hasError) return false;
+							treeApplet.columns.set(field, "comboList", listObj.values, listObj.labels);
+						} else if (canEdit) {
+							var valsArr = a.getListValues(curColumnParams.data_source);
+							var comboVals = [""];
+							var comboLabels = [""];
+							for (var i = 0; i < valsArr.length; i += 1) {
+								comboVals.push(a.getItemProperty(valsArr[i], "value", " "));
+								comboLabels.push(a.getItemProperty(valsArr[i], "label", " "));
+							}
+							treeApplet.columns.set(field, "comboList", comboVals, comboLabels);
+							treeApplet.columns.set(field, "editType", "FilterComboBox");
+						}
+						res = true;
+						break;
+					case "textarea":
+						showTextarea(canEdit);
+						break;
+					case "item":
+						bInputInProgress = true;
+						res = true;
+						break;
+					case "color":
+						val = cell.getBgColor();
+						editingCell.val = val;
+						if (canEdit) showColorDialog(val);
+						break;
+					case "image":
+						var re = /^<img src=["']([^'"]*)['"]/;
+						if (re.test(val)) val = RegExp.$1;
+						if (canEdit) showImageDialog(val);
+						break;
+					case "formatted text":
+						var canEditText = (canEdit) ? "true" : "false";
+						showHTMLEditorDialog(canEditText);
+						break;
+					default:
+						res = true;
+						break;
+				}
+				return (res && canEdit);
+			}
+			//---- special checks for non system columns
+
+			clearTimeout(execureFilterTimeOut);
+			if (!parent.isEditMode && !isInput) {
+				return false;
+			}
+			if (rowType == "WBS Element" && colId != fld['tree_node'])
+			{
+				emptyEditingCell();
+				return false;
+			}
+			if (colId == fld['attach'] || colId == fld['n'])
+			{
+				if (!isInput)
+				{
+					emptyEditingCell();
+					return false;
+				}
+			}
+			// +++ IR-005439
+			if (rowType == "Activity2")
+			{
+				var isMilestone = a.getItemProperty(selItem, "is_milestone") == "1" ? true : false;
+				var hasAsmnts = selItem.selectSingleNode("Relationships/Item[@type='Activity2 Assignment' and string(@action)!='delete']");
+				var isLeadRoleFilled = (a.getItemProperty(selItem, "lead_role"))
+				if (isMilestone && (colId == fld['hours'] || colId == fld['duration']) || (hasAsmnts && (colId == fld['status'] || colId == fld['hours'])) || (colId == fld['leader'] && isLeadRoleFilled))
+				{
+					emptyEditingCell();
+					return false;
+				}
+			}
+			// --- IR-005439
+
+			editingCell.row = rowId;
+			editingCell.col = colId;
+			editingCell.val = val;
+			editingCell.type = rowType;
+			editingCell.item = selItem;
+
+			if (selItem) selItem = getItemForEdit(selItem);
+
+			if ((colId == fld['plan_start'] || colId == fld['plan_finish']) && !isInput)
+			{
+				showDateDialog(val, getDatePropertyPattern(rowType, curColumn.name));
+				return false;
+			}
+			bInputInProgress = (colId === fld['leader']);
+
+			return true;
+		}
+
+		function onEditCellM2(val)
+		{
+			if (!parent.isEditMode || isEditingCellEmpty()) return;
+
+			var colId = editingCell.col;
+			var rowId = editingCell.row;
+			var prevVal = editingCell.val;
+
+			if (bOnEditCellM2Halt)
+			{
+				bOnEditCellM2Halt = false;
+				return;
+			}
+
+			if (isInputRow(rowId))
+			{
+				colId = fldToCol[colId];
+			}
+
+			var res = setCellValue(rowId, colId, prevVal, val);
+
+			if (colId == fld['leader'] && res === false)
+			{
+				setCellValue(rowId, fld['leader'], "", "");
+				emptyEditingCell();
+				return false;
+			}
+			return true;
+		}
+
+		function onChangeSchedProps(act, onchange, val, dontCheck)
+		{
+			var type = "Activity2";
+
+			var res = { start: null, finish: null, d: null };
+			switch (onchange)
+			{
+				case fld['plan_start']:
+					res.start = val;
+					if (dontCheck) break;
+					if (val == "") break;
+					var es = a.getItemProperty(act, "date_es");
+					if (compareDates(val, es) == -1) // start < es
+					{
+						var preds = act.selectNodes("Relationships/Item[@type='Predecessor'][not(@action='delete')]");
+						if (preds.length == 1)
+						{
+							if (top.aras.confirm(a.getResource("project", "project_tree.remove_predecessor_or_cancel")))
+							{
+								var pred = preds[0];
+								var predAction = pred.getAttribute("action");
+								if (predAction == "add")
+									pred.parentNode.removeChild(pred);
+								else
+									pred.setAttribute("action", "delete");
+							}
+						}
+						else
+						{
+							var d = a.getItemProperty(act, "expected_duration");
+							if (a.getItemProperty(act, "date_due_sched"))
+							{
+								res.finish = incDate(val, ((d == "0") ? 0 : parseInt(d) - 1));
+							}
+							res.d = d;
+						}
+					}
+					else
+					{
+						var d = a.getItemProperty(act, "expected_duration");
+						if (a.getItemProperty(act, "date_due_sched"))
+						{
+							res.finish = incDate(val, ((d == "0") ? 0 : parseInt(d) - 1));
+						}
+					}
+					break;
+				case fld['plan_finish']:
+					res.finish = val;
+					if (dontCheck) break;
+					if (val == "") break;
+					if (a.getItemProperty(act, "is_milestone") == "1")
+					{
+						res.start = val;
+						res.d = "0";
+						break;
+					}
+					val = val;
+					var ef = a.getItemProperty(act, "date_ef");
+					var lf = a.getItemProperty(act, "date_lf");
+					var start = a.getItemProperty(act, "date_start_sched");
+					if (start != "")
+					{
+						var newd = diffDates(start, val);
+						if (((!ef || compareDates(val, ef) == -1) && newd < 0) || newd < 0)
+						{
+							res.finish = a.getItemProperty(act, "date_due_sched");
+
+							var continueEdit = top.aras.confirm(a.getResource("project", "project_tree.can_not_change_to_negative_duration"));
+							if (continueEdit)
+							{
+								treeApplet.editCell(treeApplet.getSelectedId(), onchange);
+								res.finish = a.getItemProperty(act, "date_due_sched");
+							}
+						}
+						else if (newd == 0)
+						{
+							res.finish = start;
+							res.d = 1;
+						}
+						else if (newd > 0)
+							res.d = newd + 1;
+					}
+					break;
+				case fld['duration']:
+					if (val == "") {
+						res.d = "0";
+						break;
+					}
+					res.d = parseInt(val);
+					if (dontCheck) break;
+					var schedulingType = a.getItemProperty(projectItem, "scheduling_type");
+					var start = a.getItemProperty(act, "date_start_sched");
+					var finish = a.getItemProperty(act, "date_due_sched");
+					var lf = a.getItemProperty(act, "date_lf");
+					var es = a.getItemProperty(act, "date_es");
+					switch (schedulingType)
+					{
+						case "Forward":
+							if (start != "" && finish != "")
+							{
+								res.finish = incDate(start, ((parseInt(val) == "0") ? 0 : parseInt(val) - 1));
+							}
+							break;
+						case "Backward":
+							if (finish != "" && start != "")
+							{
+								res.start = decDate(finish, ((parseInt(val) == "0") ? 0 : parseInt(val) - 1));
+							}
+							break;
+					}
+					break;
+			}
+			return res;
+		}
+
+		function setDirty()
+		{
+			if (projectItem.getAttribute("isDirty") != "1") projectItem.setAttribute("isDirty", "1");
+		}
+
+		function isDirty(itm)
+		{
+			var r = a.isDirtyEx(itm);
+			r = (r || itm.selectSingleNode('descendant-or-self::Item[@action and @action!= "get" and @action!= "skip"]'));
+			return r;
+		}
+
+		function emptyEditingCell () {
+			var isInput = isInputRow(editingCell.row);
+			bOnEditCellM2Halt = isInput;
+			if (!isInput) {
+				editingCell = {};
+			}
+		}
+
+		function isEditingCellEmpty () {
+			return (0 === Object.getOwnPropertyNames(editingCell).length);
+		}
+
+		function isInputRow (rowId) {
+			return ("input_row" === rowId);
+		}
+
+		function onStartEdit (rowId, field) {
+			var i,
+				columnIndex = treeApplet.columns.get(field, "index");
+
+			editingCell.row = rowId;
+			editingCell.col = columnIndex;
+
+			if (isInputRow(rowId)) {
+				editingCell.val = treeApplet.inputRow.get(editingCell.col, "value");
+			} else {
+				for (i in fld) {
+					if (editingCell.col === fld[i]) {
+						editingCell.val = treeApplet.items.get(rowId, "value", i);
+						return;
+					}
+				}
+			}
+		}
+
+		function onInputHelperShow (rowId, column) {
+			editingCell.row = rowId;
+			editingCell.col = column;
+			editingCell.val = treeApplet.inputRow.get(column, "value");
+			bInputInProgress = (column === fld['leader']);
+		}
+
+		var bENTER_KEY_PRESSED = false;
+		function onKeyPressed(keyEvent)
+		{
+			var F2_pressed = (113 === keyEvent.keyCode);
+
+			if (bInputInProgress && F2_pressed) {
+				switch (editingCell.col) {
+					case fld['leader']:
+						bOnEditCellM2Halt = !keyEvent.inputRow;
+						bInputInProgress = false;
+						control_turnEditOff();
+						findLeader();
+						break;
+					default:
+						bOnEditCellM2Halt = true;
+						control_turnEditOff();
+						showSearchDialog();
+						break;
+				}
+			}
+		}
+
+		///Obrect represent simple access to predecessor's properties and validation of predecessors in "Predecessor" column
+		///param[1] string: text representation of predecessor
+		function Predecessor(pred)
+		{
+			this.textRepresentation = pred;
+			this.reg_exp = /^([0-9]+)(SS|SF|FS|FF)?((\+|\-)[0-9]+)?$/;
+		}
+
+		Predecessor.prototype.IsValidity = function Predecessor_IsValidity()
+		{
+			var re = this.reg_exp;
+			return re.test(this.textRepresentation);
+		}
+
+		Predecessor.prototype.GetNumber = function Predecessor_GetNumber()
+		{
+			var arr = this.reg_exp.exec(this.textRepresentation);
+			return arr[1];
+		}
+
+		Predecessor.prototype.GetPrecedenceType = function Predecessor_GetPrecedenceType()
+		{
+			var arr = this.reg_exp.exec(this.textRepresentation);
+			if (!arr[2]) return "Finish to Start";
+			switch (arr[2])
+			{
+				case "SS": return "Start to Start";
+				case "SF": return "Start to Finish";
+				case "FF": return "Finish to Finish";
+				default: return "Finish to Start";
+			}
+		}
+
+		Predecessor.prototype.GetLeadLag = function Predecessor_GetLeadLag()
+		{
+			var arr = this.reg_exp.exec(this.textRepresentation);
+			if (!arr[3]) return 0;
+			else return arr[3];
+		}
+
+		function checkPredecessor(rowId, val)
+		{
+			var predecessorIsInvalid = false;
+			if (val == "") return true;
+			var continueEdit = null;
+
+			var predList = val.split(",");
+			for (var i = 0; i < predList.length; i++)
+			{
+				if (!(new Predecessor(predList[i])).IsValidity())
+				{
+					predecessorIsInvalid = true;
+					treeApplet.edit.setErrorMessage(top.aras.getResource("project", "project_tree.invalid_predecessor"));
+					return !predecessorIsInvalid;
+				}
+			}
+			var preds = val.split(",");
+			var _path = new Array(rowId);
+			var distinct = new Array();
+			var nextStep = Array();
+			for (var i = 0; i < preds.length; i++)
+			{
+				var pred = (new Predecessor(preds[i])).GetNumber(); //get predecessor number
+				if (pred.search(/\d/) == -1)
+				{
+					predecessorIsInvalid = true;
+					treeApplet.edit.setErrorMessage(top.aras.getResource("project", "project_tree.not_number_between_commas"));
+					return !predecessorIsInvalid;
+				}
+				if (!checkActNum(pred))
+				{
+					predecessorIsInvalid = true;
+					treeApplet.edit.setErrorMessage(top.aras.getResource("project", "project_tree.number_of_predecessor_out_of_range_of_possible_values"));
+					return !predecessorIsInvalid;
+				}
+				if (getActNum(rowId) == pred)
+				{
+					predecessorIsInvalid = true;
+					treeApplet.edit.setErrorMessage(top.aras.getResource("project", "project_tree.predecessor_can_not_link_activity_with_sel"));
+					return !predecessorIsInvalid;
+				}
+				if (distinct[pred])
+				{
+					predecessorIsInvalid = true;
+					treeApplet.edit.setErrorMessage(top.aras.getResource("project", "project_tree.can_not_be_more_than_one_same_predecessors"));
+					return !predecessorIsInvalid;
+				}
+				distinct[pred] = true;
+				nextStep[nextStep.length] = getActIdByNum(pred);
+			}
+			curStep = nextStep;
+			LoadFullTree_implementation();
+			//+++breadth-first search, check for non-cyclic
+			//curStep - enum of Activities (starts from Predecessors of edited Activity)
+			//nextStep - enum of Predecessors for curStep Activities
+			var nextStepExists = true;
+			var circularRefExists = false;
+			while (nextStepExists)
+			{
+				nextStepExists = false;
+				nextStep = new Array();
+				//run step
+				for (i = 0; i < curStep.length; i++)
+				{
+					predId = curStep[i];
+					var predIds = getPredecessors(predId);
+					for (var j = 0; j < predIds.length; j++)
+					{
+						var actId = predIds[j];
+						if (actId == rowId)
+						{
+							nextStepExists = false;
+							circularRefExists = true;
+							break;
+						}
+						if (seekInArray(nextStep, actId) == -1)
+						{
+							nextStep[nextStep.length] = actId;
+						}
+					}
+					if (circularRefExists) break;
+					nextStepExists = nextStepExists || (nextStep.length > 0);
+				}
+				curStep = nextStep;
+			}
+
+			//---breadth-first search, check for non-cyclic
+			if (circularRefExists)
+			{
+				predecessorIsInvalid = true;
+				treeApplet.edit.setErrorMessage(top.aras.getResource("project", "project_tree.trying_link_task_has_task_links_to_first_task"));
+				return !predecessorIsInvalid;
+			}
+
+			return true;
+		}
+
+		function getReferrers(id, excludeIds, bOnlyClientSearch)
+		{
+			var excludeCond = "";
+			var excludeAmlCond = "";
+			if (excludeIds && excludeIds.length)
+			{
+				excludeAmlCond = "<and>";
+				for (var i = 0; i < excludeIds.length; i++)
+				{
+					excludeId = excludeIds[i];
+					excludeCond += "[@id!='" + excludeId + "']";
+					excludeAmlCond += '<source_id condition= "ne">' + excludeId + '</source_id>';
+				}
+				excludeAmlCond += "</and>";
+			}
+
+			var refsArr = new Array();
+
+			var results;
+			var bFlg = false;
+
+			if (bOnlyClientSearch)
+			{
+				var preds = wbs.selectNodes("descendant::Item[@type='Activity2']" + excludeCond + "/Relationships/Item[@type='Predecessor'][not(@action='delete')][related_id='" + id + "']");
+				for (var i = 0; i < preds.length; i++)
+				{
+					var sourceItem = preds[i].parentNode.parentNode;
+					var sourceId = sourceItem.getAttribute("id");
+					refsArr.push(sourceId);
+				}
+			}
+			else
+			{
+				if (queryCache.links.from[id])
+				{
+					results = queryCache.links.from[id];
+					bFlg = true;
+				}
+				else
+				{
+					var queryXml = '<Item type= "Predecessor" action= "get" select= "source_id">' +
+                       '<related_id>' + id + '</related_id>' +
+                       excludeAmlCond +
+                     '</Item>';
+
+					var qry = new top.Item();
+					qry.loadAML(queryXml);
+					results = qry.apply();
+					if (results.isError() && !results.isEmpty()) { a.AlertError(a.getResource("project", "project_tree.iom_apply_gets_ fault")); return; }
+					if (!results.isEmpty())
+					{
+						queryCache.links.from[id] = results;
+						bFlg = true;
+					}
+				}
+
+				if (bFlg)
+				{
+					for (var i = 0; i < results.getItemCount(); i++)
+					{
+						var res = results.getItemByIndex(i).node;
+						var resId = res.getAttribute("id");
+						var resSourceId = a.getItemProperty(res, "source_id");
+						var isDel = wbs.selectSingleNode("descendant::Item[@type='Predecessor'][@action='delete'][@id='" + resId + "']");
+						if (!isDel) refsArr.push(resSourceId);
+					}
+				}
+
+				var addedPreds = wbs.selectNodes("descendant::Item[@type='Activity2']" + excludeCond + "/Relationships/Item[@type='Predecessor'][@action='add'][related_id='" + id + "']");
+
+				for (var i = 0; i < addedPreds.length; i++)
+				{
+					var sourceItem = addedPreds[i].parentNode.parentNode;
+					var sourceId = sourceItem.getAttribute("id");
+					refsArr.push(sourceId);
+				}
+			}
+
+			return refsArr;
+		}
+
+		function seekInArray(arr, elem, prop) // seek for arr[] == elem or arr[].prop == elem
+		{
+			if (prop)
+			{
+				for (var i = 0; i < arr.length; i++)
+				{
+					if (arr[i][prop] == elem) return i;
+				}
+			}
+			else
+			{
+				for (var i = 0; i < arr.length; i++)
+				{
+					if (arr[i] == elem) return i;
+				}
+			}
+			return -1;
+		}
+
+		function findLeader()
+		{
+			window.flagIsAlias = true;
+			var params = {
+					aras: a,
+					itemtypeName: "Identity",
+					sourceItemTypeName: "Activity2",
+					sourcePropertyName: "managed_by_id",
+					callback: function (res) {
+						var prev_bOnEditCellM2Halt = bOnEditCellM2Halt;
+						bOnEditCellM2Halt = false;
+						window.flagIsAlias = undefined;
+						if (res == undefined) return false;
+						if (parent.isEditMode)
+							onEditCellM2(res.keyed_name);
+						else
+							setCellValue('input_row', fld['leader'], "", res.keyed_name);
+						bOnEditCellM2Halt = prev_bOnEditCellM2Halt;
+						setFlagsAndExecuteFilterOrClearFilter();
+					}
+				};
+			top.aras.modalDialogHelper.show('SearchDialog', top, params);
+		}
+
+		function showSearchDialog()
+		{
+			if (!editingCell) return;
+			var curCol = columns[fldToCol[editingCell.col]];
+			var shortType = getCellSrcType(editingCell.item);
+			if (!shortType) return;
+			var params = curCol.sources[shortType].params;
+			var itName = a.getItemTypeName(params["data_source"]);
+			if (!itName) return;
+
+			top.aras.modalDialogHelper.show('SearchDialog', top, { aras: a, itemtypeName: itName, sourceItemTypeName: params["itemTypeName"], sourcePropertyName: params["name"], callback: dialogCallback });
+			function dialogCallback(val)
+			{
+				if (val && val !== ""){
+					onEditCellM2(val.keyed_name);
+				}
+			}
+		}
+
+		function showTextarea(openToEdit)
+		{
+			if (openToEdit == undefined) openToEdit = false;
+
+			var param = new Object();
+			param.isEditMode = openToEdit;
+			param.content = editingCell.val;
+			param.aras = top.aras;
+
+			var options = {
+					dialogWidth: 600,
+					dialogHeight: 450,
+					resizable: true
+				},
+				res = top.aras.modalDialogHelper.show('DefaultModal', window, param, options, 'textDialog.html');
+			if (res == undefined) return false;
+			onEditCellM2(res);
+		}
+
+		function showHTMLEditorDialog(openToEdit)
+		{
+			if (openToEdit == 'false')
+			{
+				var content = editingCell.val;
+				content = content.replace(/\\/g, "\\\\");
+				content = content.replace(/\\n/g, '\n');
+				content = content.replace(/'/g, '\\\'');
+				top.aras.modalDialogHelper.show('DefaultModal', window, null, { resizable: true }, "javascript: '" + content + "'");
+			}
+			else
+			{
+				var param = new Object();
+				param.sHTML = editingCell.val;
+				param.aras = a;
+				var res = a.modalDialogHelper.show('HTMLEditorDialog', window, param);
+
+				if (res == undefined) return false;
+				onEditCellM2(res);
+			}
+		}
+
+		function showColorDialog(oldColor) {
+			if (oldColor == '') {
+				oldColor = '#FFFFFF';
+			}
+
+			var newColor = top.aras.showColorDialog(oldColor);
+			if (!newColor) {
+				return false;
+			}
+
+			onEditCellM2(newColor);
+		}
+
+		function showImageDialog(img)
+		{
+			if (!img) img = '';
+			var params = new Object();
+			params.aras = top.aras;
+			params.image = img;
+
+			var res = top.aras.modalDialogHelper.show('ImageBrowser', window, params);
+			if (res == undefined) return false;
+
+			onEditCellM2(res);
+		}
+
+		function getStatusColor(percents)
+		{
+			return "#ffffff"; //status color update is removed from client.
+		}
+
+		function getAbsoluteCoord(oNode)
+		{
+			var oCurrentNode = oNode;
+			var iLeft = 0;
+			var iTop = 0;
+			while (oCurrentNode.tagName != "BODY")
+			{
+				iLeft += oCurrentNode.offsetLeft;
+				iTop += oCurrentNode.offsetTop;
+				oCurrentNode = oCurrentNode.offsetParent;
+			}
+
+			return { top: iTop, left: iLeft };
+		}
+
+		function showDateDialog(oldDate, format)
+		{
+			format = top.aras.getDotNetDatePattern(format);
+			var param = { date: top.aras.convertFromNeutral(oldDate, 'date', format), format: format, aras: top.aras};
+
+			var newDate = top.aras.uiShowDialogNearElement(document.body, top.aras.getScriptsURL() + 'dateDialog.html', param);
+			if (newDate) {
+				newDate = top.aras.convertToNeutral(newDate, 'date', format);
+				onEditCellM2(newDate);
+			}
+		}
+
+		function onRowSelect(rowId)
+		{
+			if (parent.isEditMode)
+			{
+				enableAllMenuItems();
+
+				if (filterApplied && isFilterCriteriaInputted)
+				{
+					disableMenuItem("add_wbs_element");
+					disableMenuItem("add_activity");
+					disableMenuItem("add_milestone");
+					disableMenuItem('cut');
+					disableMenuItem('paste');
+					disableMenuItem('indent');
+					disableMenuItem('outdent');
+				}
+
+				if (rowId == wbsId)
+				{
+					disableMenuItem('delete_selected_item');
+					disableMenuItem('indent');
+					disableMenuItem('outdent');
+					disableMenuItem('cut');
+				}
+			}
+			else
+				initMenuItems();
+
+			var selItem = getTreeItemById(rowId);
+			if (selItem)
+			{
+				if (parent.isEditMode)
+				{
+					var prevSibling = getSibling(selItem, false, true);
+					var follSibling = getSibling(selItem, true, true);
+
+					if (!prevSibling)
+					{
+						disableMenuItem('move_up');
+					}
+					if (!follSibling)
+					{
+						disableMenuItem('move_down');
+					}
+				}
+
+				if (selItem.getAttribute("type") == "WBS Element")
+				{
+					if (RootITNm == "Project Template")
+						disableMenuItem("view_edit_selected_item");
+					else if (RootITNm == "Project")
+						disableMenuItem("open_completion_dialog");
+					disableMenuItem("cut");
+					if (parent.isEditMode && !cutBuffer) disableMenuItem("paste");
+				}
+				else
+				{
+					disableMenuItem('indent');
+					disableMenuItem('outdent');
+					if (parent.isEditMode && cutBuffer) disableMenuItem("cut");
+					else disableMenuItem("paste");
+					enableMenuItem("view_edit_selected_item");
+				}
+			}
+			else { a.AlertError(a.getResource("project", "project_tree.error_can_not_find_item_with_id", rowId)); return; }
+
+			updateToolbarState();
+		}
+
+		function updateToolbarState()
+		{
+			if (!menu_items)
+			{
+				setTimeout("updateToolbarState()", 10);
+				return;
+			}
+			for (var i = 0; i < menu_items.length; i++)
+			{
+				var m_item = menu_items[i];
+				var m_item_id = menu_items_ids[i];
+				if (m_item != "-") setControlEnabled(m_item_id, !isMenuItemDisabled(m_item_id));
+			}
+		}
+
+
+		// +++ menu items switches
+
+		var disabledMenuItems = null;
+		var menu_items = null;
+		var menu_items_ids = null;
+		var treeToolbarDom = null;
+
+		function initMenuItems()
+		{
+			disabledMenuItems = [];
+			menu_items = [];
+			menu_items_ids = [];
+			if (!treeToolbarDom)
+			{
+				treeToolbarDom = a.createXMLDocument();
+				if (RootITNm == "Project")
+					treeToolbarDom.load(top.aras.getI18NXMLResource("projectTree_toolbar.xml", xmlParentUrl));
+				else if (RootITNm == "Project Template")
+					treeToolbarDom.load(top.aras.getI18NXMLResource("projectTemplateTree_toolbar.xml", xmlParentUrl));
+			}
+
+			var tlb = treeToolbarDom.selectSingleNode("//toolbar[@id='tb1']");
+			var nodes = tlb.selectNodes("*");
+			for (var i = 0; i < nodes.length; i++)
+			{
+				var node = nodes[i];
+				var nodeName = node.nodeName;
+				switch (nodeName)
+				{
+					case 'button':
+						var label = node.getAttribute("text");
+						menu_items.push(label);
+						var id = node.getAttribute("id");
+						menu_items_ids.push(id);
+						if (node.getAttribute("disabled") == "true") disableMenuItem(id);
+						break;
+					case 'separator':
+						menu_items.push('-');
+						menu_items_ids.push('-');
+						break;
+				}
+			}
+		}
+
+		function getMenuItems(bSkipSeparators, bSkipDisabled, bDisplayCustomActions)
+		{
+			var retArr = new Array();
+			for (var i = 0; i < menu_items.length; i++)
+			{
+				var menu_item = menu_items[i];
+				var menu_item_id = menu_items_ids[i];
+				if (menu_item == "-" && (bSkipSeparators || retArr.length == 0 || (retArr[retArr.length - 1] && retArr[retArr.length - 1].getId() == "-")))
+					continue;
+
+				if (!(bSkipDisabled && isMenuItemDisabled(menu_item_id)))
+					addNewMenuItem(menu_item, menu_item);
+			}
+
+			if (retArr.length && retArr[retArr.length - 1].getId() == "-")
+				retArr.pop();
+
+			if (bDisplayCustomActions)
+			{
+				var id = treeApplet.getSelectedId();
+
+				var RTActions = null;
+				var itm = projectItem.selectSingleNode(".//Item[@id='" + id + "']");
+				if (itm)
+				{
+					var tp = itm.getAttribute("type");
+					if (tp == "Activity2")
+						RTActions = relationshipTypeActions["Activity2"];
+					else if (tp == "WBS Element")
+						RTActions = relationshipTypeActions["WBS Element"];
+				}
+
+				if (RTActions)
+				{
+					addNewMenuItem("-", "-");
+					for (var menuEntry in RTActions)
+						addNewMenuItem(menuEntry.concat("-").concat("grid"), RTActions[menuEntry]);
+				}
+			}
+
+			function addNewMenuItem(menuId, menuLabel)
+			{
+				var newMenuItm = { id: menuId, label: menuLabel };
+				newMenuItm.getId = new Function('return this.id;');
+				newMenuItm.getLabel = new Function('return this.label;');
+
+				retArr.push(newMenuItm);
+			}
+
+			return retArr;
+		}
+
+		function enableMenuItem(id)
+		{
+			disabledMenuItems[id] = undefined;
+		}
+
+		function disableMenuItem(id)
+		{
+			disabledMenuItems[id] = true;
+		}
+
+		function enableAllMenuItems()
+		{
+			disabledMenuItems = new Array();
+		}
+
+		function disableAllMenuItems()
+		{
+			for (var i = 0; i < menu_items_ids.length; i++)
+			{
+				if (menu_items_ids[i] != '-')
+					disableMenuItem(menu_items_ids[i]);
+			}
+		}
+
+		function isMenuItemDisabled(id)
+		{
+			return (disabledMenuItems[id] === true);
+		}
+
+		// --- menu items switches
+
+		// show popup menu
+		function initmenu(rowID, col)
+		{
+			var menu = treeApplet.contexMenu;
+			menu.removeAll();
+
+			var m_items = getMenuItems(false, true, true);
+			for (var i = 0; i < m_items.length; i++) {
+				var m_item = m_items[i];
+				if ('-' === m_item.getId()) {
+					menu.addSeparator();
+				} else {
+					menu.add(m_item.getId(), m_item.getLabel());
+				}
+			}
+		}
+
+		// if popup menu is clicked
+		function onmenu(item, r)
+		{
+			var menuItmId = item;
+			for (var i = 0; i < menu_items_ids.length; i++) {
+				if (item === menu_items[i]) {
+					menuItmId = menu_items_ids[i];
+					i = menu_items_ids.length;
+				}
+			}
+
+			var fakedBtn = { id: menuItmId, getId: function () { return this.id; } };
+			onToolbarButtonClick(fakedBtn);
+		}
+
+		function addWbsElement(rowId)
+		{
+			var selItem = getTreeItemById(rowId);
+			var selectedType = selItem.getAttribute("type");
+			var selectedAction = selItem.getAttribute("action");
+
+			if (!treeIsFullyLoaded && !top.aras.isNew(selItem) && "WBS Element" == selectedType)
+			{
+				var statusId = a.showStatusMessage(0, top.aras.getResource("project", "project_tree.loading_data_for_opening_node"));
+
+				var wbsBranch = queryBranch(rowId, -2, false);
+				top.aras.mergeItem(selItem, wbsBranch);
+
+				if (selItem.parentNode && selItem.parentNode.parentNode && "Project" == selItem.parentNode.parentNode.getAttribute("type"))
+				{
+					treeIsFullyLoaded = true;
+				}
+
+				a.clearStatusMessage(statusId);
+			}
+
+			if (true === treeApplet.items.get(rowId, "value", "children")) {
+				treeApplet.items.set(rowId, "value", "children", false);
+			}
+
+			var removedRelationships = new Array();
+			var relsToRemove = null;
+			var newItem = ptNewItem("WBS Element");
+
+			if (selectedType == "WBS Element")
+			{
+				relsToRemove = selItem.selectNodes("Relationships/Item[not(@action='delete')][not(@type='WBS Deliverable')]");
+				for (var i = 0; i < relsToRemove.length; i++)
+				{
+					var delNode = relsToRemove[i];
+					removedRelationships.push(deleteLinkRelationship(delNode));
+				}
+
+				if (rowId == wbsId) // selected item is root
+				{
+					rowToExpand = wbsId;
+					var added = addLinkRelationship(selItem, "Sub WBS", newItem);
+					newItem = added.selectSingleNode("related_id/Item");
+				}
+				else
+				{
+					var parentWbs = selItem.selectSingleNode("ancestor::Item[@type='WBS Element'][1]");
+					var added = addLinkRelationship(parentWbs, "Sub WBS", newItem, "below", selItem);
+					newItem = added.selectSingleNode("related_id/Item");
+				}
+			}
+			else // if selected item is Activity2
+			{
+				var parentWbs = selItem.selectSingleNode("ancestor::Item[@type='WBS Element'][1]");
+				var parentId = parentWbs.getAttribute("id");
+				var selectedRel = selItem.parentNode.parentNode;
+
+				if (parentId == wbsId) // parent of selected activity is root
+				{
+					relsToRemove = selectedRel.selectNodes("following-sibling::Item[@type='WBS Activity2'][not(@action='delete')]");
+					for (var i = 0; i < relsToRemove.length; i++)
+					{
+						var delNode = relsToRemove[i];
+						var delRelated = delNode.selectSingleNode("related_id/Item");
+
+						relinkPrevItemOnDelete(delRelated);
+
+						removedRelationships.push(deleteLinkRelationship(delNode));
+					}
+
+					var added = addLinkRelationship(parentWbs, "Sub WBS", newItem, "below", selItem);
+					newItem = added.selectSingleNode("related_id/Item");
+				}
+				else
+				{
+					relsToRemove = selectedRel.selectNodes("following-sibling::Item[not(@action='delete')]");
+					for (var i = 0; i < relsToRemove.length; i++)
+					{
+						var delNode = relsToRemove[i];
+						removedRelationships.push(deleteLinkRelationship(delNode));
+					}
+
+					var grandParentWbs = parentWbs.selectSingleNode("ancestor::Item[@type='WBS Element'][1]");
+					var added = addLinkRelationship(grandParentWbs, "Sub WBS", newItem, "below", parentWbs);
+					newItem = added.selectSingleNode("related_id/Item");
+				}
+			}
+
+			for (var i = 0; i < removedRelationships.length; i++)
+			{
+				var relToInsert = removedRelationships[i];
+				var type = relToInsert.getAttribute("type") == "WBS Element" ? "Sub WBS" : "WBS Activity2";
+				var added = addLinkRelationship(newItem, type, relToInsert);
+				relinkPrevItemOnAdd(added.selectSingleNode("related_id/Item"));
+			}
+
+			relinkPrevItemOnAdd(newItem);
+
+			updateWbsIndex(newItem, true, true);
+			a.setItemProperty(newItem, "name", "New Element");
+
+			focusData = { rowId: newItem.getAttribute("id"), colId: fld['tree_node'] };
+			reInitTree();
+		}
+
+		function updateWbsIndex(newItem, updateFollowing, updatePreceding)
+		{
+			var newItemParentWbs = newItem.selectSingleNode("ancestor::Item[@type='WBS Element'][1]");
+
+			var newItemParentSubWbs = newItem.parentNode.parentNode;
+			var precedingNodes = newItemParentSubWbs.selectNodes("preceding-sibling::Item[@type='Sub WBS' and not(@action='delete')]/related_id/Item[@type='WBS Element']");
+			if (updatePreceding)
+			{
+				for (var i = 0; i < precedingNodes.length; i++)
+					updateWbsIndex(precedingNodes[i], false);
+			}
+
+			var newSortOrder = parseInt(precedingNodes.length) + 1;
+
+			var parentWbsIndex = a.getItemProperty(newItemParentWbs, "wbs_index");
+			var projNum = a.getItemProperty(projectItem, "project_number");
+			var newWbsIndex;
+			//var newName = "New Element";
+			if (parseInt(parentWbsIndex) == 0) // If parent Wbs Element is root.
+			{
+				newWbsIndex = newSortOrder;
+				//newName += " " + newSortOrder;
+			}
+			else
+			{
+				newWbsIndex = parentWbsIndex + "." + newSortOrder;
+				//newName +=  " " + newWbsIndex;
+			}
+
+			a.setItemProperty(newItem, "proj_num", projNum);
+			a.setItemProperty(newItem, "wbs_index", newWbsIndex);
+			//  if (!a.getItemPropertyAttribute(newItem, "name", "changed") && newItem.getAttribute("action") == "add")
+			//    a.setItemProperty(newItem, "name", newName);
+
+			if (updateFollowing)
+			{
+				var followingNodes =
+					newItemParentSubWbs.selectNodes("following-sibling::Item[@type='Sub WBS' and not(@action='delete')]/related_id/Item[@type='WBS Element']");
+				for (var i = 0; i < followingNodes.length; i++)
+					updateWbsIndex(followingNodes[i], false);
+			}
+
+			var childWbsNodes =
+				newItem.selectNodes("Relationships/Item[@type='Sub WBS' and not(@action='delete')]/related_id/Item[@type='WBS Element']")
+			for (var i = 0; i < childWbsNodes.length; i++)
+				updateWbsIndex(childWbsNodes[i]);
+		}
+
+		function addActivityMilestone(rowId, isMilestone)
+		{
+			var selItem = getTreeItemById(rowId);
+			var selectedType = selItem.getAttribute("type");
+
+			var newItem = ptNewItem("Activity2");
+			var added = null;
+
+			if (selectedType == "WBS Element")
+			{
+				var added = addLinkRelationship(selItem, "WBS Activity2", newItem, "first");
+				rowToExpand = rowId;
+			}
+			else
+			{
+				var parentWbs = selItem.selectSingleNode("ancestor::Item[@type='WBS Element'][1]");
+				var added = addLinkRelationship(parentWbs, "WBS Activity2", newItem, "below", selItem);
+			}
+
+			newItem = added.selectSingleNode("related_id/Item");
+
+			relinkPrevItemOnAdd(newItem);
+
+			var projNum = a.getItemProperty(projectItem, "project_number");
+			var newName;
+			if (isMilestone == 1)
+			{
+				newName = "New Milestone";
+				a.setItemProperty(newItem, "is_milestone", 1);
+				a.setItemProperty(newItem, "expected_duration", "0");
+			}
+			else
+			{
+				newName = "New Activity";
+				a.setItemProperty(newItem, "expected_duration", "1");
+			}
+
+			a.setItemProperty(newItem, "proj_num", projNum);
+			a.setItemProperty(newItem, "name", newName);
+
+			focusData = { rowId: newItem.getAttribute("id"), colId: fld['tree_node'] };
+			reInitTree();
+		}
+
+		function addExistingDeliverable(rowId)
+		{
+			if (!deliverableItemTypeList) initDelivITList();
+
+			var selItem = getTreeItemById(rowId);
+			var selDelivType = a.getItemProperty(selItem, "deliv_type");
+
+			if (!selDelivType || selDelivType == "") selDelivType = a.uiItemTypeSelectionDialog(deliverableItemTypeList, window);
+			else selDelivType = a.getItemTypeName(selDelivType);
+
+			if (!selDelivType || selDelivType == "") return;
+
+			var oldVals = {};
+			oldVals["attach"] = getCellValue(rowId, fld["attach"]).retVal;
+
+			var itemtypeID = a.getItemTypeId(selDelivType);
+
+			var param = { aras: a, itemtypeID: itemtypeID, multiselect: true };
+			var options = { dialogWidth: 700, dialogHeight: 450 };
+			var delivs = top.aras.modalDialogHelper.show('DefaultModal', window, param, options, 'searchDialog.html');
+			if (delivs == undefined || delivs.length == 0) return false;
+
+			selItem = getItemForEdit(selItem);
+
+			var relType = getDelivType(selItem);
+
+			for (var i = 0; i < delivs.length; i++)
+			{
+				var deliv = delivs[i];
+				var delivItem = a.getItemById(selDelivType, deliv, 0);
+
+				ptNewRelationship(relType, selItem, delivItem);
+			}
+
+			updateRow(selItem, oldVals);
+		}
+
+		function addNewDeliverable(rowId)
+		{
+			if (!deliverableItemTypeList) initDelivITList();
+
+			var selItem = getTreeItemById(rowId);
+			var selDelivType = a.getItemProperty(selItem, "deliv_type");
+
+			if (!selDelivType || selDelivType == "") selDelivType = a.uiItemTypeSelectionDialog(deliverableItemTypeList, window);
+			else selDelivType = a.getItemTypeName(selDelivType);
+
+			if (!selDelivType || selDelivType == "") return;
+
+			var oldVals = {};
+			oldVals["attach"] = getCellValue(rowId, fld["attach"]).retVal;
+
+			selItem = getItemForEdit(selItem);
+			var newDeliv = ptNewItem(selDelivType);
+			if (!newDeliv) return;
+
+			var relType = getDelivType(selItem);
+
+			ptNewRelationship(relType, selItem, newDeliv);
+
+			var newId = newDeliv.getAttribute("id");
+
+			a.uiShowItemEx(newDeliv, "tab view");
+
+			var delivsCount = selItem.selectNodes("Relationships/Item[@type='" + relType + "'][not(@action='delete')]").length;
+
+			if (delivsCount > 0)
+			{
+				win = a.uiFindWindowEx(newId);
+				if (win)
+					new Synchronizer({ rowId: rowId, winId: newId, winItem: newDeliv, updateOnlyOnClose: true, win: win, oldVals: oldVals });
+			}
+			else
+				updateRow(selItem, oldVals);
+		}
+
+		function initDelivITList()
+		{
+			var xml = '<Item type="Morphae" action="get" select="related_id">' +
+              '<source_id>' + a.getItemTypeId("Deliverable") + '</source_id>' +
+            '</Item>';
+
+			var qry = new top.Item();
+			qry.loadAML(xml);
+
+			var statusId = a.showStatusMessage(0, a.getResource("project", "project_tree.loading_deliverable_related_itemtypes"));
+			var results = qry.apply();
+			a.clearStatusMessage(statusId);
+			if (results.isError()) { a.AlertError(a.getResource("project", "project_tree.can_not_get_deliverable")); return; }
+
+			deliverableItemTypeList = new Array();
+			for (var i = 0; i < results.getItemCount(); i++)
+			{
+				var res = results.getItemByIndex(i).node.selectSingleNode("related_id/Item");
+				var resId = res.getAttribute("id");
+				var resName = a.getItemProperty(res, "name");
+				var resLabel = a.getItemProperty(res, "label");
+				deliverableItemTypeList.push({ id: resId, name: resName, label: resLabel });
+			}
+		}
+
+		function deleteSelectedItem(rowId)
+		{
+			var selItem = getTreeItemById(rowId);
+			var selectedParent = selItem.parentNode.parentNode;
+			var selectedType = selItem.getAttribute("type");
+			var msg;
+
+			if (selectedType == "WBS Element")
+			{
+				msg = a.getResource("project", "project_tree.wbs_and_children_will_be_ deleted");
+			}
+			else
+			{
+				msg = a.getResource("project", "project_tree.activity_will_be_deleted");
+			}
+
+			if (top.aras.confirm(msg))
+			{
+				if (selectedType == "WBS Element")
+				{
+					getBranch(selItem);
+				}
+
+				// +++ seek for is_required
+
+				var isRequiredItem = selItem.selectSingleNode("descendant-or-self::Item[@type='Activity2'][not(@action='delete')][is_required='1']");
+				if (isRequiredItem)
+				{
+					var id = isRequiredItem.getAttribute("id");
+					var name = a.getItemProperty(isRequiredItem, "name");
+					var isMilestone = a.getItemProperty(isRequiredItem, "is_milestone");
+					if (isMilestone == "1") var s = "milestone";
+					else s = "activity";
+					a.AlertError(a.getResource("project", "project_tree.can_not_delete_required", s, getActNum(id)));
+					return;
+				}
+
+				//
+
+				var successors = [];
+				var cond = "[";
+				var actsToDel = selectedParent.selectNodes("descendant-or-self::Item[@type='WBS Activity2']/related_id/Item[@type='Activity2'][not(@action='delete')]");
+				for (var i = 0; i < actsToDel.length; i++)
+				{
+					var actToDel = actsToDel[i];
+					var actId = actToDel.getAttribute("id");
+					if (i != 0) cond += " or ";
+					cond += "related_id='" + actId + "'";
+
+					var tmpChain = getReferrers(actId); // changed getChain to getReferrers, because of IR-005491
+
+					if (tmpChain)
+					{
+						for (var j = 0; j < tmpChain.length; j++)
+						{
+							var elem = tmpChain[j];
+							if (seekInArray(successors, elem) == -1) successors.push(elem);
+						}
+					}
+				}
+				cond += "]";
+
+				if (successors.length != 0)
+				{
+					if (top.aras.confirm(a.getResource("project", "project_tree.activity_for_deletion_has_successor")))
+					{
+						loadActivities(successors);
+						deletePredecessors(successors, cond);
+					}
+					else return;
+				}
+
+				var curPred = selItem.selectSingleNode("Relationships/Item[@type='Predecessor']");
+				if (curPred)
+				{
+					if (curPred.getAttribute("action") == "add") curPred.parentNode.removeChild(curPred);
+					else curPred.setAttribute("action", "delete");
+				}
+
+				// need to load deleting branch by getBranch(selItem);
+				//
+				// after getBranch() parent node can be null
+				relinkPrevItemOnDelete(selItem, selectedParent);
+				deleteDescendant(selectedParent);
+				setDirty();
+				reInitTree();
+			}
+		}
+
+		function loadActivities(chain)
+		{
+			var nodesToLoad = new Array();
+
+			function getDeeperById(nodeId)
+			{
+				for (var i = 0; i < nodesToLoad.length; i++)
+				{
+					if (nodesToLoad[i][0] == nodeId) return nodesToLoad[i];
+				}
+				return null;
+			}
+
+			for (var i = 0; i < chain.length; i++)
+			{
+				var id = chain[i];
+				if (!wbs.selectSingleNode("descendant::Item[@type='WBS Activity2']/related_id/Item[@type='Activity2'][@id='" + id + "']"))
+				{
+					var actN = actNums.selectSingleNode("//a[@id='" + actN + "']");
+					if (actN)
+					{
+						var ancestors = actN.selectNodes("ancestor::w");
+
+						for (var j = 0; j < ancestors.length; j++)
+						{
+							var ancestor = ancestors[j];
+							var ancId = ancestor.getAttribute("id");
+							var node = wbs.selectSingleNode("descendant-or-self::Item[@type='WBS Element'][@id='" + ancId + "']");
+							if (node) break;
+						}
+						if (node)
+						{
+							var oldElem = getDeeperById(ancId);
+							if (oldElem && oldElem[2] > j)
+							{
+								oldElem[1] = node;
+								oldElem[2] = j;
+							}
+							else
+							{
+								var arrToPush = new Array();
+								arrToPush[0] = ancId;
+								arrToPush[1] = node;
+								arrToPush[2] = j;
+								nodesToLoad.push(arrToPush);
+							}
+						}
+						else { /*??? inadmissible?*/ }
+					}
+					else { /*??? inadmissible?*/ }
+				}
+			}
+
+			for (var i = 0; i < nodesToLoad.length; i++)
+			{
+				var elemToLoad = nodesToLoad[i];
+				loadBranch(elemToLoad[1], elemToLoad[2]);
+			}
+		}
+
+		function deletePredecessors(chain, cond)
+		{
+			for (var i = 0; i < chain.length; i++)
+			{
+				var id = chain[i];
+				var act = wbs.selectSingleNode("descendant::Item[@type='WBS Activity2']/related_id/Item[@type='Activity2'][@id='" + id + "']");
+				if (!act) { a.AlertError(a.getResource("project", "project_tree.can_not_find_item_it_should_be_in_tree", id)); return; }
+				var rels = act.selectSingleNode("Relationships");
+				var preds = rels.selectNodes("Item[@type='Predecessor'][not(@action='delete')]" + cond);
+				for (j = 0; j < preds.length; j++)
+				{
+					var pred = preds[j];
+					var predAction = pred.getAttribute("action");
+					if (predAction == "add")
+					{
+						pred.parentNode.removeChild(pred);
+					}
+					else
+					{
+						pred.setAttribute("action", "delete");
+					}
+				}
+				if (!rels.hasChildNodes()) rels.parentNode.removeChild(rels);
+			}
+		}
+
+		function getChain(id, bIncludeActsWithoutPreds) // this function temporarily unused because of IR-005491 "Deletion of predecessor activity removes too many dependencies"
+		{
+			bIncludeActsWithoutPreds = bIncludeActsWithoutPreds == undefined ? false : bIncludeActsWithoutPreds;
+
+			var retChain = new Array();
+			var arrWithPreds = new Array();
+
+			getChainInternal(id);
+
+			if (!bIncludeActsWithoutPreds)
+			{
+				var tmpChain = new Array();
+				for (var i = 0; i < retChain.length; i++)
+				{
+					var elem = retChain[i];
+					if (arrWithPreds[elem]) tmpChain.push(elem);
+				}
+				return tmpChain;
+			}
+			else return retChain;
+
+			function getChainInternal(id, dontPush)
+			{
+				if (!dontPush) retChain.push(id);
+
+				var fromIds = getReferrers(id, retChain);
+				var toIds = getPredecessors(id, retChain);
+
+				if (toIds.length != 0) arrWithPreds[id] = true;
+				else if (fromIds.length == 0) return;
+
+				for (var i = 0; i < fromIds.length; i++)
+				{
+					var fromId = fromIds[i];
+					arrWithPreds[fromId] = true;
+					retChain.push(fromId);
+					getChainInternal(fromId, true);
+				}
+
+				for (var i = 0; i < toIds.length; i++)
+				{
+					var toId = toIds[i];
+					getChainInternal(toId);
+				}
+			}
+		}
+
+		function deleteLinkRelationship(delNode)
+		{
+			var delId = delNode.getAttribute("id");
+			var wasAction = delNode.getAttribute("action");
+			var retItem = delNode.selectSingleNode("related_id/Item");
+
+			retItem = retItem.parentNode.removeChild(retItem);
+
+			if (wasAction == "add")
+			{
+				delNode.parentNode.removeChild(delNode);
+			}
+			else  /// LOCK ISSUE
+			{
+				var removedFrom = retItem.getAttribute("removed_from");
+				if (!removedFrom) retItem.setAttribute("removed_from", delId);
+
+				delNode.setAttribute("action", "delete");
+			}
+
+			return retItem;
+		}
+
+		function putBack(node, type, removedFrom)
+		{
+			var parent = wbs.selectSingleNode("descendant::Item[@id='" + removedFrom + "']");
+			if (!parent) { a.AlertError(a.getResource("project", "project_tree.can_not_find_item_with_id_removedFrom", removedFrom)); return; }
+
+			var relatedId = parent.selectSingleNode("related_id");
+			if (!relatedId) relatedId = parent.appendChild(parent.ownerDocument.createElement("related_id"));
+
+			node = relatedId.appendChild(node);
+
+			node.removeAttribute("removed_from");
+
+			deleteDescendant(node);
+		}
+
+		function deleteDescendant(delNode)
+		{
+			var delType = delNode.getAttribute("type");
+			if (delType == "WBS Element" || delType == "Activity2")
+			{
+				var removedFrom = delNode.getAttribute("removed_from");
+				if (removedFrom)
+				{
+					putBack(delNode.parentNode.removeChild(delNode), delType, removedFrom);
+					return;
+				}
+				else
+				{
+					if (delType == "WBS Element")
+					{
+						var nodesToDelete = delNode.selectNodes("Relationships/Item[@type='Sub WBS' or @type='WBS Activity2']");
+						for (var i = 0; i < nodesToDelete.length; i++)
+						{
+							deleteDescendant(nodesToDelete[i]);
+						}
+					}
+				}
+			}
+			else if (delType == "Sub WBS" || delType == "WBS Activity2")
+			{
+				var nodeToDelete = delNode.selectSingleNode("related_id/Item");
+				if (nodeToDelete) deleteDescendant(nodeToDelete);
+			}
+			delItem(delNode);
+		}
+
+		function delItem(delNode)
+		{
+			var delAction = delNode.getAttribute("action");
+			if (delAction == "add")
+			{
+				delNode.parentNode.removeChild(delNode);
+			}
+			else
+			{
+				delNode.setAttribute("action", "delete");
+			}
+		}
+
+		function addLinkRelationship(sourceItem, relTypeName, relatedItem, where, whereNode)
+		{
+			var rel = ptNewRelationship(relTypeName, sourceItem, relatedItem);
+			switch (where)
+			{
+				case "first":
+					rel = rel.parentNode.insertBefore(rel, rel.parentNode.firstChild);
+					break;
+				case "above":
+					if (!whereNode) { a.AlertError(a.getResource("project", "project_tree.wrong_call_of_addlinkrelationship")); return; }
+					var whereRel = whereNode.parentNode.parentNode;
+					rel = rel.parentNode.insertBefore(rel, whereRel);
+					break;
+				case "below":
+					if (!whereNode) { a.AlertError(a.getResource("project", "project_tree.wrong_call_of_addlinkrelationship")); return; }
+					var whereRel = whereNode.parentNode.parentNode;
+					if (whereRel.nextSibling) rel = rel.parentNode.insertBefore(rel, whereRel.nextSibling);
+					else rel = rel.parentNode.appendChild(rel);
+					break;
+			}
+			return rel;
+		}
+
+		function getSibling(nd, findFollowing, nodeIsActivity2OrWbsElement)
+		{
+			var xpath = "-sibling::Item[@type='WBS Activity2' or @type='Sub WBS'][not(@action='delete')][1]";
+			if (findFollowing)
+			{
+				xpath = "following" + xpath;
+			}
+			else
+			{
+				xpath = "preceding" + xpath;
+			}
+
+			if (nodeIsActivity2OrWbsElement)
+			{
+				xpath = "parent::related_id/parent::Item/" + xpath;
+			}
+
+			var res = nd.selectSingleNode(xpath);
+			return res;
+		}
+
+		function relinkPrevItemOnDelete(delNode, delNodeParent)
+		{
+			if (delNode.parentNode && delNode.parentNode.parentNode) var delRel = delNode.parentNode.parentNode;
+			else
+			{
+				if (delNodeParent)
+				{
+					var delRel = delNodeParent;
+				}
+				else
+				{
+					return;
+				}
+			}
+			var delRelType = delRel.getAttribute("type");
+			if (delRelType != "Sub WBS" && delRelType != "WBS Activity2") return;
+
+			//TODO: use getSibling instead
+			var belowRel = delRel.selectSingleNode("following-sibling::Item[@type='WBS Activity2' or @type='Sub WBS'][not(@action='delete')][1]");
+			if (!belowRel) return;
+			var belowWbs = belowRel.selectSingleNode("related_id/Item");
+			var belowId = belowWbs.getAttribute("id");
+			var belowType = belowWbs.getAttribute("type");
+			var belowWbsAction = belowWbs.getAttribute("action");
+
+			//TODO: use getSibling instead
+			var aboveRel = delRel.selectSingleNode("preceding-sibling::Item[@type='WBS Activity2' or @type='Sub WBS'][not(@action='delete')][1]");
+			var aboveWbs;
+			var aboveId = "";
+			if (aboveRel)
+			{
+				aboveWbs = aboveRel.selectSingleNode("related_id/Item");
+				aboveId = aboveWbs.getAttribute("id");
+			}
+
+			belowWbs = getItemForEdit(belowWbs);
+			if (!belowWbs) { a.AlertError(a.getResource("project", "project_tree.can_not_get_item_of_type_for_edit", belowType, belowId)); return; }
+			a.setItemProperty(belowWbs, "prev_item", aboveId);
+		}
+
+		function relinkPrevItemOnAdd(addNode)
+		{
+			if (addNode.parentNode && addNode.parentNode.parentNode) var addRel = addNode.parentNode.parentNode;
+			else { a.AlertError(a.getResource("project", "project_tree.item_has_not_parent_relationship")); return; }
+
+			addNode = getItemForEdit(addNode);
+			if (!addNode) { a.AlertError(a.getResource("project", "project_tree.can_not_get_item_for_edit")); return; }
+
+			var addRelType = addRel.getAttribute("type");
+			if (addRelType != "Sub WBS" && addRelType != "WBS Activity2") { a.AlertError(a.getResource("project", "project_tree.wrong_type_of_relationship", addRelType)); return; }
+
+			var addId = addNode.getAttribute("id");
+
+			var aboveId = "";
+			//TODO: use getSibling instead
+			var aboveRel = addRel.selectSingleNode("preceding-sibling::Item[@type='WBS Activity2' or @type='Sub WBS'][not(@action='delete')][1]");
+			if (aboveRel)
+			{
+				aboveWbs = aboveRel.selectSingleNode("related_id/Item");
+				aboveId = aboveWbs.getAttribute("id");
+			}
+
+			a.setItemProperty(addNode, "prev_item", aboveId);
+
+			//TODO: use getSibling instead
+			var belowRel = addRel.selectSingleNode("following-sibling::Item[@type='WBS Activity2' or @type='Sub WBS'][not(@action='delete')][1]");
+			if (belowRel)
+			{
+				var belowWbs = belowRel.selectSingleNode("related_id/Item");
+				var belowId = belowWbs.getAttribute("id");
+				var belowType = belowWbs.getAttribute("type");
+				belowWbs = getItemForEdit(belowWbs);
+				if (!belowWbs) { a.AlertError(a.getResource("project", "project_tree.can_not_get_item_of_type_for_edit", belowType, belowId)); return; }
+				a.setItemProperty(belowWbs, "prev_item", addId);
+			}
+		}
+
+		function getItemForEdit(itemNode, needLock)
+		{
+			var action = itemNode.getAttribute("action");
+			var id = itemNode.getAttribute("id");
+
+			if (action == "delete") return false;
+			if (action == "add" || action == "update" || action == "edit" && !needLock) return itemNode;
+
+			// IR-005805
+			// now 'item for edit' doesn't lock item for better performance, it just sets 'edit' action
+
+			if ((id == wbsId || needLock) && a.isLocked(itemNode) == false)
+			{
+				var parentOfItemNode = itemNode.parentNode;
+				var tmpItemNode = a.lockItemEx(itemNode);
+				if (!tmpItemNode) return false;
+
+				var tmpNd = itemNode.selectSingleNode("locked_by_id");
+				if (!tmpNd) tmpNd = itemNode.appendChild(itemNode.ownerDocument.createElement("locked_by_id"));
+				tmpNd.text = a.getItemProperty(tmpItemNode, "locked_by_id");
+
+				var nd2delete = parentOfItemNode.selectSingleNode("Item");
+				//because lockItemEx replaces itemNode in cache, i.e in ProjectItem
+				if (nd2delete) parentOfItemNode.replaceChild(itemNode, nd2delete);
+
+				itemNode.setAttribute("action", "update");
+			}
+
+			if (!itemNode.getAttribute("action"))
+				itemNode.setAttribute("action", "edit");
+			return itemNode;
+		}
+
+		function indent(rowId)
+		{
+			var selectedWbs = wbs.selectSingleNode("descendant::Item[@type='WBS Element' and @id='" + rowId + "']");
+			if (!selectedWbs) return;
+
+			var selectedSub = selectedWbs.parentNode.parentNode;
+			var aboveSub = selectedSub.selectSingleNode("preceding-sibling::Item[@type='Sub WBS' and not(@action='delete')][1]");
+			if (!aboveSub) { a.AlertError(a.getResource("project", "project_tree.can_not_indent_wbs_not_has_not_root_wbs_above")); return; }
+
+			var aboveWbs = aboveSub.selectSingleNode("related_id/Item");
+
+			relinkPrevItemOnDelete(selectedWbs);
+
+			var removedWbs = deleteLinkRelationship(selectedSub);
+
+			var added = addLinkRelationship(aboveWbs, "Sub WBS", removedWbs, "last");
+
+			relinkPrevItemOnAdd(added.selectSingleNode("related_id/Item"));
+
+			updateWbsIndex(selectedWbs, false, true);
+
+			reInitTree();
+		}
+
+		function outdent(rowId)
+		{
+			var selectedWbs = wbs.selectSingleNode("descendant::Item[@type='WBS Element' and @id='" + rowId + "']");
+			if (!selectedWbs) return;
+
+			var selectedSub = selectedWbs.parentNode.parentNode;
+
+			var parentWbs = selectedWbs.selectSingleNode("ancestor::Item[@type='WBS Element'][1]");
+			if (!parentWbs) { a.AlertError(a.getResource("project", "project_tree.can_not_find_parent_of_wbs", rowId)); return; }
+
+			if (parentWbs.getAttribute("id") == wbsId) { a.AlertError(a.getResource("project", "project_tree.can_not_outdent_to_root_level")); return; }
+
+			var grandParentWbs = parentWbs.selectSingleNode("ancestor::Item[@type='WBS Element'][1]");
+			if (!grandParentWbs) { a.AlertError(a.getResource("project", "project_tree.can_not_find_parent_of_parent_of_WBS", rowId)); return; }
+
+			relinkPrevItemOnDelete(selectedWbs);
+
+			var removedWbs = deleteLinkRelationship(selectedSub);
+
+			var added = addLinkRelationship(grandParentWbs, "Sub WBS", removedWbs, "below", parentWbs);
+
+			updateWbsIndex(selectedWbs, false, true);
+
+			relinkPrevItemOnAdd(added.selectSingleNode("related_id/Item"));
+
+			reInitTree();
+		}
+
+		function moveDownOrUp(rowId, moveDown)
+		{
+			if (!rowId) return;
+
+			var selItem = getTreeItemById(rowId);
+			if (!selItem) return;
+
+			var moveDownNd;
+			var moveUpNd;
+
+			if (moveDown)
+			{
+				moveUpNd = getSibling(selItem, true, true);
+				moveDownNd = selItem.selectSingleNode("parent::related_id/parent::Item");
+			}
+			else
+			{
+				moveUpNd = selItem.selectSingleNode("parent::related_id/parent::Item");
+				moveDownNd = getSibling(selItem, false, true);
+			}
+
+			if (!moveUpNd) return;
+			if (!moveDownNd) return;
+
+			var parentNd = moveUpNd.parentNode;
+			var bottomNd = getSibling(moveUpNd, true, false);
+
+			parentNd.insertBefore(moveUpNd, moveDownNd);
+			parentNd.insertBefore(moveDownNd, bottomNd);
+
+			var movedDownNd = getItemForEdit(moveDownNd.selectSingleNode("related_id/Item"));
+			var movedUpNd = getItemForEdit(moveUpNd.selectSingleNode("related_id/Item"));
+
+			var prevItemOfMovedDownNd = a.getItemProperty(movedDownNd, "prev_item");
+			a.setItemProperty(movedDownNd, "prev_item", movedUpNd.getAttribute("id"));
+			a.setItemProperty(movedUpNd, "prev_item", prevItemOfMovedDownNd);
+			if (bottomNd)
+			{
+				var notMovedNd = getItemForEdit(bottomNd.selectSingleNode("related_id/Item"));
+				a.setItemProperty(notMovedNd, "prev_item", movedDownNd.getAttribute("id"));
+			}
+
+			reInitTree();
+		}
+
+		function cut(rowId)
+		{
+			var selectedAct = wbs.selectSingleNode("descendant::Item[@type='WBS Activity2']/related_id/Item[@type='Activity2' and @id='" + rowId + "']");
+			if (!selectedAct) { a.AlertError(a.getResource("project", "common.can_not_find_activity2_with_id", rowId)); return; }
+
+			var successors = getReferrers(rowId); // changed getChain to getReferrers, because of IR-005491
+
+			if (successors.length != 0)
+			{
+				if (top.aras.confirm(a.getResource("project", "project_tree.cutting_activity_has_successor")))
+				{
+					var cond = "[related_id='" + rowId + "']";
+					loadActivities(successors);
+					deletePredecessors(successors, cond);
+				}
+				else return;
+			}
+
+			var selectedRel = selectedAct.parentNode.parentNode;
+			var selectedRelId = selectedRel.getAttribute("id");
+			var selectedRelAction = selectedRel.getAttribute("action");
+
+			relinkPrevItemOnDelete(selectedAct);
+
+			cutBuffer = selectedAct.cloneNode(true);
+
+			if (!cutBuffer.getAttribute("removed_from") && selectedRelAction != 'add')
+			{
+				cutBuffer.setAttribute("removed_from", selectedRelId);
+			}
+
+			deleteDescendant(selectedRel);
+
+			setDirty();
+			reInitTree();
+		}
+
+		function paste(rowId)
+		{
+			if (!cutBuffer) return;
+			var cuttedPredecessors = cutBuffer.selectNodes("Relationships/Item[@type='Predecessor']");
+			for (var i = 0; i < cuttedPredecessors.length; i++)
+			{
+				var curPred = cuttedPredecessors[i];
+				var predId = a.getItemProperty(curPred, "related_id");
+				var predAct = getTreeItemById(predId, true, "Activity2");
+				if (predAct && predAct.getAttribute("action") == "delete")
+				{
+					delItem(curPred);
+				}
+			}
+
+			var selItem = getTreeItemById(rowId);
+			var selType = selItem.getAttribute("type");
+
+			// we should remove cutted item, if it has action=='delete'
+
+			var cutId = cutBuffer.getAttribute("id");
+			var cutRemovedFrom = cutBuffer.getAttribute("removed_from");
+
+			if (cutRemovedFrom)
+			{
+				var cutItem = getTreeItemById(cutId, true);
+				if (cutItem) cutItem.parentNode.removeChild(cutItem);
+			}
+
+			var added = null;
+
+			if (selType == "WBS Element")
+			{
+				added = addLinkRelationship(selItem, "WBS Activity2", cutBuffer, "first");
+			}
+			else
+			{
+				var selWbsParent = selItem.selectSingleNode("ancestor::Item[@type='WBS Element'][1]");
+				if (!selWbsParent) { a.AlertError(a.getResource("project", "project_tree.no_wbs_in_parents_of_activity2_with_id", selItem.getAttribute("id"))); return; }
+				added = addLinkRelationship(selWbsParent, "WBS Activity2", cutBuffer, "below", selItem);
+			}
+
+			relinkPrevItemOnAdd(added.selectSingleNode("related_id/Item"));
+
+			cutBuffer = null;
+			reInitTree();
+		}
+
+		function expandAll(forceReinit)
+		{
+			if (!treeIsFullyLoaded) {
+				expandingMode = "expand";
+				LoadFullTree();
+			} else if (forceReinit) {
+				expandingMode = "expand";
+				reInitTree();
+			}
+
+			treeApplet.expandAll(true);
+		}
+
+		function expandMore()
+		{
+			var tmpDOM = a.createXMLDocument();
+
+			tmpDOM.loadXML(treeApplet.getXML());
+
+			var xpath = treeApplet.getOpenedItems(".");
+			xpath = "//tr[@id!='" + xpath.replace(/\./g, "' and @id!='") + "']";
+
+			var TRs = tmpDOM.selectNodes(xpath);
+			var s = "";
+			for (var i = 0; i < TRs.length; i++)
+			{
+				var TR = TRs[i];
+				var id = TR.getAttribute("id");
+				if (treeApplet.getChildId(id))
+				{
+					treeApplet.openItem(id)
+					return;
+				}
+			}
+			// end of expanding
+			treeApplet.setSelectedRow(selectedItem, false, true);
+			selectedItem = null;
+			//  bNeedExpanding = false;
+		}
+
+		function collapseMore()
+		{
+			var itms = treeApplet.getOpenedItems("-");
+			if (itms.search(/-/) == -1)
+			{
+				// end of collapsing
+				//    bNeedCollapsing = false;
+				// +++ IR-005937
+				firstItem = wbs.selectSingleNode("Relationships/Item/related_id/Item[1]");
+				if (firstItem)
+				{
+					firstItemId = firstItem.getAttribute("id");
+					treeApplet.showRow(firstItemId);
+					treeApplet.showRow(wbsId);
+				}
+				// --- IR-005937
+				return;
+			}
+			var re = new RegExp(wbsId);
+			itms = itms.replace(re, "-").replace(/---/, "-").replace(/--/, "");
+			var xpath = "descendant::tr[@id='" + itms.replace(/-/g, "' or @id='") + "']";
+			var itmsArr = itms.split("-");
+			for (var i = 0; i < itmsArr.length; i++)
+			{
+				var itmId = itmsArr[i];
+				var itm = treeDOM.selectSingleNode("//tr[@id='" + itmId + "']");
+				if (!itm.selectSingleNode(xpath))
+				{
+					setTimeout("treeApplet.closeItem('" + itmId + "')", 10);  // if not using setTimeout, then null poiner exceprion raises
+					return;
+				}
+			}
+		}
+
+		function saveUnlock()
+		{
+			var statusId = a.showStatusMessage(0, a.getResource("project", "project_tree.saving_and_unlocking"));
+
+			onSaveCommand();
+
+			a.clearStatusMessage(statusId);
+
+			onAfterSaveCommand();
+		}
+
+		function setFlagsAndExecuteFilterOrClearFilter()
+		{
+			var oldFilterState = isFilterCriteriaInputted;
+			setIsFilterCriteriaInputtedFlag();
+			var newFilterState = isFilterCriteriaInputted;
+			var code;
+
+			if (oldFilterState && !newFilterState)
+				code = "clearFilter(true, true);";
+			else
+				code = "executeFilter();";
+
+			if (code) execureFilterTimeOut = setTimeout(code, 10);
+		}
+
+		function executeFilter()
+		{
+			LoadFullTree();
+
+			var condArr = getInputRowVals();
+
+			clearFilterInTree();
+
+			if (condArr.length != 0)
+			{
+				filterActivities(condArr);
+				filterWbses();
+			}
+
+			filterApplied = true;
+
+			expandAll(true);
+		}
+
+		function clearFilterInTree()
+		{
+			var filteredItems = wbs.selectNodes("descendant-or-self::Item[@pt_filtered]");
+			for (var i = 0; i < filteredItems.length; i++)
+			{
+				var filteredItem = filteredItems[i];
+				filteredItem.removeAttribute("pt_filtered");
+			}
+		}
+
+		function setIsFilterCriteriaInputtedFlag()
+		{
+			isFilterCriteriaInputted = false;
+			var i = 0;
+			while (!isFilterCriteriaInputted && i < columns.length)
+			{
+				var column = columns[i];
+				var colId = fld[column.name];
+				var val = treeApplet.inputRow.get(colId, "value");
+				if (val) {
+					isFilterCriteriaInputted = true;
+				}
+				i++;
+			}
+		}
+
+		function getInputRowVals()
+		{
+			var condArr = [];
+			for (var i = 0; i < columns.length; i++)
+			{
+				var column = columns[i];
+				var colId = fld[column.name];
+				var val = treeApplet.inputRow.get(fldToCol[colId], "value");
+				if (val && val != "") // maybe we should add condition to check number of spaces or tabs
+				{
+					var condArrObj = { colId: colId, val: val };
+					condArr.push(condArrObj);
+				}
+			}
+			return condArr;
+		}
+
+		function setInputRowVals(arr)
+		{
+			for (var i = 0; i < arr.length; i++) {
+				var elem = arr[i];
+				treeApplet.inputRow.set(fldToCol[elem.colId], "value", elem.val);
+			}
+		}
+
+		function filterWbses()
+		{
+			var wbses = wbs.selectNodes("descendant-or-self::Item[@type='WBS Element'][not(descendant::Item[@type='Activity2'][not(@pt_filtered)])]");
+			for (var i = 0; i < wbses.length; i++)
+			{
+				wbsNode = wbses[i];
+				wbsNode.setAttribute("pt_filtered", "true");
+			}
+		}
+
+		function filterActivities(condArr)
+		{
+			var cache = [];
+			var acts = wbs.selectNodes("descendant::Item[@type='Activity2'][not(@action='delete')]");
+			for (var i = 0; i < acts.length; i++)
+			{
+				var act = acts[i];
+				var actId = act.getAttribute("id");
+				for (var j = 0; j < condArr.length; j++)
+				{
+					var cond = condArr[j];
+					var valObj = getCellLabel(actId, cond.colId);
+					var val = valObj.retVal;
+
+					if (!cache[cond.colId]) cache[cond.colId] = getFilterCondition(cond.val, cond.colId);
+					var condPrepared = cache[cond.colId];
+
+					if (!condPrepared.test(val))
+					{
+						act.setAttribute("pt_filtered", "true");
+						break;
+					}
+				}
+				if (j == condArr.length) // all conditions passed
+				{
+					if (act.getAttribute("pt_filtered"))
+					{
+						act.removeAttribute("pt_filtered");
+					}
+				}
+			}
+			condArr = null;
+			cache = null;
+		}
+
+		function getFilterCondition(condVal, colId)
+		{
+			var retCond;
+			switch (colId)
+			{
+				case fld['predecessor']:
+					retCond = new filterPredecessorCondition(condVal);
+					break;
+				default:
+					retCond = new filterDefaultCondition(condVal);
+					break;
+			}
+
+			function filterPredecessorCondition(condVal)
+			{
+				this.error = false;
+				this.test = function (val)
+				{
+					if (this.error) return true; // filter is not working
+					if (!this.rePreds) return false;
+					for (var i = 0; i < this.rePreds.length; i++)
+					{
+						var rePred = this.rePreds[i];
+						if (!rePred.test(val)) return false;
+					}
+					return true;
+				}
+
+				if (typeof (condVal) != "string")
+				{
+					this.error = true;
+					return;
+				}
+
+				var re = /\d+/g;
+				var preds = condVal.match(re);
+
+				if (preds == null)
+				{
+					this.rePreds = null;
+					return;
+				}
+
+				this.rePreds = [];
+
+				for (var i = 0; i < preds.length; i++)
+				{
+					var pred = preds[i];
+					var reStr = "(^" + pred + "\\D+)|(\\D+" + pred + "$)|(\\D+" + pred + "\\D+)|(^" + pred + "$)";
+					var re = new RegExp();
+					re = re.compile(reStr, "");
+
+					this.rePreds.push(re);
+				}
+			}
+
+			function filterDefaultCondition(condVal)
+			{
+				this.error = false;
+				this.test = function (val)
+				{
+					if (this.error) return true; // filter is not working
+					return this.regex.test(val);
+				}
+
+				if (typeof (condVal) != "string")
+				{
+					this.error = true;
+					return;
+				}
+
+				var reSpecChars = /(\$|\(|\)|\+|\.|\[|\?|\^|\{|\||\\)/g; // except *, because * and % used in mask
+				condVal = condVal.replace(reSpecChars, "\\$1");
+				var reMask = /(\*|%)/g;
+				condVal = condVal.replace(reMask, ".*");
+				condVal = "^" + condVal + "$";
+				this.regex = new RegExp();
+				this.regex.compile(condVal, "i");
+			}
+
+			return retCond;
+		}
+
+		function clearFilter(forceReinit, loadFullTree)
+		{
+			if (loadFullTree) {
+				LoadFullTree_implementation();
+			}
+			var i;
+			for (i = 0; i < columns.length; i += 1) {
+				treeApplet.inputRow.set(fld[columns[i].name], "value", "");
+			}
+			isFilterCriteriaInputted = false; // reset flag after input_row clearing
+
+			if (filterApplied) {
+				clearFilterInTree();
+				filterApplied = false;
+				expandAll(forceReinit);
+			}
+		}
+
+		function getDelivType(item)
+		{
+			var type = item.getAttribute("type");
+			if (type == "WBS Element") return "WBS Deliverable";
+			if (type == "Activity2") return "Activity2 Deliverable";
+			a.AlertError(a.getResource("project", "project_tree.no_such_type_supported_for_deliverables", type));
+		}
+
+		function ClickItemProperty(obj)
+		{
+			if ((obj) && (obj.type) && (obj.id))
+			{
+				top.aras.uiShowItem(obj.type, obj.id);
+			}
+		}
+
+		function onLink(rowId)
+		{
+			//This expression checks  if clicked link for  item property or attach item. If rowId.indexOf(..)=-1 then  clicked attach item, else is item property.
+			if (-1 != rowId.indexOf("{"))
+			{
+				ClickItemProperty(eval('(' + rowId + ')'));
+				return;
+			}
+			var selItem = getTreeItemById(rowId);
+			var delivType = getDelivType(selItem);
+			var delivs = selItem.selectNodes("Relationships/Item[@type='" + delivType + "'][not(@action='delete')]/related_id/Item");
+			if (delivs.length == 1)
+			{
+				var deliv = delivs[0];
+				var delivID = deliv.getAttribute("id");
+				var delivItem = a.getItemById(deliv.getAttribute("type"), delivID, 0);
+				if (delivItem)
+				{
+					delivItem = delivItem.cloneNode(true);
+					deliv.parentNode.replaceChild(delivItem, deliv);
+					deliv = delivItem;
+				}
+				deliv = top.aras.replacePolyItemNodeWithNativeItem(deliv);
+				top.aras.uiShowItemEx(deliv, "tab view");
+				win = top.aras.uiFindWindowEx(delivID);
+				if (win)
+				{
+					var oldVals = {};
+					oldVals["attach"] = getCellValue(rowId, fld["attach"]).retVal;
+					new Synchronizer({ rowId: rowId, winId: delivID, winItem: deliv, updateOnlyOnClose: true, win: win, tmout: 300, oldVals: oldVals });
+				}
+			}
+			else if (delivs.length > 1)
+			{
+				var deliverArr = [];
+				for (var i = 0; i < delivs.length; i++)
+				{
+					var deliv = delivs[i];
+					var delivName = a.getKeyedNameEx(deliv);
+					var delivId = deliv.getAttribute("id");
+					deliverArr.push([delivId, delivName]);
+				}
+				var arg = {aras: a, deliverables: deliverArr};
+				var options = {
+						dialogWidth: 400,
+						dialogHeight: 300
+					},
+					delivID = top.aras.modalDialogHelper.show('DefaultModal', window, arg, options, '../Solutions/Project/scripts/itemChoice.html');
+				if (!delivID) return;
+				var deliv = selItem.selectSingleNode("Relationships/Item[@type='" + delivType + "'][not(@action='delete')]/related_id/Item[@id='" + delivID + "']");
+				var delivItem = a.getItemById(deliv.getAttribute("type"), delivID, 0);
+				if (delivItem)
+				{
+					delivItem = delivItem.cloneNode(true);
+					deliv.parentNode.replaceChild(delivItem, deliv);
+					deliv = delivItem;
+				}
+				deliv = top.aras.replacePolyItemNodeWithNativeItem(deliv);
+				top.aras.uiShowItemEx(deliv, "tab view");
+				win = top.aras.uiFindWindowEx(delivID);
+				if (win)
+				{
+					new Synchronizer({ rowId: rowId, winId: delivID, winItem: deliv, updateOnlyOnClose: true, win: win, tmout: 300 });
+				}
+			}
+		}
+
+		function viewEditSelectedItem(rowId)
+		{
+			var selItem = getTreeItemById(rowId);
+			var selType = selItem.getAttribute("type");
+			var selAction = selItem.getAttribute("action");
+
+			if (parent.isEditMode)
+			{
+				selItem = getItemForEdit(selItem, true);
+				if (!selAction && selItem) selItem.removeAttribute("action"); //remove redundant action (user may not edit item in popup)
+			}
+
+			if (!selItem) return;
+
+			if (selAction != "add")
+			{
+				var tmpXml = "<Item type='" + selType + "' action='get' id='" + rowId + "' />";
+				var qry = new top.Item();
+				qry.loadAML(tmpXml);
+				var results = qry.apply();
+				if (!results.isError()) var res = results.getItemByIndex(0).node;
+				if (!res) { a.AlertError(a.getResource("project", "project_tree.can_not_find_seltype", selType, rowId)); return; }
+				var props = selItem.selectNodes("*[name()!='Relationships']");
+				var cond = "";
+				for (var i = 0; i < props.length; i++)
+				{
+					if (i != 0) cond += " and ";
+					cond += "name()!='" + props[i].tagName + "'";
+				}
+				props = res.selectNodes("*[" + cond + "]");
+				for (i = 0; i < props.length; i++)
+				{
+					selItem.appendChild(props[i].cloneNode(true));
+				}
+			}
+
+			var w;
+			var h;
+			var selItemTypeNd = a.getItemTypeForClient(selType, "name").node;
+			if (selItemTypeNd)
+			{
+				var formNd = selItemTypeNd.selectSingleNode("Relationships/Item[@type='View']/related_id/Item[@type='Form' and name='" + selType + "']");
+				var formNd = a.getFormForDisplay(formNd.getAttribute("id"));
+				if (formNd && formNd.node)
+				{
+					w = parseInt(a.getItemProperty(formNd.node, "width"));
+					h = parseInt(a.getItemProperty(formNd.node, "height")) + 6 /*splitter*/ + 230 /*relationships*/ + 23 /*status bar*/;
+				}
+			}
+			if (!w) w = 820;
+			if (!h) h = 650;
+
+			var par = {};
+
+			par.aras = a;
+			par.item = selItem;
+			par.Item = top.Item;
+			par.isEditMode = parent.isEditMode;
+			par.itemID = selItem.getAttribute("id");
+			par.itemTypeName = selType;
+			par.keyed_name = a.getKeyedNameEx(selItem);
+			par.noTabs = false;
+			par.opener = window;
+
+			var itemTypeNd = a.getItemTypeDictionary(selType).node
+			par.itemType = itemTypeNd;
+			par.itemTypeLabel = a.getItemProperty(itemTypeNd, 'label');
+
+			par.scriptsURL = a.getScriptsURL();
+			par.dbName = a.getDatabase();
+
+			if (selType == "Activity2" && a.getItemProperty(selItem, "is_milestone") == '1') par.tabsToDisable = ["Time Record"];
+			else par.tabsToDisable = [];
+
+			var oldVals = {};
+			for (var elem in fld)
+			{
+				oldVals[elem] = getCellValue(rowId, fld[elem]).retVal;
+			}
+			window.focus();
+			var options = {
+					dialogWidth: w,
+					dialogHeight: h,
+					resizable: true
+				},
+				res = top.aras.modalDialogHelper.show('DefaultModal', window, par, options, '../Solutions/Project/scripts/modalViewEditWrapper.html');
+
+			if (parent.isEditMode)
+			{
+				var selItemAction = selItem.getAttribute("action");
+				if (selItemAction == "update") selItem.setAttribute("action", "edit");
+				else if (selItemAction == "add" || selItemAction == "edit") { /*do nothing*/ }
+				else return;
+			}
+			else return;
+
+			allDelWBS = selItem.selectNodes("Relationships/Item[@type='WBS Activity2'][@action='delete']/related_id/Item[@type='Activity2'][Relationships/Item[@type='Predecessor']]")
+			if (allDelWBS.length > 0)
+			{
+				for (var i = 0; i < allDelWBS.length; i++)
+				{
+					actId = allDelWBS[i].getAttribute("id");
+					selItemDeleted = getTreeItemById(actId);
+					var successors = [];
+					var cond = "[related_id='" + actId + "']";
+
+					var tmpChain = getReferrers(actId); // changed getChain to getReferrers, because of IR-005491
+
+					for (var j = 0; j < tmpChain.length; j++)
+					{
+						var elem = tmpChain[j];
+						if (seekInArray(successors, elem) == -1) successors.push(elem);
+					}
+
+					if (successors.length != 0)
+					{
+						loadActivities(successors);
+						deletePredecessors(successors, cond);
+					}
+
+					// need to load deleting branch by getBranch(selItem);
+					//
+					relinkPrevItemOnDelete(selItemDeleted);
+					deleteDescendant(selItemDeleted.parentNode.parentNode);
+
+					var curPred = selItemDeleted.selectSingleNode("Relationships/Item[@type='Predecessor']");
+					if (curPred) delItem(curPred);
+				}
+				reInitTree();
+			}
+			updateRow(selItem, oldVals);
+		}
+
+		var Synchronizers = new Object();
+
+		function Synchronizer(oParam)
+		{
+			for (var elem in oParam) this[elem] = oParam[elem];
+			this.updateOnlyOnClose = this.updateOnlyOnClose ? true : false;
+
+			if (!this.tmout) this.tmout = 150;
+
+			Synchronizers[this.rowId] = this;
+
+			this.interval = setInterval('if(Synchronizers["' + this.rowId + '"] && Synchronizers["' + this.rowId + '"].updateData) Synchronizers["' + this.rowId + '"].updateData();', this.tmout);
+		}
+
+		Synchronizer.prototype.updateData = function Synchronizer_updateData()
+		{
+			var bClosed = false;
+			if (top.aras.isWindowClosed(this.win))
+			{
+				clearInterval(this.interval);
+				var itemAction = this.winItem.getAttribute("action");
+				if (itemAction != "skip" && !a.checkItem(this.winItem))
+				{
+					a.uiShowItemEx(this.winItem, "tab view");
+					this.win = a.uiFindWindowEx(this.winId);
+					this.interval = setInterval('if(Synchronizers["' + this.rowId + '"] && Synchronizers["' + this.rowId + '"].updateData) Synchronizers["' + this.rowId + '"].updateData();', this.tmout);
+					return;
+				}
+
+				top.aras.deletePropertyFromObject(Synchronizers, this.rowId);
+				bClosed = true;
+			}
+
+			if (!this.updateOnlyOnClose || bClosed)
+			{
+				var itemNd = getTreeItemById(this.rowId);
+				updateRow(itemNd, this.oldVals);
+				if (!bClosed)
+				{
+					for (var elem in this.oldVals)
+					{
+						this.oldVals[elem] = getCellValue(this.itemID, fld[elem]).retVal;
+					}
+				}
+			}
+		}
+		// --- onmenu functions
+
+
+		function executeScheduling()
+		{
+			var actNm = "Schedule Project";
+			var projItemTypeNd = a.getItemTypeForClient("Project", "name");
+			if (!projItemTypeNd)
+			{
+				a.AlertError(a.getResource("project", "project_tree.project_item_type_not_found"));
+				return;
+			}
+			var actItm = a.getItem("Action", "name='" + actNm + "'", "<name>" + actNm + "</name>");
+			if (!actItm)
+			{
+				a.AlertError(a.getResource("project", "project_tree.action_with_name_con_not_be_found", actNm));
+				return;
+			}
+			a.invokeAction(actItm, projItemTypeNd.getAttribute("id"), projectId);
+		}
+
+		function updateFormStartFinish()
+		{
+			var projectStart = a.getItemProperty(projectItem, "date_start_sched");
+			var projectFinish = a.getItemProperty(projectItem, "date_due_sched");
+			if (instance_frame.handleItemChange)
+			{
+				instance_frame.handleItemChange('date_start_sched', projectStart); //no date conversion is required
+				instance_frame.handleItemChange('date_due_sched', projectFinish);
+			}
+		}
+
+		function openCompletionDialog(r)
+		{
+			if (isDirty(projectItem))
+			{
+				a.AlertError(a.getResource("project", "project_tree.save_changes_in_project"));
+				return;
+			}
+			var ACWFormNm = "Activity Completion Worksheet";
+			var acwFormNd = a.getItem("Form", "name='" + ACWFormNm + "'", "<name>" + ACWFormNm + "</name>", 0);
+			var w = '700';
+			var h = '500';
+			if (acwFormNd)
+			{
+				var tmpw = a.getItemProperty(acwFormNd, "width");
+				var tmph = a.getItemProperty(acwFormNd, "height");
+				tmpw = parseInt(tmpw);
+				tmph = parseInt(tmph);
+				if (tmpw) w = tmpw;
+				if (tmph) h = tmph;
+			}
+			var param = new Array();
+			param[0] = window;
+			param[1] = r;
+			param.aras = top.aras;
+                        window.focus();
+			var options = {
+					dialogWidth: w,
+					dialogHeight: h,
+					resizable: true
+				},
+				doReload = top.aras.modalDialogHelper.show('DefaultModal', window, param, options, '../Solutions/Project/scripts/ActivityCompletionWorksheet/ACWDialog.html');
+			if (doReload)
+			{
+				if (doReload.isProjectUpdated)
+				{
+					//do nothing. ACW handles this case.
+				}
+				else if (doReload.isActivityUpdated)
+				{
+					var qryDom = uniCache.queryDom;
+					if (!qryDom) { a.AlertError(a.getResource("project", "project_tree.query_dom_invalid")); return; }
+					var nd = projectItem.selectSingleNode(".//Item[@id='" + r + "']");
+					var tp = (nd) ? nd.getAttribute("type") : "";
+					var pNd = (nd) ? nd.parentNode : null;
+					if (pNd)
+					{
+						var qryNd = qryDom.selectSingleNode("//Item[@type='" + tp + "']");
+						if (!qryNd) { a.AlertError(a.getResource("project", "project_tree.query_node_can_not_be_found", tp)); return; }
+						var qryNdClone = qryNd.cloneNode(true);
+						qryNdClone.setAttribute("id", r);
+						qryNdClone.setAttribute("action", "get");
+						var res = a.soapSend("ApplyItem", qryNdClone.xml);
+						var newItm = res.results.selectSingleNode(top.aras.XPathResult('/Item'))
+						if (newItm)
+						{
+							pNd.insertBefore(newItm, nd);
+							pNd.removeChild(nd);
+							reInitTree();
+						}
+					}
+				}
+			}
+		}
+
+		onbeforeunload = function()
+		{
+			try
+			{
+				if (GanttWnd != null && !top.aras.isWindowClosed(GanttWnd)) GanttWnd.close();
+			} catch (ex1) { }
+
+			saveEditedData();
+		}
+
+		function saveEditedData()
+		{
+			if (editingCell && editingCell.cell)
+			{
+				control_turnEditOff();
+			}
+		}
+
+		function showGantt()
+		{
+			LoadFullTree();
+			sortItems(wbs);
+
+			var projectNumber = a.getItemProperty(projectItem, "project_number");
+
+			showGanttInternal(wbs, projectNumber);
+		}
+
+
+		function control_turnEditOff()
+		{
+			if (!treeApplet) return;
+			treeApplet.turnEditOff();
+		}
+
+		//+++++ Custom Actions menu +++++
+		var relationshipTypeActions = new Object();
+		function initCustomActionsMenu()
+		{
+			var menuId;
+			var itName;
+
+			relationshipTypeActions["actionsOfTypeItemType"] = new Object();
+			for (var stepNum = 1; stepNum < 3; stepNum++)
+			{
+				if (stepNum == 1)
+				{
+					menuId = "actions_menu_wbsPPM";
+					itName = "WBS Element";
+				}
+				else
+				{
+					menuId = "actions_menu_actPPM";
+					itName = "Activity2";
+				}
+
+				relationshipTypeActions[itName] = new Object();
+
+				var res = top.aras.getItemTypeDictionary(itName).node;
+				for (var stepNum2 = 1; stepNum2 < 3; stepNum2++)
+				{
+					var tp = (stepNum2 == 1) ? "itemtype" : "item";
+					var nds = res.selectNodes("Relationships/Item[@type='Item Action']/related_id/Item[type='" + tp + "' and name]");
+					for (var i = 0; i < nds.length; i++)
+					{
+						var act = nds[i];
+						var lbl = top.aras.getItemProperty(act, "label");
+						if (!lbl) lbl = top.aras.getItemProperty(act, "name");
+						relationshipTypeActions[itName][act.getAttribute("id")] = lbl;
+						if (tp == "itemtype")
+							relationshipTypeActions["actionsOfTypeItemType"][act.getAttribute("id")] = top.aras.getItemProperty(act, "name");
+					}
+				}
+			}
+		}
+
+		function defineCurCustomActionsMenu()
+		{
+			var rowId = treeApplet.getSelectedId();
+			var RTActions = null;
+			if (!rowId)
+				RTActions = relationshipTypeActions["actionsOfTypeItemType"];
+			else
+			{
+				var itm = projectItem.selectSingleNode(".//Item[@id='" + rowId + "']");
+				if (itm)
+				{
+					var tp = itm.getAttribute("type");
+					if (tp == "Activity2")
+						RTActions = relationshipTypeActions["Activity2"];
+					else if (tp == "WBS Element")
+						RTActions = relationshipTypeActions["WBS Element"];
+				}
+			}
+
+			var actionsTb = activeToolbar.getItem("actions_menu");
+			if (actionsTb && RTActions)
+			{
+				actionsTb.removeAll();
+				for (var menuEntry in RTActions)
+					actionsTb.Add(menuEntry.concat("-").concat("dropwdown"), RTActions[menuEntry]);
+			}
+		}
+
+		function onCustomActionsMenuItemClick(actId)
+		{
+			var selectedId = "";
+
+			if (!actId)
+				return;
+
+			actId = actId.split("-")[0];
+
+			var act = a.getItemById("Action", actId, 0);
+			if (!act) return;
+			if (a.getItemProperty(act, "type") == "item")
+				selectedId = treeApplet.getSelectedId();
+
+			var itemTypeNd = null;
+			var res = top.aras.getItemTypeDictionary("Activity2").node;
+			tp = (res.selectSingleNode("Relationships/Item[@type='Item Action']/related_id/Item[id='" + actId + "']")) ? "Activity2" : "WBS Element";
+
+			if (!itemTypeNd)
+				itemTypeNd = a.getItemTypeForClient(tp, "name").node;
+
+			if (!itemTypeNd)
+				return;
+
+			a.invokeAction(act, itemTypeNd.getAttribute("id"), selectedId);
+		}
+		//----- Custom Actions menu -----
+		</script>
+
+		<table id="main_table" style="width: 100%; height: 100%;" cellspacing="0" cellpadding="0">
+			<tr style="vertical-align: top;">
+				<td id="toolbar_container" style="height: 28px;">
+				</td>
+			</tr>
+			<tr style="vertical-align: top;">
+				<td id="grid" style="height: 100%;"></td>
+			</tr>
+		</table>
+	</body>
+	<script LANGUAGE='JavaScript' SRC='modal.js'></script>
+	<script LANGUAGE='JavaScript' SRC='ProjectTreeAdd.js'></script>
+</html>
