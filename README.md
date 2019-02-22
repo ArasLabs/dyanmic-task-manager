@@ -1,3 +1,8 @@
+>## Archived Aras Community Project
+*This project has been migrated to GitHub from the old Aras Projects page (http://www.aras.com/projects). As an Archived project, this project is no longer being actively developed or maintained.*
+
+>*For current projects, please visit the new Aras Community Projects page on the updated Aras Community site: http://community.aras.com/projects*
+
 # Dynamic Task Manager
 
 DTM is an Innovator-based project management solution that provides interactive Gantt Chart UI and allows users to intuitively manage the progress of project tasks, deliverables, issues, to-do lists, related approval workflows, and furthermore visualize the allocated resource load.
